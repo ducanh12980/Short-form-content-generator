@@ -1,0 +1,14 @@
+---
+description: Architecture Decision Record authoring
+globs: docs/adr/**/*
+alwaysApply: false
+---
+
+# ADR rules
+
+Follow template in `docs/adr/README.md`:
+
+- Four-digit prefix, kebab-case slug
+- Sections: Status, Date, Context, Decision, Consequences
+- Add row to ADR index table in `docs/adr/README.md`
+- Supersede old ADRs instead of silently contradicting them

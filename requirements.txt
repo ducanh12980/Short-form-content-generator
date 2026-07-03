@@ -1,0 +1,8 @@
+# Video timeline compilation, TTS, HTTP, config parsing, LLM agents
+moviepy==2.1.2
+edge-tts==7.2.8
+requests==2.32.3
+pyyaml==6.0.2
+openai==1.58.1
+python-dotenv==1.0.1
+pytest==8.3.4

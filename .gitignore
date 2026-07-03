@@ -1,0 +1,9 @@
+.env
+app.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+output/
+*.pem
+credentials.json

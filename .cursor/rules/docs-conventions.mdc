@@ -1,0 +1,13 @@
+---
+description: Documentation conventions for docs/ and AGENTS.md
+globs: docs/**/*
+alwaysApply: false
+---
+
+# Documentation rules
+
+- Keep root `AGENTS.md` under ~80 lines; link to `docs/` for depth.
+- Use kebab-case filenames; ADRs use `NNNN-short-title.md`.
+- Prefer links over duplicating content across files.
+- Update `docs/workflow/current-tasks.md` when task status changes.
+- Mermaid diagrams are fine for architecture and workflow docs.

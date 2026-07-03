@@ -1,0 +1,31 @@
+---
+description: Core project context and agent working agreements
+alwaysApply: true
+---
+
+# Short-form content generator
+
+Read root `AGENTS.md` at session start. Use `docs/` for detail — do not load all docs into context.
+
+## Priorities
+
+1. Minimal, correct diffs scoped to the task
+2. Match existing repo patterns before introducing new ones
+3. Update `docs/workflow/current-tasks.md` when starting or finishing agent work
+4. Record architectural choices in `docs/adr/`
+
+## Commands
+
+Detect package manager from lockfile. Do not assume npm if another lockfile exists.
+
+## Never
+
+- Commit secrets or `.env` files
+- Interpolate untrusted input into shell/SQL
+- Commit unless the user explicitly asks
+
+## Links
+
+- Workflow: `docs/workflow/agentic-workflow.md`
+- Architecture: `docs/architecture/overview.md`
+- Security: `docs/security/guidelines.md`
