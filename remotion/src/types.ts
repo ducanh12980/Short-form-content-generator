@@ -35,6 +35,23 @@ export type TimelineImage = {
   media_type?: string;
 };
 
+/** TikTok / Reels / Shorts — always portrait 9:16 (width < height). */
+export const CANVAS_WIDTH = 1080;
+export const CANVAS_HEIGHT = 1920;
+
+/** Normalize props so landscape dimensions cannot slip through. */
+export const normalizeCanvasSize = (
+  width?: number,
+  height?: number,
+): { width: number; height: number } => {
+  const w = width ?? CANVAS_WIDTH;
+  const h = height ?? CANVAS_HEIGHT;
+  if (w > h) {
+    return { width: h, height: w };
+  }
+  return { width: w, height: h };
+};
+
 export type ShortVideoProps = {
   width: number;
   height: number;
@@ -55,8 +72,8 @@ export type ShortVideoProps = {
 };
 
 export const defaultShortVideoProps: ShortVideoProps = {
-  width: 1080,
-  height: 1920,
+  width: CANVAS_WIDTH,
+  height: CANVAS_HEIGHT,
   fps: 30,
   durationMs: 3000,
   themeName: "minimalist",
@@ -66,10 +83,10 @@ export const defaultShortVideoProps: ShortVideoProps = {
       primary_text_color: "#FFFFFF",
       highlight_color: "#FFFF00",
       font: "Arial, sans-serif",
-      font_size: 72,
+      font_size: 52,
       stroke_color: "#000000",
       stroke_width: 2,
-      position: "center",
+      position: "lower",
     },
   },
   tokens: [],

@@ -18,10 +18,27 @@ from core.project_schema import (
     get_canvas_size,
     get_caption_settings,
     get_caption_tokens,
+    get_music_settings,
     get_narration_duration_ms,
     get_narration_path,
     load_project,
 )
+
+# Portrait 9:16 — must match remotion/src/types.ts CANVAS_WIDTH / CANVAS_HEIGHT
+CANVAS_WIDTH = 1080
+CANVAS_HEIGHT = 1920
+
+
+def _normalize_canvas_props(props: dict[str, Any]) -> dict[str, Any]:
+    """Force portrait 9:16 even if props carry swapped landscape dimensions."""
+    w = int(props.get("width", CANVAS_WIDTH))
+    h = int(props.get("height", CANVAS_HEIGHT))
+    if w > h:
+        w, h = h, w
+    props = dict(props)
+    props["width"] = w
+    props["height"] = h
+    return props
 
 REMOTION_DIR = Path(__file__).resolve().parent.parent / "remotion"
 THEME_STYLES_PATH = Path(__file__).resolve().parent.parent / "config" / "theme_styles.json"
@@ -154,7 +171,7 @@ def project_to_remotion_props(
 
     font_override = settings["font_override"]
     public_dir = narration_path.resolve().parent
-    return {
+    props: dict[str, Any] = {
         "width": width,
         "height": height,
         "fps": fps,
@@ -166,7 +183,56 @@ def project_to_remotion_props(
         "narrationSrc": _to_static_src(narration_path, public_dir),
         "images": _resolve_image_timeline(project, public_dir),
         "backgroundColor": background_color,
-    }, public_dir
+    }
+
+    music_settings = get_music_settings(project)
+    if music_settings is not None:
+        music_path = music_settings["path"].resolve()
+        if music_path.is_file():
+            if not music_path.is_relative_to(public_dir.resolve()):
+                staged = public_dir / music_path.name
+                if staged.resolve() != music_path:
+                    shutil.copy2(music_path, staged)
+                music_path = staged
+            props["musicSrc"] = _to_static_src(music_path, public_dir)
+            props["musicVolume"] = music_settings["volume"]
+
+    return props, public_dir
+
+
+def _ensure_project_music(project: dict[str, Any], run_dir: Path) -> bool:
+    """Attach random music to the project when missing; stage file in run_dir."""
+    if get_music_settings(project) is not None:
+        return False
+
+    from core.music_picker import attach_random_music
+
+    music = attach_random_music(run_dir)
+    if music is None:
+        return False
+
+    audio = project.setdefault("audio", {})
+    audio["music"] = music
+    return True
+
+
+def _persist_project(project_path: Path, project: dict[str, Any]) -> None:
+    project_path.write_text(
+        json.dumps(project, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def _record_render_final_path(
+    project_path: Path,
+    project: dict[str, Any],
+    final_mp4: Path,
+) -> None:
+    """Persist render.final_path beside other run artifacts."""
+    render = project.setdefault("render", {})
+    render["output_dir"] = str(project_path.parent.resolve())
+    render["final_path"] = str(final_mp4.resolve())
+    _persist_project(project_path, project)
 
 
 def _ensure_remotion_ready() -> None:
@@ -196,6 +262,8 @@ def render_with_remotion(
     work_dir = remotion_dir or REMOTION_DIR
     out = Path(output_path).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
+
+    props = _normalize_canvas_props(props)
 
     props_path = out.with_suffix(".remotion-props.json")
     props_path.write_text(json.dumps(props, ensure_ascii=False), encoding="utf-8")
@@ -255,6 +323,13 @@ def render_project_video(
     Output: Resolved path to rendered MP4.
     """
     project = load_project(project_path)
+    project_file = Path(project_path)
+    run_dir = project_file.parent
+
+    if _ensure_project_music(project, run_dir):
+        _persist_project(project_file, project)
+        print(f"Background music: {project['audio']['music']['original_name']}")
+
     props, public_dir = project_to_remotion_props(
         project,
         background_color=background_color,
@@ -262,12 +337,14 @@ def render_project_video(
     )
 
     project_file = Path(project_path)
-    default_out = project_file.parent / "caption_preview.mp4"
-    return render_with_remotion(
+    default_out = project_file.parent / "final.mp4"
+    final_out = render_with_remotion(
         props,
         output_path or default_out,
         public_dir=public_dir,
     )
+    _record_render_final_path(project_file, project, final_out)
+    return final_out
 
 
 def main() -> None:
@@ -287,7 +364,7 @@ def main() -> None:
         "-o",
         "--output",
         default=None,
-        help="Output MP4 path (default: beside project as caption_preview.mp4)",
+        help="Output MP4 path (default: beside project as final.mp4)",
     )
     parser.add_argument(
         "--background-color",

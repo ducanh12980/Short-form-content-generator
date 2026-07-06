@@ -7,7 +7,7 @@ Index for humans and coding agents. Keep root `AGENTS.md` lightweight; put detai
 | Folder | Contents |
 |--------|----------|
 | [domain/](domain/) | Product domain: content pipeline, learning loop, KPIs |
-| [architecture/](architecture/) | System design, modules, data flow, technical spec |
+| [architecture/](architecture/) | System design, modules, data flow, [roadmap](architecture/roadmap.md) |
 | [workflow/](workflow/) | Agentic workflow, tasks, PR process |
 | [conventions/](conventions/) | Code style, naming, commit rules |
 | [security/](security/) | Secrets, API usage, content handling |

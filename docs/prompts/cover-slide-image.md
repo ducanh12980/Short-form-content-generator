@@ -1,15 +1,15 @@
 # Cover slide image — Nhân Tướng VN
 
-Prompt for **cover-slide image generation** only. Typography text comes from the [Script writer](slide-script-writer.md) output — do not invent title or description here.
+Prompt for **cover-slide image generation** only. On-image typography is **inspired by** the [Script writer](slide-script-writer.md) output — same theme and message, but wording on the image may differ.
 
-**Inputs (from script writer JSON):** `{{TITLE}}`, `{{DESCRIPTION}}`, optional `{{TOPIC}}` for scene symbolism.
+**Inputs (from script writer JSON):** `{{TITLE}}`, `{{DESCRIPTION}}`, optional `{{TOPIC}}` for scene symbolism. Use these as creative briefs, not verbatim copy requirements.
 
 ---
 
 ## Image generation prompt
 
 ```
-Create a brand-new premium vertical illustration for a TikTok educational slideshow.
+Create a brand-new premium vertical illustration for a TikTok educational slideshow about Vietnamese Physiognomy (Nhân Tướng Học).
 
 The image is designed for short-form educational content and must instantly capture attention while remaining elegant, luxurious, minimal, and highly readable on a mobile phone.
 
@@ -284,20 +284,20 @@ Easy to read.
 Thought-provoking.
 
 --------------------------------------------------
-TEXT CONTENT (from Script writer — render exactly)
+TEXT CONTENT (from Script writer — relate, do not copy verbatim)
 --------------------------------------------------
 
-Title:
+Use the script writer copy below as the **theme and message** for on-image typography. The text on the image must **relate to** this content — same idea, same tone — but you **may rephrase** for layout, length, or visual impact.
+
+Do not contradict the message. Do not add unrelated claims. Keep fluent natural Vietnamese.
+
+Reference title:
 
 {{TITLE}}
 
-Description:
+Reference description:
 
 {{DESCRIPTION}}
-
-Everything must be written in fluent, natural Vietnamese exactly as provided above.
-
-Do not paraphrase, shorten, or add text.
 
 --------------------------------------------------
 BRAND CONSISTENCY
@@ -393,8 +393,8 @@ The final artwork should immediately make viewers stop scrolling, feel curious, 
 
 | Variable | Source | Notes |
 |----------|--------|-------|
-| `{{TITLE}}` | Script writer → `title` | Cover headline |
-| `{{DESCRIPTION}}` | Script writer → `description` | Cover subcopy, 4–6 lines |
+| `{{TITLE}}` | Script writer → `title` | Thematic headline — image text may rephrase |
+| `{{DESCRIPTION}}` | Script writer → `description` | Thematic subcopy — image text may shorten or reword |
 | `{{TOPIC}}` | Script writer input or brief | Scene symbolism only; not rendered as text |
 
 ---
@@ -405,5 +405,6 @@ The final artwork should immediately make viewers stop scrolling, feel curious, 
 flowchart LR
   T[Topic brief] --> SW[slide-script-writer]
   SW -->|title, description| IMG[cover-slide-image]
-  SW -->|tts_script| TTS[TTS / captions]
+  SW -->|slide copy| TW[slide-tts-writer]
+  TW -->|tts per scene| TTS[edge-tts / captions]
 ```

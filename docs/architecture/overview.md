@@ -1,10 +1,10 @@
 # Architecture overview
 
-> Status: **planning** — high-level index. Full technical spec: [ai-shorts-engine-spec.md](ai-shorts-engine-spec.md).
+> Status: **production pipeline active** — current milestone is a **CSV batch demo + cron** ([roadmap.md](roadmap.md)). Optimization and Knowledge are deferred. Full technical spec: [ai-shorts-engine-spec.md](ai-shorts-engine-spec.md).
 
 ## Purpose
 
-Generate short-form video content end-to-end or in stages. The full product workflow (Production → Optimization → Knowledge) is defined in [../domain/content-learning-system.md](../domain/content-learning-system.md).
+Generate short-form video content end-to-end or in stages. Near-term focus is **batch production** from a CSV job file on a schedule. The full product loop (Production → Optimization → Knowledge) is defined in [../domain/content-learning-system.md](../domain/content-learning-system.md) but **not in scope** until the batch demo ships.
 
 - **Input**: topic, brief, brand voice, reference material
 - **Generation**: script, hook, captions, metadata (title, hashtags)
@@ -66,7 +66,12 @@ flowchart LR
   tts --> remotion
 ```
 
-Entry: `python orchestrator_mvp.py "topic" --mode slideshow`. Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none` (typography baked into slides). Use `--caption-mode sentence` for per-sentence overlay captions timed via TTS word boundaries.
+Entry: `python orchestrator_mvp.py "topic"` (default: slideshow). Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none` (typography baked into slides). Export: `python core/remotion_render_stage.py output/pipeline_payload.json`.
+
+## Roadmap
+
+- **Current milestone:** [roadmap.md](roadmap.md) — CSV job queue, batch runner, cron
+- Task board: [current-tasks.md](../workflow/current-tasks.md)
 
 ## Related
 

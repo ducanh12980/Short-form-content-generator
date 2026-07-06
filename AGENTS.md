@@ -23,11 +23,16 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Install Python deps | `pip install -r requirements.txt` |
 | Install Remotion deps | `cd remotion && npm install` |
 | Run MVP pipeline | `python orchestrator_mvp.py "your topic"` |
-| Run slideshow pipeline | `python orchestrator_mvp.py "your topic" --mode slideshow` |
+| Run slideshow pipeline (default) | `python orchestrator_mvp.py "your topic"` or `--mode slideshow` |
 | Slideshow + free images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider pollinations` |
 | Slideshow + mock images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider mock` |
-| Generate slide images only | `python core/slide_image_stage.py output/pipeline_payload.json` |
-| Render preview (Remotion) | `python core/remotion_render_stage.py output/pipeline_payload.json` |
+| Run slideshow + final MP4 | `python orchestrator_mvp.py "topic"` (no captions by default) |
+| Slideshow + sentence captions | `python orchestrator_mvp.py "topic" --caption-mode sentence` |
+| Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
+| **Daily CSV batch (1 video)** | `python batch_runner.py --csv jobs.csv` — see [docs/batch-demo.md](docs/batch-demo.md) |
+| Generate slide images only | `python core/slide_image_stage.py output/generations/<run-id>/pipeline_payload.json` |
+| Render final MP4 (Remotion) | `python core/remotion_render_stage.py output/generations/<run-id>/pipeline_payload.json` |
+| **Stitch images + audio** | `python stitch.py --images img.jpg --audio voice.mp3` — see [docs/stitch-cli.md](docs/stitch-cli.md) |
 | Remotion Studio | `cd remotion && npm run studio` |
 | Run tests | `pytest -q` |
 | Lint / format | TBD |
@@ -42,6 +47,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | `docs/domain/content-learning-system.md` | **Core product spec** — production, optimization, knowledge loop |
 | `docs/workflow/` | Agentic workflow, task tracking, PR conventions |
 | `docs/architecture/` | System design, module boundaries |
+| `docs/architecture/roadmap.md` | **Current milestone** — CSV batch demo + cron (Optimization/Knowledge deferred) |
 | `docs/architecture/ai-shorts-engine-spec.md` | **Technical spec** — modular shorts engine, hybrid orchestration |
 | `docs/adr/` | Architecture Decision Records |
 | `.cursor/rules/` | Scoped Cursor rules (coding standards, safety) |

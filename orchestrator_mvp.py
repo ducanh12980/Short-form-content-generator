@@ -16,6 +16,8 @@ from openai import APIError, OpenAI
 
 from core.audio_generator import synthesize_speech
 from core.caption_tokens import VALID_ANIMATIONS, VALID_STYLES, merge_styled_tokens_with_timestamps
+from core.music_picker import attach_random_music
+from core.project_schema import VALID_CAPTION_MODES
 
 SCRIPT_WRITER_MODEL = "gemini-2.5-flash"
 CAPTION_STYLER_MODEL = "gemini-2.5-flash"
@@ -71,6 +73,12 @@ def _load_env() -> None:
     if env_path.is_file():
         load_dotenv(env_path)
     _env_loaded = True
+
+
+def _default_caption_mode() -> str:
+    """Caption overlay default: ``CAPTION_MODE`` env, else ``none``."""
+    mode = os.environ.get("CAPTION_MODE", "none").strip() or "none"
+    return mode if mode in VALID_CAPTION_MODES else "none"
 
 
 def _require_env(*names: str) -> None:
@@ -339,16 +347,73 @@ def run_mvp_pipeline(
             "word_timestamps": word_timestamps,
         },
     }
+    music = attach_random_music(out)
+    if music is not None:
+        payload["audio"]["music"] = music
     payload_path = out / "pipeline_payload.json"
-    save_payload(payload, payload_path)
+    save_payload(
+        {
+            **payload,
+            "render": {
+                "output_dir": str(out.resolve()),
+                "preview_path": None,
+                "final_path": None,
+            },
+        },
+        payload_path,
+    )
 
     print("=" * 60)
     print("OUTPUT ARTIFACTS")
     print("=" * 60)
-    print(f"Narration: {narration_path.resolve()}")
-    print(f"Payload:   {payload_path.resolve()}")
+    print(f"Run folder: {out.resolve()}/")
+    print(f"Narration:  {narration_path.resolve()}")
+    print(f"Payload:    {payload_path.resolve()}")
+    print()
 
     return payload
+
+
+def run_slideshow_with_render(
+    topic_prompt: str,
+    *,
+    output_dir: str | Path,
+    caption_mode: str = "none",
+    skip_images: bool = False,
+    image_provider: str | None = None,
+) -> tuple[dict[str, Any], Path]:
+    """Run slideshow generation then Remotion export → final.mp4 in output_dir."""
+    from core.remotion_render_stage import render_project_video
+    from core.slideshow_pipeline import run_slideshow_pipeline
+
+    out = Path(output_dir)
+    run_slideshow_pipeline(
+        topic_prompt,
+        output_dir=out,
+        caption_mode=caption_mode,
+        skip_images=skip_images,
+        image_provider=image_provider,
+    )
+    payload_path = out / "pipeline_payload.json"
+    final = render_project_video(payload_path, out / "final.mp4")
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    return payload, final
+
+
+def run_mvp_with_render(
+    topic_prompt: str,
+    *,
+    output_dir: str | Path,
+) -> tuple[dict[str, Any], Path]:
+    """Run MVP generation then Remotion export → final.mp4 in output_dir."""
+    from core.remotion_render_stage import render_project_video
+
+    out = Path(output_dir)
+    run_mvp_pipeline(topic_prompt, output_dir=out)
+    payload_path = out / "pipeline_payload.json"
+    final = render_project_video(payload_path, out / "final.mp4")
+    payload = json.loads(payload_path.read_text(encoding="utf-8"))
+    return payload, final
 
 
 def main() -> None:
@@ -359,7 +424,6 @@ def main() -> None:
     Output: None; exits 0 on success or 1 after printing an error message.
     """
     _load_env()
-    default_output = os.environ.get("OUTPUT_DIR", "output")
 
     parser = argparse.ArgumentParser(description="Run the short-form video MVP orchestrator.")
     parser.add_argument(
@@ -370,20 +434,28 @@ def main() -> None:
     )
     parser.add_argument(
         "--output-dir",
-        default=default_output,
-        help="Directory for narration.mp3 and pipeline_payload.json (default: OUTPUT_DIR or output)",
+        default=None,
+        help=(
+            "Exact run folder for all artifacts (default: timestamped folder under "
+            "OUTPUT_DIR env or output/generations/)"
+        ),
+    )
+    parser.add_argument(
+        "--no-render",
+        action="store_true",
+        help="Skip Remotion render; only write payload, images, and audio",
     )
     parser.add_argument(
         "--mode",
         choices=("mvp", "slideshow"),
-        default="mvp",
-        help="Pipeline mode: mvp (word karaoke) or slideshow (3-scene slides + DALL-E)",
+        default="slideshow",
+        help="Pipeline mode: slideshow (default, 3-scene slides) or mvp (word karaoke)",
     )
     parser.add_argument(
         "--caption-mode",
         choices=("none", "sentence", "word"),
-        default="none",
-        help="Caption overlay for slideshow mode (default: none)",
+        default=_default_caption_mode(),
+        help="Caption overlay for slideshow mode (default: CAPTION_MODE env or none)",
     )
     parser.add_argument(
         "--skip-images",
@@ -398,19 +470,37 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    from core.run_output import ensure_run_dir, resolve_generation_output_dir
+
+    out_dir = ensure_run_dir(resolve_generation_output_dir(args.output_dir))
+    print(f"Run folder: {out_dir}")
+
     try:
         if args.mode == "slideshow":
-            from core.slideshow_pipeline import run_slideshow_pipeline
+            if args.no_render:
+                from core.slideshow_pipeline import run_slideshow_pipeline
 
-            run_slideshow_pipeline(
-                args.topic,
-                output_dir=args.output_dir,
-                caption_mode=args.caption_mode,
-                skip_images=args.skip_images,
-                image_provider=args.image_provider,
-            )
+                run_slideshow_pipeline(
+                    args.topic,
+                    output_dir=out_dir,
+                    caption_mode=args.caption_mode,
+                    skip_images=args.skip_images,
+                    image_provider=args.image_provider,
+                )
+            else:
+                _, final = run_slideshow_with_render(
+                    args.topic,
+                    output_dir=out_dir,
+                    caption_mode=args.caption_mode,
+                    skip_images=args.skip_images,
+                    image_provider=args.image_provider,
+                )
+                print(f"Final video: {final}")
+        elif args.no_render:
+            run_mvp_pipeline(args.topic, output_dir=out_dir)
         else:
-            run_mvp_pipeline(args.topic, output_dir=args.output_dir)
+            _, final = run_mvp_with_render(args.topic, output_dir=out_dir)
+            print(f"Final video: {final}")
     except (PipelineError, ValueError, RuntimeError) as exc:
         print(f"Pipeline failed: {exc}", file=sys.stderr)
         sys.exit(1)

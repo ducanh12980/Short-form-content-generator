@@ -6,12 +6,39 @@ import json
 from pathlib import Path
 from typing import Any
 
-from core.caption_tokens import build_sentence_tokens_from_scenes, enrich_tokens_with_timestamps
+from core.caption_tokens import (
+    build_karaoke_tokens_from_scenes,
+    build_sentence_tokens_from_scenes,
+    enrich_tokens_with_timestamps,
+)
 
 DEFAULT_CANVAS = {"width": 1080, "height": 1920}
 DEFAULT_THEME = "minimalist"
 VALID_CAPTION_MODES = frozenset({"none", "sentence", "word"})
 SCENE_COUNT = 3
+
+
+def _parse_words_by_scene(audio: dict[str, Any]) -> dict[int, list[dict[str, Any]]]:
+    """Parse audio.words_by_scene JSON (string keys) into int-keyed lookup."""
+    raw = audio.get("words_by_scene")
+    if not isinstance(raw, dict):
+        return {}
+    parsed: dict[int, list[dict[str, Any]]] = {}
+    for key, entries in raw.items():
+        if isinstance(entries, list):
+            parsed[int(key)] = entries
+    return parsed
+
+
+def _tokens_have_karaoke_words(tokens: list[Any]) -> bool:
+    if not tokens:
+        return False
+    return all(
+        isinstance(token, dict)
+        and isinstance(token.get("words"), list)
+        and len(token["words"]) > 0
+        for token in tokens
+    )
 
 
 def _ensure_scene_timestamps(
@@ -46,10 +73,6 @@ def _rebuild_sentence_caption_tokens(
     audio: dict[str, Any],
 ) -> None:
     """Rebuild per-sentence caption tokens from scenes and word timestamps."""
-    word_timestamps = audio.get("word_timestamps", [])
-    if not isinstance(word_timestamps, list) or not word_timestamps:
-        return
-
     scenes = normalized.get("scenes", [])
     if not isinstance(scenes, list) or not scenes:
         return
@@ -59,6 +82,18 @@ def _rebuild_sentence_caption_tokens(
         "captions",
         {"theme": DEFAULT_THEME, "font": None, "tokens": []},
     )
+
+    caption_mode = normalized.get("caption_mode", "none")
+    words_by_scene = _parse_words_by_scene(audio)
+    if caption_mode == "sentence" and words_by_scene:
+        rebuilt = build_karaoke_tokens_from_scenes(scenes, words_by_scene)
+        captions["tokens"] = rebuilt
+        return
+
+    word_timestamps = audio.get("word_timestamps", [])
+    if not isinstance(word_timestamps, list) or not word_timestamps:
+        return
+
     captions["tokens"] = build_sentence_tokens_from_scenes(scenes, word_timestamps)
 
 
@@ -108,7 +143,14 @@ def normalize_project(data: dict[str, Any]) -> dict[str, Any]:
             isinstance(audio, dict)
             and normalized.get("caption_mode") == "sentence"
         ):
-            _rebuild_sentence_caption_tokens(normalized, audio)
+            existing_tokens: list[Any] = []
+            captions_section = normalized.get("captions")
+            if isinstance(captions_section, dict):
+                raw_tokens = captions_section.get("tokens")
+                if isinstance(raw_tokens, list):
+                    existing_tokens = raw_tokens
+            if not _tokens_have_karaoke_words(existing_tokens):
+                _rebuild_sentence_caption_tokens(normalized, audio)
         return normalized
 
     if "captions" in data and isinstance(data["captions"], dict):
@@ -314,3 +356,18 @@ def get_narration_path(project: dict[str, Any]) -> Path:
     if not path:
         raise ValueError("Project audio section must include narration path.")
     return Path(path)
+
+
+def get_music_settings(project: dict[str, Any]) -> dict[str, Any] | None:
+    """Return background music path and volume from audio.music, if set."""
+    audio = project.get("audio", {})
+    music = audio.get("music")
+    if not isinstance(music, dict):
+        return None
+    path = music.get("path")
+    if not path:
+        return None
+    return {
+        "path": Path(str(path)),
+        "volume": float(music.get("volume", 0.25)),
+    }

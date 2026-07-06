@@ -5,6 +5,8 @@ from __future__ import annotations
 import pytest
 
 from core.caption_tokens import (
+    _scene_word_timestamps,
+    build_karaoke_tokens_from_scenes,
     build_sentence_tokens_from_scenes,
     enrich_tokens_with_timestamps,
     match_word_timestamp,
@@ -172,3 +174,28 @@ def test_build_sentence_tokens_without_word_timestamps_uses_scene_boundaries() -
     assert tokens[0]["text"] == "Câu một. Câu hai."
     assert tokens[0]["start_ms"] == 0
     assert tokens[0]["end_ms"] == 5000
+
+
+def test_scene_word_timestamps_includes_overlap_at_boundary() -> None:
+    words = [
+        {"text": "end", "start_ms": 13500, "end_ms": 13800},
+        {"text": "start", "start_ms": 13700, "end_ms": 13900},
+    ]
+    scene2 = _scene_word_timestamps(words, 13700, 26680)
+    assert len(scene2) == 2
+    assert scene2[1]["text"] == "start"
+
+
+def test_build_karaoke_tokens_per_scene_cursor_resets() -> None:
+    scenes = [
+        {"id": 1, "tts": "A.", "start_ms": 0, "end_ms": 1000},
+        {"id": 2, "tts": "B.", "start_ms": 1000, "end_ms": 2000},
+    ]
+    words_by_scene = {
+        1: [{"text": "A", "start_ms": 0, "end_ms": 200}],
+        2: [{"text": "B", "start_ms": 1000, "end_ms": 1200}],
+    }
+    tokens = build_karaoke_tokens_from_scenes(scenes, words_by_scene)
+    assert len(tokens) == 2
+    assert tokens[1]["words"][0]["text"] == "B."
+    assert len(tokens[1]["words"]) == 1

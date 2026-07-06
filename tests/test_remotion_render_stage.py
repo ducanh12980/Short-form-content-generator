@@ -7,9 +7,12 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from core.remotion_render_stage import (
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
     project_to_remotion_props,
     render_project_video,
     render_with_remotion,
+    _normalize_canvas_props,
 )
 
 
@@ -54,6 +57,12 @@ def test_project_to_remotion_props(tmp_path: Path) -> None:
     assert "minimalist" in props["themes"]
 
 
+def test_normalize_canvas_props_swaps_landscape() -> None:
+    fixed = _normalize_canvas_props({"width": 1920, "height": 1080, "fps": 30})
+    assert fixed["width"] == CANVAS_WIDTH
+    assert fixed["height"] == CANVAS_HEIGHT
+
+
 @patch("core.remotion_render_stage._resolve_npx", return_value="npx")
 @patch("core.remotion_render_stage.subprocess.run")
 @patch("core.remotion_render_stage._ensure_remotion_ready")
@@ -89,12 +98,14 @@ def test_render_project_video(
     tmp_path: Path,
 ) -> None:
     project_path = _sample_payload(tmp_path)
-    expected = tmp_path / "caption_preview.mp4"
+    expected = tmp_path / "final.mp4"
     mock_render.return_value = expected.resolve()
 
     result = render_project_video(project_path, expected)
 
     assert result == expected.resolve()
+    saved = json.loads(project_path.read_text(encoding="utf-8"))
+    assert saved["render"]["final_path"] == str(expected.resolve())
     mock_render.assert_called_once()
     props = mock_render.call_args.args[0]
     assert props["tokens"][0]["text"] == "Hello"

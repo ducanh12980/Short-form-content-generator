@@ -123,6 +123,75 @@ def test_get_raw_script_and_topic() -> None:
     assert get_raw_script(project) == "script"
 
 
+def test_normalize_project_rebuilds_karaoke_from_words_by_scene() -> None:
+    project = normalize_project(
+        {
+            "topic": "t",
+            "caption_mode": "sentence",
+            "scenes": [
+                {
+                    "id": 1,
+                    "tts": "Câu một. Câu hai.",
+                    "start_ms": 0,
+                    "end_ms": 2000,
+                }
+            ],
+            "captions": {"theme": "minimalist", "tokens": []},
+            "audio": {
+                "path": "output/narration.mp3",
+                "word_timestamps": [
+                    {"text": "Câu", "start_ms": 0, "end_ms": 100},
+                    {"text": "một", "start_ms": 100, "end_ms": 300},
+                    {"text": "Câu", "start_ms": 500, "end_ms": 600},
+                    {"text": "hai", "start_ms": 600, "end_ms": 800},
+                ],
+                "words_by_scene": {
+                    "1": [
+                        {"text": "Câu", "start_ms": 0, "end_ms": 100},
+                        {"text": "một", "start_ms": 100, "end_ms": 300},
+                        {"text": "Câu", "start_ms": 500, "end_ms": 600},
+                        {"text": "hai", "start_ms": 600, "end_ms": 800},
+                    ]
+                },
+            },
+        }
+    )
+    tokens = get_caption_tokens(project)
+    assert len(tokens) == 2
+    assert len(tokens[0]["words"]) == 2
+    assert tokens[0]["words"][0]["text"] == "Câu"
+
+
+def test_load_project_preserves_karaoke_words(tmp_path: Path) -> None:
+    payload = {
+        "topic": "t",
+        "caption_mode": "sentence",
+        "scenes": [{"id": 1, "tts": "Hi.", "start_ms": 0, "end_ms": 500}],
+        "captions": {
+            "theme": "minimalist",
+            "tokens": [
+                {
+                    "text": "Hi.",
+                    "style": "primary",
+                    "animation": "none",
+                    "start_ms": 0,
+                    "end_ms": 400,
+                    "words": [{"text": "Hi.", "start_ms": 0, "end_ms": 400}],
+                }
+            ],
+        },
+        "audio": {
+            "path": str(tmp_path / "narration.mp3"),
+            "word_timestamps": [{"text": "Hi", "start_ms": 0, "end_ms": 400}],
+        },
+    }
+    path = tmp_path / "pipeline_payload.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    loaded = load_project(path)
+    tokens = get_caption_tokens(loaded)
+    assert len(tokens[0]["words"]) == 1
+
+
 def test_normalize_project_rebuilds_sentence_captions() -> None:
     project = normalize_project(
         {

@@ -212,18 +212,21 @@ Phase 2 evolves `pipeline_payload.json` into **`project.json`** — the file a f
 4. **Render engine:** [ADR 0003](../../docs/adr/0003-remotion-render-and-editor.md) — Remotion (`remotion/`) is the main renderer. Python bridge: `core/remotion_render_stage.py`.
 4. Keep `pipeline_payload.json` as an alias or generation snapshot until UI lands; prefer `project.json` in new code.
 
-## Current wiring status (MVP)
+## Current wiring status
+
+**Defaults:** `--mode slideshow`, export via Remotion (`remotion_render_stage`).
 
 | Step | Wired in orchestrator? |
 |------|------------------------|
-| Script writer LLM | Yes |
-| Caption styler LLM | Yes |
+| Scene script + TTS writer (slideshow) | Yes (`--mode slideshow`, default) |
+| Slide images | Yes (inline in slideshow pipeline) |
 | edge-tts audio | Yes |
 | Payload JSON write | Yes |
-| Pexels background images | Yes (step 2.2 — `python -m core.broll_retrieval_stage`) |
-| Caption render | Yes (step 2.1 — `python -m core.caption_render_stage`) |
-| Acoustic mix | No (module exists; consumes audio + music path) |
-| Final video export | Not yet |
+| Remotion render → final MP4 | No (standalone CLI; batch runner in progress) |
+| Acoustic mix | No (module exists; optional) |
+| Pexels b-roll | Out of scope (removed from Phase 2) |
+
+Legacy: `caption_renderer.py` (MoviePy), `broll_retrieval_stage` (standalone CLI only).
 
 ## Environment variables
 
@@ -237,7 +240,8 @@ Phase 2 evolves `pipeline_payload.json` into **`project.json`** — the file a f
 | `OUTPUT_DIR` | default for `--output-dir` |
 | `OPENAI_TIMEOUT` | LLM client timeout (seconds) |
 | `PEXELS_API_KEY` | media_retriever |
-| `BACKGROUND_MUSIC_PATH` | acoustic_compositor (future payload field) |
+| `MUSIC_DIR` | `core/music_picker.py` — random background music library |
+| `BACKGROUND_MUSIC_PATH` | Legacy; used as music dir if it points to a folder |
 
 ## Component isolation test commands
 
@@ -253,3 +257,17 @@ python -m core.broll_retrieval_stage output/pipeline_payload.json
 ```
 
 When explaining a new feature, state which of these stages it affects and whether the payload schema must change.
+
+## Next milestone: CSV batch demo
+
+> Detail: [docs/architecture/roadmap.md](../../docs/architecture/roadmap.md)
+
+Planned additions (not implemented):
+
+| Component | Role |
+|-----------|------|
+| `jobs.csv` | Job queue — topic per row, `status`, `output_path` |
+| Batch runner CLI | Read CSV, run `pending` rows through slideshow → Remotion, update CSV |
+| Cron / Task Scheduler | Invokes batch runner on a fixed interval |
+
+Optimization and Knowledge systems from the product spec are **deferred** until this demo ships.

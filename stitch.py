@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import datetime
 from pathlib import Path
 
 try:
@@ -18,18 +17,10 @@ try:
 except ImportError:
     _ARGCOMPLETE = False
 
-# Stable base directory for all stitch runs.
-STITCH_BASE = Path("output") / "stitch"
-
-
-def _new_run_dir() -> Path:
-    """Return a unique run folder path based on the current timestamp."""
-    run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-    return STITCH_BASE / run_id
-
+from core.run_output import STITCH_BASE, new_run_dir
 
 def main() -> None:
-    run_dir = _new_run_dir()
+    run_dir = new_run_dir(STITCH_BASE)
     default_output = run_dir / "stitch.mp4"
 
     parser = argparse.ArgumentParser(

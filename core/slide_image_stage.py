@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import os
+import secrets
 import sys
 import time
 from pathlib import Path
@@ -368,13 +369,19 @@ def generate_scene_images(
             description=description,
             topic=topic,
         )
+        image_kwargs: dict[str, Any] = {
+            "scene_id": scene_id,
+            "title": title,
+        }
+        if resolved_provider == "pollinations":
+            # Random seed so repeated runs with the same prompt still get fresh images.
+            image_kwargs["seed"] = secrets.randbelow(2**31)
+
         generate_slide_image(
             prompt,
             image_path,
             provider=resolved_provider,
-            scene_id=scene_id,
-            title=title,
-            seed=scene_id * 1000 + index,
+            **image_kwargs,
         )
         scene["image"] = {"path": str(image_path.resolve()), "source": resolved_provider}
         saved.append(image_path.resolve())

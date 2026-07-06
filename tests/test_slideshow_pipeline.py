@@ -62,19 +62,45 @@ def _sample_scenes() -> list[dict]:
 def test_parse_scene_script_response_accepts_three_scenes() -> None:
     payload = {
         "scenes": [
-            {"title": "A", "description": "desc a", "tts": "tts a"},
-            {"title": "B", "description": "desc b", "tts": "tts b"},
-            {"title": "C", "description": "desc c", "tts": "tts c"},
+            {"title": "A", "description": "desc a"},
+            {"title": "B", "description": "desc b"},
+            {"title": "C", "description": "desc c"},
         ]
     }
     scenes = parse_scene_script_response(json.dumps(payload))
     assert len(scenes) == 3
     assert scenes[0]["id"] == 1
     assert scenes[2]["title"] == "C"
+    assert "tts" not in scenes[0]
+
+
+def test_parse_tts_writer_response_accepts_three_blocks() -> None:
+    from core.slideshow_pipeline import parse_tts_writer_response
+
+    payload = {
+        "scenes": [
+            {"tts": "tts a"},
+            {"tts": "tts b"},
+            {"tts": "tts c"},
+        ]
+    }
+    blocks = parse_tts_writer_response(json.dumps(payload))
+    assert blocks == ["tts a", "tts b", "tts c"]
+
+
+def test_format_slide_content_for_tts() -> None:
+    from core.slideshow_pipeline import format_slide_content_for_tts
+
+    text = format_slide_content_for_tts(
+        [{"id": 1, "title": "Tiêu đề", "description": "Mô tả ngắn."}]
+    )
+    assert "Slide 1" in text
+    assert "Tiêu đề" in text
+    assert "Mô tả ngắn." in text
 
 
 def test_parse_scene_script_response_rejects_wrong_count() -> None:
-    payload = {"scenes": [{"title": "A", "description": "d", "tts": "t"}]}
+    payload = {"scenes": [{"title": "A", "description": "d"}]}
     with pytest.raises(ValueError, match="exactly 3"):
         parse_scene_script_response(json.dumps(payload))
 
@@ -82,12 +108,12 @@ def test_parse_scene_script_response_rejects_wrong_count() -> None:
 def test_parse_scene_script_response_rejects_missing_field() -> None:
     payload = {
         "scenes": [
-            {"title": "A", "description": "d", "tts": "t"},
-            {"title": "B", "description": "d", "tts": "t"},
-            {"title": "C", "description": "d"},
+            {"title": "A", "description": "d"},
+            {"title": "B", "description": "d"},
+            {"title": "C", "title": "only title"},
         ]
     }
-    with pytest.raises(ValueError, match="tts"):
+    with pytest.raises(ValueError, match="description"):
         parse_scene_script_response(json.dumps(payload))
 
 
@@ -269,14 +295,22 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
 
     scene_payload = {
         "scenes": [
-            {"title": "A", "description": "da", "tts": "ta"},
-            {"title": "B", "description": "db", "tts": "tb"},
-            {"title": "C", "description": "dc", "tts": "tc"},
+            {"title": "A", "description": "da"},
+            {"title": "B", "description": "db"},
+            {"title": "C", "description": "dc"},
         ]
     }
-    client.chat.completions.create.return_value = MagicMock(
-        choices=[MagicMock(message=MagicMock(content=json.dumps(scene_payload)))]
-    )
+    tts_payload = {
+        "scenes": [
+            {"tts": "ta"},
+            {"tts": "tb"},
+            {"tts": "tc"},
+        ]
+    }
+    client.chat.completions.create.side_effect = [
+        MagicMock(choices=[MagicMock(message=MagicMock(content=json.dumps(scene_payload)))]),
+        MagicMock(choices=[MagicMock(message=MagicMock(content=json.dumps(tts_payload)))]),
+    ]
 
     mock_synthesize.return_value = (
         [
@@ -289,9 +323,11 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
             {"text": "tb", "start_ms": 1000, "end_ms": 1500},
             {"text": "tc", "start_ms": 2000, "end_ms": 2500},
         ],
+        {1: [{"text": "ta", "start_ms": 0, "end_ms": 500}], 2: [], 3: []},
     )
 
-    def _fake_images(project: dict, *, images_dir: Path | None = None, provider: str | None = None) -> list[Path]:
+    def _fake_images(project: dict, **kwargs) -> list[Path]:
+        provider = kwargs.get("provider")
         for scene in project["scenes"]:
             scene["image"] = {
                 "path": str((tmp_path / "images" / f"scene_{scene['id']}.png").resolve()),
@@ -329,14 +365,22 @@ def test_run_slideshow_pipeline_sentence_captions(
     mock_get_client.return_value = client
     scene_payload = {
         "scenes": [
-            {"title": "A", "description": "da", "tts": "Câu một. Câu hai."},
-            {"title": "B", "description": "db", "tts": "Câu ba."},
-            {"title": "C", "description": "dc", "tts": "Câu bốn."},
+            {"title": "A", "description": "da"},
+            {"title": "B", "description": "db"},
+            {"title": "C", "description": "dc"},
         ]
     }
-    client.chat.completions.create.return_value = MagicMock(
-        choices=[MagicMock(message=MagicMock(content=json.dumps(scene_payload)))]
-    )
+    tts_payload = {
+        "scenes": [
+            {"tts": "Câu một. Câu hai."},
+            {"tts": "Câu ba."},
+            {"tts": "Câu bốn."},
+        ]
+    }
+    client.chat.completions.create.side_effect = [
+        MagicMock(choices=[MagicMock(message=MagicMock(content=json.dumps(scene_payload)))]),
+        MagicMock(choices=[MagicMock(message=MagicMock(content=json.dumps(tts_payload)))]),
+    ]
     mock_synthesize.return_value = (
         [
             {"scene_id": 1, "start_ms": 0, "end_ms": 1000},
@@ -353,6 +397,16 @@ def test_run_slideshow_pipeline_sentence_captions(
             {"text": "Câu", "start_ms": 2000, "end_ms": 2100},
             {"text": "bốn", "start_ms": 2100, "end_ms": 2300},
         ],
+        {
+            1: [
+                {"text": "Câu", "start_ms": 0, "end_ms": 100},
+                {"text": "một", "start_ms": 100, "end_ms": 300},
+                {"text": "Câu", "start_ms": 400, "end_ms": 500},
+                {"text": "hai", "start_ms": 500, "end_ms": 700},
+            ],
+            2: [{"text": "Câu", "start_ms": 1000, "end_ms": 1100}, {"text": "ba", "start_ms": 1100, "end_ms": 1300}],
+            3: [{"text": "Câu", "start_ms": 2000, "end_ms": 2100}, {"text": "bốn", "start_ms": 2100, "end_ms": 2300}],
+        },
     )
     mock_images.side_effect = lambda project, **kwargs: []
 

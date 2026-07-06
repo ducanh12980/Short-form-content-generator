@@ -219,11 +219,11 @@ def _scene_word_timestamps(
     scene_start_ms: int,
     scene_end_ms: int,
 ) -> list[dict[str, Any]]:
-    """Return word boundaries whose start falls within a scene window."""
+    """Return word boundaries that overlap a scene window (inclusive of boundary speech)."""
     return [
         entry
         for entry in word_timestamps
-        if scene_start_ms <= int(entry["start_ms"]) < scene_end_ms
+        if int(entry["start_ms"]) < scene_end_ms and int(entry["end_ms"]) > scene_start_ms
     ]
 
 
