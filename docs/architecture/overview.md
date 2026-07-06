@@ -31,15 +31,18 @@ Generate short-form video content end-to-end or in stages. The full product work
 
 Agents implementing features should verify current platform limits before hard-coding.
 
-## Stack (TBD)
+## Stack
 
-Document chosen stack here when decided:
-
-- Language / runtime:
-- Package manager:
-- LLM provider(s):
-- Media tooling:
-- Deployment:
+| Layer | Choice | Notes |
+|-------|--------|-------|
+| **Generation / orchestration** | Python | `orchestrator_mvp.py`, `core/*` |
+| **LLM** | Gemini via OpenAI-compatible SDK | ADR [0001](../adr/0001-gemini-openai-compatible-sdk.md) |
+| **TTS** | edge-tts | Word-level timestamps for caption sync; per-scene concat in slideshow mode |
+| **Slide images** | Gemini (`gemini-2.5-flash-image`) | `core/slide_image_stage.py` — same `OPENAI_API_KEY` as LLM |
+| **Project state** | `project.json` | ADR [0002](../adr/0002-project-file-editability.md) |
+| **Video render** | [Remotion](https://www.remotion.dev/) (`remotion/`) | ADR [0003](../adr/0003-remotion-render-and-editor.md) — captions, b-roll, export |
+| **Audio mix (interim)** | MoviePy | `acoustic_compositor.py` until Remotion/ffmpeg mix |
+| **Deployment** | TBD | Local Node SSR first; Lambda optional |
 
 ## Data flow (high level)
 
@@ -51,9 +54,23 @@ flowchart LR
   Media --> Export[Platform export]
 ```
 
+### Slideshow mode (3-scene)
+
+```mermaid
+flowchart LR
+  topic[Topic] --> sw[SceneScriptWriter]
+  sw --> scenes["scenes x3"]
+  scenes --> dalle[DALL-E3 slides]
+  scenes --> tts[PerScene TTS]
+  dalle --> remotion[Remotion]
+  tts --> remotion
+```
+
+Entry: `python orchestrator_mvp.py "topic" --mode slideshow`. Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none` (typography baked into slides). Use `--caption-mode sentence` for per-sentence overlay captions timed via TTS word boundaries.
+
 ## Related
 
 - Technical spec: [ai-shorts-engine-spec.md](ai-shorts-engine-spec.md)
 - Product spec: [../domain/content-learning-system.md](../domain/content-learning-system.md)
-- ADRs: [../adr/README.md](../adr/README.md)
+- ADRs: [../adr/README.md](../adr/README.md) (see [0002 project editability](../adr/0002-project-file-editability.md))
 - Agent workflow: [../workflow/agentic-workflow.md](../workflow/agentic-workflow.md)

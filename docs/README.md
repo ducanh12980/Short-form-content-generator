@@ -12,6 +12,7 @@ Index for humans and coding agents. Keep root `AGENTS.md` lightweight; put detai
 | [conventions/](conventions/) | Code style, naming, commit rules |
 | [security/](security/) | Secrets, API usage, content handling |
 | [adr/](adr/) | Architecture Decision Records |
+| [prompts/](prompts/) | LLM / image prompts for content stages (script writer, cover art) |
 
 ## How agents should use this
 

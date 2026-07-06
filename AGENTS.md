@@ -14,20 +14,30 @@ Stack and layout will evolve as code lands. Treat `docs/` as the source of truth
 python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env   # fill OPENAI_API_KEY, OPENAI_BASE_URL
+cd remotion && npm install && cd ..
+cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 ```
 
 | Action | Command |
 |--------|---------|
-| Install deps | `pip install -r requirements.txt` |
+| Install Python deps | `pip install -r requirements.txt` |
+| Install Remotion deps | `cd remotion && npm install` |
 | Run MVP pipeline | `python orchestrator_mvp.py "your topic"` |
-| Run tests | `pytest tests/test_orchestrator_mvp.py -q` |
+| Run slideshow pipeline | `python orchestrator_mvp.py "your topic" --mode slideshow` |
+| Slideshow + free images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider pollinations` |
+| Slideshow + mock images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider mock` |
+| Generate slide images only | `python core/slide_image_stage.py output/pipeline_payload.json` |
+| Render preview (Remotion) | `python core/remotion_render_stage.py output/pipeline_payload.json` |
+| Remotion Studio | `cd remotion && npm run studio` |
+| Run tests | `pytest -q` |
 | Lint / format | TBD |
 
 ## Directory guide
 
 | Path | Purpose |
 |------|---------|
+| `remotion/` | **Main video renderer** — Remotion compositions, Studio, export |
+| `core/remotion_render_stage.py` | Python bridge: `project.json` → Remotion CLI |
 | `docs/` | Human + agent documentation (architecture, workflow, ADRs) |
 | `docs/domain/content-learning-system.md` | **Core product spec** — production, optimization, knowledge loop |
 | `docs/workflow/` | Agentic workflow, task tracking, PR conventions |

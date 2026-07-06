@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
-output/
+node_modules/
+remotion/node_modules/
 *.pem
 credentials.json
+output/

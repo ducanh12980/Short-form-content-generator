@@ -56,6 +56,39 @@ def test_run_caption_styler_not_called_when_script_writer_empty() -> None:
     client.chat.completions.create.assert_called_once()
 
 
+@patch.dict(os.environ, {}, clear=True)
+@patch("orchestrator_mvp.time.sleep")
+def test_call_with_api_retry_succeeds_on_second_attempt(mock_sleep: MagicMock) -> None:
+    client = MagicMock()
+    client.chat.completions.create.side_effect = [
+        orch.APIError("transient", request=MagicMock(), body=None),
+        _mock_completion("Script text"),
+    ]
+
+    result = orch.run_script_writer(client, "topic")
+
+    assert result == "Script text"
+    assert client.chat.completions.create.call_count == 2
+    mock_sleep.assert_called_once_with(orch.API_RETRY_DELAY_SECONDS)
+
+
+@patch.dict(os.environ, {}, clear=True)
+@patch("orchestrator_mvp.time.sleep")
+def test_call_with_api_retry_fails_after_two_attempts(mock_sleep: MagicMock) -> None:
+    client = MagicMock()
+    client.chat.completions.create.side_effect = orch.APIError(
+        "still failing",
+        request=MagicMock(),
+        body=None,
+    )
+
+    with pytest.raises(orch.PipelineError, match="after 2 attempt"):
+        orch.run_script_writer(client, "topic")
+
+    assert client.chat.completions.create.call_count == 2
+    mock_sleep.assert_called_once_with(orch.API_RETRY_DELAY_SECONDS)
+
+
 def test_parse_caption_styler_response_rejects_invalid_json() -> None:
     with pytest.raises(ValueError, match="invalid JSON"):
         orch.parse_caption_styler_response("not-json")
@@ -66,25 +99,25 @@ def test_parse_caption_styler_response_requires_tokens_key() -> None:
         orch.parse_caption_styler_response('{"layout": []}')
 
 
-def test_validate_tokens_accepts_word_only() -> None:
-    tokens = [{"word": "hello"}]
+def test_validate_tokens_accepts_text_only() -> None:
+    tokens = [{"text": "hello"}]
     assert orch.validate_tokens(tokens) == tokens
 
 
-def test_validate_tokens_rejects_missing_word() -> None:
-    with pytest.raises(ValueError, match="'word'"):
-        orch.validate_tokens([{"highlight_color": "yellow"}])
+def test_validate_tokens_rejects_missing_text() -> None:
+    with pytest.raises(ValueError, match="'text'"):
+        orch.validate_tokens([{"style": "highlight"}])
 
 
 def test_validate_tokens_accepts_partial_styling() -> None:
-    tokens = [{"word": "hello", "highlight_color": "blue"}]
+    tokens = [{"text": "hello", "style": "highlight"}]
     assert orch.validate_tokens(tokens) == tokens
 
 
 def test_validate_tokens_accepts_full_tokens() -> None:
     tokens = [
-        {"word": "90%", "highlight_color": "yellow", "animation_pop": "sudden_snap"},
-        {"word": "wrong", "highlight_color": "none", "animation_pop": "none"},
+        {"text": "90%", "style": "highlight", "animation": "pop"},
+        {"text": "wrong", "style": "primary", "animation": "none"},
     ]
     assert orch.validate_tokens(tokens) == tokens
 
@@ -115,14 +148,18 @@ def test_run_mvp_pipeline_happy_path(
 ) -> None:
     client = MagicMock()
     mock_get_client.return_value = client
-    mock_synthesize.return_value = [{"text": "Hook", "start_ms": 0, "end_ms": 100}]
+    mock_synthesize.return_value = [
+        {"text": "Hook", "start_ms": 0, "end_ms": 100},
+        {"text": "line", "start_ms": 100, "end_ms": 200},
+        {"text": "here", "start_ms": 200, "end_ms": 300},
+    ]
 
     script = "Hook line here."
     tokens_payload = {
         "tokens": [
-            {"word": "Hook", "highlight_color": "yellow", "animation_pop": "elastic_bounce"},
-            {"word": "line", "highlight_color": "none", "animation_pop": "none"},
-            {"word": "here.", "highlight_color": "none", "animation_pop": "none"},
+            {"text": "Hook", "style": "highlight", "animation": "pop"},
+            {"text": "line", "style": "primary", "animation": "none"},
+            {"text": "here.", "style": "primary", "animation": "none"},
         ]
     }
     client.chat.completions.create.side_effect = [
@@ -132,6 +169,9 @@ def test_run_mvp_pipeline_happy_path(
 
     result = orch.run_mvp_pipeline("test topic", output_dir=tmp_path)
     assert len(result["tokens"]) == 3
+    assert result["tokens"][0]["start_ms"] == 0
+    assert result["tokens"][0]["spoken_text"] == "Hook"
+    assert result["tokens"][2]["text"] == "here."
     assert client.chat.completions.create.call_count == 2
     assert (tmp_path / "pipeline_payload.json").is_file()
     assert result["audio"]["word_timestamps"][0]["text"] == "Hook"
