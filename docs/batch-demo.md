@@ -15,27 +15,29 @@ python batch_runner.py --csv jobs.csv
 python batch_runner.py --csv jobs.csv --dry-run
 ```
 
-Each successful job writes artifacts under `output/batch/<id>/`:
+Each successful job writes artifacts under `output/final/` (the folder is cleared before each run):
 
 ```
-output/batch/1/
+output/final/
 ├── final.mp4
 ├── pipeline_payload.json
 ├── narration.mp3
 ├── images/
+│   ├── intro.png
 │   ├── scene_1.png
 │   ├── scene_2.png
-│   └── scene_3.png
+│   ├── scene_3.png
+│   └── ending.png
 └── <music>.mp3          # if a track was picked
 ```
 
-The CSV row is updated: `status=done`, `output_path=<path to final.mp4>`.
+The CSV row is updated: `status=done`, `output_path=<path to final.mp4>`. Copy `final.mp4` elsewhere if you need to keep it before the next job runs.
 
 ## CSV columns
 
 | Column | Required | Description |
 |--------|----------|-------------|
-| `id` | yes | Stable job id (folder name under `output/batch/`) |
+| `id` | yes | Stable job id (tracked in CSV; artifacts go to `output/final/`) |
 | `topic` | yes | Passed to the slideshow script writer |
 | `status` | yes | `pending` \| `running` \| `done` \| `failed` |
 | `mode` | no | `slideshow` (default) or `mvp` |

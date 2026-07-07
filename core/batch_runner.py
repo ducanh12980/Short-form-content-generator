@@ -174,10 +174,12 @@ def collect_slideshow_image_paths(payload: dict[str, Any]) -> list[Path]:
 def execute_job(
     row: dict[str, str],
     *,
-    output_base: str | Path = "output/batch",
+    output_dir: str | Path | None = None,
     caption_mode: str | None = None,
 ) -> Path:
     """Run one job row through generation and render. Returns path to final MP4."""
+    from core.run_output import prepare_default_run_dir, reset_run_dir
+
     job_id = row["id"].strip()
     topic = row["topic"].strip()
     if not job_id:
@@ -202,8 +204,10 @@ def execute_job(
         or "none"
     )
 
-    job_dir = Path(output_base) / job_id
-    job_dir.mkdir(parents=True, exist_ok=True)
+    if output_dir is not None and str(output_dir).strip():
+        job_dir = reset_run_dir(output_dir)
+    else:
+        job_dir = prepare_default_run_dir()
 
     if mode == "slideshow":
         from orchestrator_mvp import run_slideshow_with_render
@@ -252,7 +256,7 @@ def process_pending_jobs(
     csv_path: str | Path,
     *,
     max_jobs: int = 1,
-    output_base: str | Path = "output/batch",
+    output_dir: str | Path | None = None,
     dry_run: bool = False,
     lock_path: str | Path | None = None,
 ) -> list[dict[str, str]]:
@@ -285,7 +289,7 @@ def process_pending_jobs(
             save_jobs(path, rows)
 
             try:
-                output = execute_job(row, output_base=output_base)
+                output = execute_job(row, output_dir=output_dir)
                 row["status"] = "done"
                 row["output_path"] = str(output.resolve())
                 row["error"] = ""

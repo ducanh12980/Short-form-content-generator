@@ -115,7 +115,7 @@ def test_process_pending_jobs_updates_csv(mock_execute, tmp_path: Path) -> None:
         ],
     )
 
-    results = process_pending_jobs(csv_path, max_jobs=1, output_base=tmp_path / "batch")
+    results = process_pending_jobs(csv_path, max_jobs=1, output_dir=tmp_path / "final")
     assert len(results) == 1
     assert results[0]["status"] == "done"
 
@@ -146,7 +146,7 @@ def test_process_pending_jobs_marks_failed(mock_execute, tmp_path: Path) -> None
         ],
     )
 
-    results = process_pending_jobs(csv_path, output_base=tmp_path / "batch")
+    results = process_pending_jobs(csv_path, output_dir=tmp_path / "final")
     assert results[0]["status"] == "failed"
     rows = load_jobs(csv_path)
     assert rows[0]["status"] == "failed"

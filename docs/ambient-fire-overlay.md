@@ -63,7 +63,7 @@ Add to an existing `pipeline_payload.json`:
 Copy `assets/overlays/fire/smoke_fire_sparks.webm` beside `narration.mp3`, then:
 
 ```bash
-python core/remotion_render_stage.py output/generations/<run-id>/pipeline_payload.json
+python core/remotion_render_stage.py output/final/pipeline_payload.json
 ```
 
 ## Related

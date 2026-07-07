@@ -9,3 +9,11 @@ def log_step_done(step: str, detail: str = "") -> None:
         print(f"[PIPELINE] ✓ {step} — {detail}")
     else:
         print(f"[PIPELINE] ✓ {step}")
+
+
+def log_step(step: str, detail: str = "") -> None:
+    """Print a single line when a pipeline step starts or reports progress."""
+    if detail:
+        print(f"[PIPELINE] → {step} — {detail}")
+    else:
+        print(f"[PIPELINE] → {step}")

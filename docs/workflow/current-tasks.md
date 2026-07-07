@@ -50,7 +50,8 @@ Living task board for agent and human work. Agents: update this file when starti
 | T018 | End-to-end batch wiring | 2026-07-06 | `run_slideshow_with_render`; batch `execute_job` |
 | T017 | Cron / daily batch docs | 2026-07-06 | `docs/batch-demo.md`, `--max-jobs 1` default |
 | T016 | CSV batch runner CLI | 2026-07-06 | `batch_runner.py`, lock file, status columns |
-| T019 | Orchestrator + render chain | 2026-07-06 | `render.final_path`, timestamped `output/generations/` |
+| T023 | Fixed orchestrator output folder | 2026-07-07 | All runs → `output/final/`; cleared each run (orchestrator + batch). Export/copy MP4 elsewhere deferred. |
+| T019 | Orchestrator + render chain | 2026-07-06 | `render.final_path`, timestamped `output/generations/` (superseded by T023) |
 | T015 | Stitch CLI guide + portrait canvas | 2026-07-06 | `docs/stitch-cli.md`, `AGENTS.md` link. `CANVAS_WIDTH`/`CANVAS_HEIGHT` 1080×1920 enforced in `Root.tsx`, `remotion_render_stage.py`, pixel-sized layers in `effects.tsx`. |
 | T014 | TikTok-style stitch effects | 2026-07-06 | **Done.** CapCut-style default in `remotion/src/effects.tsx` + `SlideshowBackground`. Ken Burns center zoom (no pan). Unified zoom-out (2 s ease-in → mirror+blur). Fast zoom-in. 3×3 XY mirror grid. Mirror preloads 0.1 s before zoom-out. Optional `--music` via stitch CLI. |
 | T013 | Simple asset stitcher | 2026-07-06 | Optional manual path. `stitch.py` + `core/stitch_stage.py`. Per-run folder `output/stitch/<timestamp>/`. |

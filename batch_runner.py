@@ -41,9 +41,12 @@ def main() -> None:
         help="Pending rows to process per invocation (default: 1 — one video per daily cron run)",
     )
     parser.add_argument(
-        "--output-base",
-        default="output/batch",
-        help="Base directory for per-job artifacts (default: output/batch)",
+        "--output-dir",
+        default=None,
+        help=(
+            "Run folder for pipeline artifacts (default: output/final; "
+            "cleared and recreated each job)"
+        ),
     )
     parser.add_argument(
         "--dry-run",
@@ -71,7 +74,7 @@ def main() -> None:
         results = process_pending_jobs(
             args.csv,
             max_jobs=args.max_jobs,
-            output_base=args.output_base,
+            output_dir=args.output_dir,
             dry_run=args.dry_run,
         )
 

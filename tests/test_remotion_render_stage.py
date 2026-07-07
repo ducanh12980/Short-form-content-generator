@@ -101,28 +101,27 @@ def test_normalize_canvas_props_swaps_landscape() -> None:
 
 
 @patch("core.remotion_render_stage._resolve_npx", return_value="npx")
-@patch("core.remotion_render_stage.subprocess.run")
+@patch("core.remotion_render_stage._run_remotion_cli")
 @patch("core.remotion_render_stage._ensure_remotion_ready")
 def test_render_with_remotion_invokes_cli(
     mock_ready: MagicMock,
-    mock_run: MagicMock,
+    mock_run_cli: MagicMock,
     _mock_npx: MagicMock,
     tmp_path: Path,
 ) -> None:
     output_path = tmp_path / "preview.mp4"
     props = {"width": 1080, "height": 1920, "fps": 30, "durationMs": 1000, "tokens": []}
 
-    def _touch_output(*_args, **_kwargs) -> MagicMock:
+    def _touch_output(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> None:
         output_path.write_bytes(b"mp4")
-        return MagicMock(returncode=0)
 
-    mock_run.side_effect = _touch_output
+    mock_run_cli.side_effect = _touch_output
 
     result = render_with_remotion(props, output_path)
 
     assert result == output_path.resolve()
-    mock_run.assert_called_once()
-    cmd = mock_run.call_args.args[0]
+    mock_run_cli.assert_called_once()
+    cmd = mock_run_cli.call_args.args[0]
     assert "remotion" in cmd
     assert "ShortVideo" in cmd
 

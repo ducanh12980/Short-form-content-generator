@@ -14,6 +14,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from core.pipeline_log import log_step, log_step_done
 from core.project_schema import (
     get_ambient_overlay,
     get_canvas_size,
@@ -29,6 +30,67 @@ from core.project_schema import (
 # Portrait 9:16 — must match remotion/src/types.ts CANVAS_WIDTH / CANVAS_HEIGHT
 CANVAS_WIDTH = 1080
 CANVAS_HEIGHT = 1920
+
+
+def _format_duration_ms(ms: int) -> str:
+    if ms >= 60_000:
+        minutes, seconds = divmod(ms / 1000, 60)
+        return f"{int(minutes)}m {seconds:.1f}s"
+    if ms >= 1000:
+        return f"{ms / 1000:.1f}s"
+    return f"{ms}ms"
+
+
+def _format_file_size(path: Path) -> str:
+    size = path.stat().st_size
+    if size >= 1_048_576:
+        return f"{size / 1_048_576:.1f} MB"
+    if size >= 1024:
+        return f"{size / 1024:.1f} KB"
+    return f"{size} B"
+
+
+def _summarize_render_props(props: dict[str, Any]) -> str:
+    parts = [
+        f"{props['width']}x{props['height']} @ {props['fps']}fps",
+        f"duration {_format_duration_ms(int(props['durationMs']))}",
+        f"{len(props.get('images', []))} slides",
+        f"{len(props.get('tokens', []))} caption tokens",
+    ]
+    if props.get("musicSrc"):
+        parts.append("music")
+    if props.get("ambientOverlaySrc"):
+        parts.append("ambient overlay")
+    return ", ".join(parts)
+
+
+def _run_remotion_cli(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> None:
+    """Run Remotion CLI and stream combined stdout/stderr to the terminal."""
+    log_step("Remotion CLI", " ".join(cmd))
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    output_lines: list[str] = []
+    assert proc.stdout is not None
+    for line in proc.stdout:
+        line = line.rstrip("\n")
+        output_lines.append(line)
+        print(line, flush=True)
+
+    returncode = proc.wait()
+    if returncode != 0:
+        tail = "\n".join(output_lines[-20:]).strip()
+        raise RuntimeError(
+            f"Remotion render failed (exit {returncode})."
+            + (f"\n{tail}" if tail else "")
+        )
 
 
 def _normalize_canvas_props(props: dict[str, Any]) -> dict[str, Any]:
@@ -283,9 +345,11 @@ def render_with_remotion(
     out.parent.mkdir(parents=True, exist_ok=True)
 
     props = _normalize_canvas_props(props)
+    log_step("Remotion render", _summarize_render_props(props))
 
     props_path = out.with_suffix(".remotion-props.json")
     props_path.write_text(json.dumps(props, ensure_ascii=False), encoding="utf-8")
+    log_step_done("write Remotion props", props_path.name)
 
     npx = _resolve_npx()
     cmd = [
@@ -300,30 +364,18 @@ def render_with_remotion(
     ]
     if public_dir is not None:
         cmd.extend(["--public-dir", str(public_dir.resolve())])
+        log_step_done("public assets dir", str(public_dir.resolve()))
 
     env = _render_env()
     try:
-        subprocess.run(
-            cmd,
-            cwd=work_dir,
-            check=True,
-            env=env,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-    except subprocess.CalledProcessError as exc:
-        detail = (exc.stderr or exc.stdout or "").strip()
-        raise RuntimeError(
-            f"Remotion render failed (exit {exc.returncode}). {detail}"
-        ) from exc
+        _run_remotion_cli(cmd, cwd=work_dir, env=env)
     finally:
         props_path.unlink(missing_ok=True)
 
     if not out.is_file():
         raise RuntimeError(f"Remotion render did not produce output: {out}")
 
+    log_step_done("Remotion render", f"{out.name} ({_format_file_size(out)})")
     return out
 
 
@@ -341,21 +393,24 @@ def render_project_video(
         output_path — optional MP4 path; background_color — canvas fill; fps — frame rate.
     Output: Resolved path to rendered MP4.
     """
-    project = load_project(project_path)
     project_file = Path(project_path)
-    run_dir = project_file.parent
+    run_dir = project_file.parent.resolve()
+    log_step("Remotion render stage", str(project_file.name))
+
+    project = load_project(project_path)
+    log_step_done("load project", str(project_file.resolve()))
 
     if _ensure_project_music(project, run_dir):
         _persist_project(project_file, project)
-        print(f"Background music: {project['audio']['music']['original_name']}")
+        log_step_done("background music", project["audio"]["music"]["original_name"])
 
     props, public_dir = project_to_remotion_props(
         project,
         background_color=background_color,
         fps=fps,
     )
+    log_step_done("build Remotion props", _summarize_render_props(props))
 
-    project_file = Path(project_path)
     default_out = project_file.parent / "final.mp4"
     final_out = render_with_remotion(
         props,
@@ -363,6 +418,7 @@ def render_project_video(
         public_dir=public_dir,
     )
     _record_render_final_path(project_file, project, final_out)
+    log_step_done("save render metadata", f"render.final_path → {final_out.name}")
     return final_out
 
 
@@ -398,7 +454,7 @@ def main() -> None:
             args.output,
             background_color=args.background_color,
         )
-        print(f"Remotion render: {out}")
+        print(f"[PIPELINE] ✓ final video — {out.resolve()}")
     except (ValueError, RuntimeError, OSError) as exc:
         print(f"Remotion render failed: {exc}", file=sys.stderr)
         raise SystemExit(1) from exc

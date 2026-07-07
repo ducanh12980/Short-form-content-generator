@@ -30,8 +30,8 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Slideshow + sentence captions | `python orchestrator_mvp.py "topic" --caption-mode sentence` |
 | Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
 | **Daily CSV batch (1 video)** | `python batch_runner.py --csv jobs.csv` — see [docs/batch-demo.md](docs/batch-demo.md) |
-| Generate slide images only | `python core/slide_image_stage.py output/generations/<run-id>/pipeline_payload.json` |
-| Render final MP4 (Remotion) | `python core/remotion_render_stage.py output/generations/<run-id>/pipeline_payload.json` |
+| Generate slide images only | `python core/slide_image_stage.py output/final/pipeline_payload.json` |
+| Render final MP4 (Remotion) | `python core/remotion_render_stage.py output/final/pipeline_payload.json` |
 | **Stitch images + audio** | `python stitch.py --images img.jpg --audio voice.mp3` — see [docs/stitch-cli.md](docs/stitch-cli.md) |
 | Remotion Studio | `cd remotion && npm run studio` |
 | Run tests | `pytest -q` |

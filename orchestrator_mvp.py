@@ -477,8 +477,8 @@ def main() -> None:
         "--output-dir",
         default=None,
         help=(
-            "Exact run folder for all artifacts (default: timestamped folder under "
-            "OUTPUT_DIR env or output/generations/)"
+            "Exact run folder for all artifacts (default: OUTPUT_DIR/final or "
+            "output/final; cleared and recreated each run unless this flag is set)"
         ),
     )
     parser.add_argument(
@@ -511,9 +511,12 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    from core.run_output import ensure_run_dir, resolve_generation_output_dir
+    from core.run_output import ensure_run_dir, prepare_default_run_dir, resolve_generation_output_dir
 
-    out_dir = ensure_run_dir(resolve_generation_output_dir(args.output_dir))
+    if args.output_dir:
+        out_dir = ensure_run_dir(resolve_generation_output_dir(args.output_dir))
+    else:
+        out_dir = prepare_default_run_dir()
     print(f"Run folder: {out_dir}")
 
     try:
