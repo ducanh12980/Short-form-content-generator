@@ -181,6 +181,15 @@ def _normalize_themes_for_remotion(themes: dict[str, Any]) -> dict[str, Any]:
     return remotion_themes
 
 
+def _is_under_dir(path: Path, base_dir: Path) -> bool:
+    """Return True when path resolves inside base_dir (Python 3.8-safe)."""
+    try:
+        path.resolve().relative_to(base_dir.resolve())
+        return True
+    except ValueError:
+        return False
+
+
 def _to_static_src(path: Path, public_dir: Path) -> str:
     """Return a POSIX path relative to the Remotion public directory."""
     return path.resolve().relative_to(public_dir.resolve()).as_posix()
@@ -253,7 +262,7 @@ def project_to_remotion_props(
     if music_settings is not None:
         music_path = music_settings["path"].resolve()
         if music_path.is_file():
-            if not music_path.is_relative_to(public_dir.resolve()):
+            if not _is_under_dir(music_path, public_dir):
                 staged = public_dir / music_path.name
                 if staged.resolve() != music_path:
                     shutil.copy2(music_path, staged)
@@ -265,7 +274,7 @@ def project_to_remotion_props(
     if ambient_settings is not None:
         overlay_path = ambient_settings["path"].resolve()
         if overlay_path.is_file():
-            if not overlay_path.is_relative_to(public_dir.resolve()):
+            if not _is_under_dir(overlay_path, public_dir):
                 staged = public_dir / overlay_path.name
                 if staged.resolve() != overlay_path:
                     shutil.copy2(overlay_path, staged)
