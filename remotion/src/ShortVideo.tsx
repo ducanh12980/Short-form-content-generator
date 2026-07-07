@@ -8,6 +8,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { CaptionToken, KaraokeWord, ShortVideoProps, ThemeStyle } from "./types";
+import { AmbientOverlay } from "./AmbientOverlay";
 import { getPopScale, SlideshowBackground } from "./effects";
 
 const msToFrames = (ms: number, fps: number): number =>
@@ -156,6 +157,22 @@ export const ShortVideo: React.FC<ShortVideoProps> = (props) => {
   return (
     <AbsoluteFill style={{ backgroundColor: props.backgroundColor }}>
       <SlideshowBackground images={props.images} fps={fps} />
+      {props.ambientOverlaySrc ? (
+        <AbsoluteFill
+          style={{
+            zIndex: 50,
+            pointerEvents: "none",
+            mixBlendMode: (props.ambientBlendMode ?? "screen") as React.CSSProperties["mixBlendMode"],
+            opacity: props.ambientOpacity ?? 0.4,
+          }}
+        >
+          <AmbientOverlay
+            src={props.ambientOverlaySrc}
+            loopDurationMs={props.ambientLoopDurationMs}
+            playbackRate={props.ambientPlaybackRate}
+          />
+        </AbsoluteFill>
+      ) : null}
       {props.tokens.map((token, index) => {
         if (token.start_ms == null || token.end_ms == null) return null;
         const start = msToFrames(token.start_ms, fps);

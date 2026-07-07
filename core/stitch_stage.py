@@ -12,6 +12,8 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from core.slide_timing import compute_slide_durations_ms
+
 THEME_STYLES_PATH = _REPO_ROOT / "config" / "theme_styles.json"
 FPS = 30
 
@@ -88,15 +90,8 @@ def build_stitch_props(
         raise ValueError("At least one image is required.")
 
     # First and last slides get half the screen time of a content slide so the
-    # opener/closer don't dominate. For N slides the unit is duration/(N-1),
-    # giving: first=unit/2, middle×(N-2)=unit each, last=unit/2.
-    # Total = unit/2 + (N-2)*unit + unit/2 = (N-1)*unit = duration. ✓
-    # For N==1 the single slide fills the whole duration.
-    if n == 1:
-        slide_durations = [duration_ms]
-    else:
-        unit = duration_ms / (n - 1)
-        slide_durations = [unit / 2] + [unit] * (n - 2) + [unit / 2]
+    # opener/closer don't dominate. See core.slide_timing.compute_slide_durations_ms.
+    slide_durations = [float(value) for value in compute_slide_durations_ms(int(round(duration_ms)), n)]
 
     images_timeline: list[dict[str, Any]] = []
     cursor_ms = 0.0

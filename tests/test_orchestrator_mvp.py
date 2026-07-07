@@ -89,6 +89,21 @@ def test_call_with_api_retry_fails_after_two_attempts(mock_sleep: MagicMock) -> 
     mock_sleep.assert_called_once_with(orch.API_RETRY_DELAY_SECONDS)
 
 
+@patch.dict(os.environ, {}, clear=True)
+def test_call_with_api_retry_fails_fast_on_daily_quota() -> None:
+    client = MagicMock()
+    client.chat.completions.create.side_effect = orch.APIError(
+        "quota",
+        request=MagicMock(),
+        body={"error": {"message": "GenerateRequestsPerDayPerProjectPerModel-FreeTier"}},
+    )
+
+    with pytest.raises(orch.PipelineError, match="daily quota exceeded"):
+        orch.run_script_writer(client, "topic")
+
+    assert client.chat.completions.create.call_count == 1
+
+
 def test_parse_caption_styler_response_rejects_invalid_json() -> None:
     with pytest.raises(ValueError, match="invalid JSON"):
         orch.parse_caption_styler_response("not-json")

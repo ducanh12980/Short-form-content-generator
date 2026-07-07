@@ -18,13 +18,16 @@ from core.pipeline_log import log_step_done
 from core.project_schema import (
     get_images_dir,
     get_scenes,
+    get_slides,
     get_topic,
     load_project,
     save_project,
+    slide_image_filename,
 )
 from core.prompt_loader import DOCS_PROMPTS_DIR, load_fenced_prompt, substitute_prompt
 
 COVER_SLIDE_PROMPT_PATH = DOCS_PROMPTS_DIR / "cover-slide-image.md"
+BOOKEND_SLIDE_PROMPT_PATH = DOCS_PROMPTS_DIR / "bookend-slide-image.md"
 DEFAULT_GEMINI_IMAGE_MODEL = "gemini-2.5-flash-image"
 DEFAULT_POLLINATIONS_MODEL = "flux"
 DEFAULT_ASPECT_RATIO = "9:16"
@@ -131,13 +134,73 @@ def build_pollinations_prompt(
     )
 
 
+def build_bookend_slide_image_prompt(
+    *,
+    title: str,
+    visual_concept: str,
+    topic: str,
+    slide_role: str,
+    template_path: Path | None = None,
+) -> str:
+    """Fill bookend-slide-image.md for intro/ending (title + hero visual, no description)."""
+    path = template_path or BOOKEND_SLIDE_PROMPT_PATH
+    template = load_fenced_prompt(path)
+    return substitute_prompt(
+        template,
+        {
+            "TITLE": title.strip(),
+            "VISUAL_CONCEPT": visual_concept.strip(),
+            "TOPIC": topic.strip(),
+            "SLIDE_ROLE": slide_role.strip(),
+        },
+    )
+
+
+def build_pollinations_bookend_prompt(
+    *,
+    title: str,
+    visual_concept: str,
+    topic: str,
+    slide_role: str,
+) -> str:
+    """Background + hero visual for bookend slides (no baked-in text; title overlaid in Remotion if needed)."""
+    return (
+        "Premium vertical 9:16 TikTok educational slideshow. "
+        "Luxury editorial Vietnamese philosophy illustration, warm ivory and muted gold, "
+        "museum-quality digital painting, soft cinematic golden-hour light. "
+        f"{slide_role} slide layout: clean minimal upper third for title overlay, "
+        f"lower two-thirds striking hero visual directly about: {topic.strip()}. "
+        f"Hero scene: {visual_concept.strip()[:220]}. "
+        f"Title theme (do not render as text): {title.strip()}. "
+        "Bold scroll-stopping focal point, dramatic elegant composition. "
+        "No description paragraph, no body text, no letters, no watermark, no anime, no cartoon."
+    )
+
+
 def build_prompt_for_provider(
     provider: str,
     *,
     title: str,
-    description: str,
     topic: str,
+    role: str = "content",
+    description: str = "",
+    visual_concept: str = "",
 ) -> str:
+    is_bookend = role in ("intro", "ending")
+    if is_bookend:
+        if provider == "pollinations":
+            return build_pollinations_bookend_prompt(
+                title=title,
+                visual_concept=visual_concept,
+                topic=topic,
+                slide_role=role,
+            )
+        return build_bookend_slide_image_prompt(
+            title=title,
+            visual_concept=visual_concept,
+            topic=topic,
+            slide_role=role,
+        )
     if provider == "pollinations":
         return build_pollinations_prompt(title=title, description=description, topic=topic)
     return build_slide_image_prompt(title=title, description=description, topic=topic)
@@ -328,10 +391,10 @@ def generate_scene_images(
     force: bool = False,
     provider: str | None = None,
 ) -> list[Path]:
-    """Generate slide images for each scene and update scene.image paths."""
-    scenes = get_scenes(project)
-    if not scenes:
-        raise ValueError("Project has no scenes for slide image generation.")
+    """Generate slide images for each slide and update slide.image paths."""
+    slides = get_slides(project)
+    if not slides:
+        raise ValueError("Project has no slides for slide image generation.")
 
     resolved_provider = resolve_image_provider(provider)
     topic = get_topic(project)
@@ -339,38 +402,53 @@ def generate_scene_images(
     out_dir.mkdir(parents=True, exist_ok=True)
 
     saved: list[Path] = []
-    total = len(scenes)
+    total = len(slides)
     step = provider_step_label(resolved_provider)
 
     if resolved_provider != "mock":
         print(VIETNAMESE_TEXT_WARNING)
 
-    for index, scene in enumerate(scenes):
-        scene_id = int(scene.get("id", index + 1))
-        image_path = out_dir / f"scene_{scene_id}.png"
+    for index, slide in enumerate(slides):
+        slide_id = int(slide.get("id", index + 1))
+        image_path = out_dir / slide_image_filename(slide)
 
         if not force and image_path.is_file():
-            scene["image"] = {
+            slide["image"] = {
                 "path": str(image_path.resolve()),
                 "source": resolved_provider,
             }
             saved.append(image_path.resolve())
-            log_step_done(step, f"scene {scene_id}/{total} cached: {image_path.name}")
+            log_step_done(step, f"slide {slide_id}/{total} cached: {image_path.name}")
             continue
 
-        title = str(scene.get("title", "")).strip()
-        description = str(scene.get("description", "")).strip()
-        if not title or not description:
-            raise ValueError(f"Scene {scene_id} must include title and description.")
-
-        prompt = build_prompt_for_provider(
-            resolved_provider,
-            title=title,
-            description=description,
-            topic=topic,
-        )
+        title = str(slide.get("title", "")).strip()
+        role = str(slide.get("role", "content"))
+        if role in ("intro", "ending"):
+            visual_concept = str(slide.get("visual_concept") or slide.get("description", "")).strip()
+            if not title or not visual_concept:
+                raise ValueError(
+                    f"Slide {slide_id} ({role}) must include title and visual_concept."
+                )
+            prompt = build_prompt_for_provider(
+                resolved_provider,
+                title=title,
+                topic=topic,
+                role=role,
+                visual_concept=visual_concept,
+            )
+        else:
+            description = str(slide.get("description", "")).strip()
+            if not title or not description:
+                raise ValueError(f"Slide {slide_id} must include title and description.")
+            prompt = build_prompt_for_provider(
+                resolved_provider,
+                title=title,
+                description=description,
+                topic=topic,
+                role=role,
+            )
         image_kwargs: dict[str, Any] = {
-            "scene_id": scene_id,
+            "scene_id": slide_id,
             "title": title,
         }
         if resolved_provider == "pollinations":
@@ -383,9 +461,9 @@ def generate_scene_images(
             provider=resolved_provider,
             **image_kwargs,
         )
-        scene["image"] = {"path": str(image_path.resolve()), "source": resolved_provider}
+        slide["image"] = {"path": str(image_path.resolve()), "source": resolved_provider}
         saved.append(image_path.resolve())
-        log_step_done(step, f"scene {scene_id}/{total} saved: {image_path.resolve()}")
+        log_step_done(step, f"slide {slide_id}/{total} saved: {image_path.resolve()}")
 
     return saved
 

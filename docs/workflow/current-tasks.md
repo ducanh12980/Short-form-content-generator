@@ -43,6 +43,9 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T022 | CapCut-style per-cut transitions | 2026-07-07 | `pullIn`, `teleportShake`, `zoomBlur` in `effects.tsx`; per-slide `transition` in payload/props; rotation in `assign_slide_transitions`. ADR 0006. |
+| T021 | Narration-based slide timing + intro/ending bookends | 2026-07-07 | 5 slides (intro + 3 content + ending); visual timing via `core/slide_timing.py`; TTS on content only. ADR 0005. |
+| T020 | Ambient fire overlay MVP | 2026-07-07 | Vecteezy sparks WebM in `assets/overlays/fire/`; `AmbientOverlay.tsx`; random overlay via `overlay_picker.py` (like music). ADR 0004. |
 | — | Regenerate slide images each pipeline run | 2026-07-06 | `force=True` in slideshow pipeline; random Pollinations seed |
 | T018 | End-to-end batch wiring | 2026-07-06 | `run_slideshow_with_render`; batch `execute_job` |
 | T017 | Cron / daily batch docs | 2026-07-06 | `docs/batch-demo.md`, `--max-jobs 1` default |

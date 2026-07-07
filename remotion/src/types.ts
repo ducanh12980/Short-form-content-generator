@@ -26,6 +26,9 @@ export type ThemeStyle = {
 
 export type ThemeStyles = Record<string, ThemeStyle>;
 
+/** Outgoing transition at the cut to the next slide. */
+export type SlideTransitionType = "pullIn" | "teleportShake" | "zoomBlur";
+
 export type TimelineImage = {
   /** Path relative to Remotion --public-dir (for staticFile). */
   src: string;
@@ -33,6 +36,8 @@ export type TimelineImage = {
   end_ms: number;
   source?: string;
   media_type?: string;
+  /** Outgoing transition to the next slide (cut after this image). */
+  transition?: SlideTransitionType;
 };
 
 /** TikTok / Reels / Shorts — always portrait 9:16 (width < height). */
@@ -69,6 +74,14 @@ export type ShortVideoProps = {
   musicSrc?: string;
   /** Volume for background music (0–1). Defaults to 0.3. */
   musicVolume?: number;
+  /** Ambient overlay video relative to Remotion --public-dir. */
+  ambientOverlaySrc?: string | null;
+  ambientOpacity?: number;
+  ambientBlendMode?: string;
+  /** Loop length for ambient overlay in milliseconds. */
+  ambientLoopDurationMs?: number;
+  /** Ambient overlay playback speed (1 = normal). */
+  ambientPlaybackRate?: number;
 };
 
 export const defaultShortVideoProps: ShortVideoProps = {

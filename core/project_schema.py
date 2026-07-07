@@ -15,7 +15,12 @@ from core.caption_tokens import (
 DEFAULT_CANVAS = {"width": 1080, "height": 1920}
 DEFAULT_THEME = "minimalist"
 VALID_CAPTION_MODES = frozenset({"none", "sentence", "word"})
-SCENE_COUNT = 3
+CONTENT_SCENE_COUNT = 3
+TOTAL_SLIDE_COUNT = CONTENT_SCENE_COUNT + 2
+SCENE_COUNT = CONTENT_SCENE_COUNT  # backward-compatible alias
+VALID_SLIDE_ROLES = frozenset({"intro", "content", "ending"})
+VALID_TRANSITIONS = frozenset({"pullIn", "teleportShake", "zoomBlur"})
+DEFAULT_TRANSITION_ROTATION = ["pullIn", "teleportShake", "zoomBlur"]
 
 
 def _parse_words_by_scene(audio: dict[str, Any]) -> dict[int, list[dict[str, Any]]]:
@@ -118,6 +123,44 @@ def normalize_project(data: dict[str, Any]) -> dict[str, Any]:
     """
     normalized = dict(data)
     normalized.setdefault("project_version", 1)
+
+    if "slides" in normalized and isinstance(normalized["slides"], list):
+        normalized.setdefault("caption_mode", "none")
+        normalized.setdefault(
+            "captions",
+            {"theme": DEFAULT_THEME, "font": None, "tokens": []},
+        )
+        normalized.setdefault(
+            "video",
+            {"canvas": dict(DEFAULT_CANVAS), "images": [], "clips": []},
+        )
+        normalized.setdefault(
+            "scenes",
+            get_content_slides(normalized["slides"]),
+        )
+        audio = normalized.get("audio", {})
+        if isinstance(audio, dict) and audio.get("path"):
+            normalized.setdefault(
+                "render",
+                {
+                    "output_dir": str(Path(audio["path"]).parent),
+                    "preview_path": None,
+                    "final_path": None,
+                },
+            )
+        if (
+            isinstance(audio, dict)
+            and normalized.get("caption_mode") == "sentence"
+        ):
+            existing_tokens: list[Any] = []
+            captions_section = normalized.get("captions")
+            if isinstance(captions_section, dict):
+                raw_tokens = captions_section.get("tokens")
+                if isinstance(raw_tokens, list):
+                    existing_tokens = raw_tokens
+            if not _tokens_have_karaoke_words(existing_tokens):
+                _rebuild_sentence_caption_tokens(normalized, audio)
+        return normalized
 
     if "scenes" in normalized and isinstance(normalized["scenes"], list):
         normalized.setdefault("caption_mode", "none")
@@ -305,32 +348,86 @@ def get_caption_mode(project: dict[str, Any]) -> str:
     return mode
 
 
+def get_slides(project: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return ordered slideshow slide list (intro + content + ending when present)."""
+    slides = project.get("slides")
+    if isinstance(slides, list) and slides:
+        return [slide for slide in slides if isinstance(slide, dict)]
+    return get_scenes(project)
+
+
+def get_content_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return slides with role content (spoken narration slides)."""
+    return [slide for slide in slides if slide.get("role") == "content"]
+
+
 def get_scenes(project: dict[str, Any]) -> list[dict[str, Any]]:
-    """Return slideshow scene list (empty for legacy word-karaoke payloads)."""
+    """Return content narration scenes (empty for legacy word-karaoke payloads)."""
+    slides = project.get("slides")
+    if isinstance(slides, list) and slides:
+        content = get_content_slides(slides)
+        if content:
+            return content
     scenes = project.get("scenes")
     if not isinstance(scenes, list):
         return []
     return [scene for scene in scenes if isinstance(scene, dict)]
 
 
-def build_image_timeline_from_scenes(scenes: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Copy scene timing and image paths into video.images timeline entries."""
+def slide_image_filename(slide: dict[str, Any]) -> str:
+    """Return the canonical image filename for a slide based on role."""
+    role = slide.get("role", "content")
+    if role == "intro":
+        return "intro.png"
+    if role == "ending":
+        return "ending.png"
+    content_index = int(slide.get("content_index", slide.get("id", 1)))
+    return f"scene_{content_index}.png"
+
+
+def resolve_slide_transition(slide: dict[str, Any], index: int) -> str:
+    """Outgoing transition for slide at index; rotates when unset."""
+    raw = slide.get("transition")
+    if isinstance(raw, str) and raw in VALID_TRANSITIONS:
+        return raw
+    return DEFAULT_TRANSITION_ROTATION[index % len(DEFAULT_TRANSITION_ROTATION)]
+
+
+def assign_slide_transitions(slides: list[dict[str, Any]]) -> None:
+    """Fill missing per-slide outgoing transition from the default rotation."""
+    for index, slide in enumerate(slides):
+        if not isinstance(slide, dict):
+            continue
+        if slide.get("transition") in VALID_TRANSITIONS:
+            continue
+        slide["transition"] = resolve_slide_transition(slide, index)
+
+
+def build_image_timeline_from_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Copy slide timing and image paths into video.images timeline entries."""
     timeline: list[dict[str, Any]] = []
-    for scene in scenes:
-        image = scene.get("image")
+    for index, slide in enumerate(slides):
+        image = slide.get("image")
         if not isinstance(image, dict) or not image.get("path"):
             continue
         timeline.append(
             {
                 "path": str(Path(str(image["path"])).resolve()),
-                "start_ms": int(scene.get("start_ms", 0)),
-                "end_ms": int(scene.get("end_ms", 0)),
-                "scene_id": scene.get("id"),
+                "start_ms": int(slide.get("start_ms", 0)),
+                "end_ms": int(slide.get("end_ms", 0)),
+                "scene_id": slide.get("id"),
+                "role": slide.get("role"),
                 "source": image.get("source", "gemini"),
                 "media_type": "image",
+                "transition": resolve_slide_transition(slide, index),
             }
         )
     return timeline
+
+
+def build_image_timeline_from_scenes(scenes: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Copy scene timing and image paths into video.images timeline entries."""
+    return build_image_timeline_from_slides(scenes)
 
 
 def save_project(project: dict[str, Any], path: str | Path) -> None:
@@ -370,4 +467,26 @@ def get_music_settings(project: dict[str, Any]) -> dict[str, Any] | None:
     return {
         "path": Path(str(path)),
         "volume": float(music.get("volume", 0.25)),
+    }
+
+
+def get_ambient_overlay(project: dict[str, Any]) -> dict[str, Any] | None:
+    """Return ambient overlay settings from video.ambient, if set."""
+    video = project.get("video", {})
+    ambient = video.get("ambient")
+    if not isinstance(ambient, dict):
+        return None
+    path = ambient.get("path")
+    if not path:
+        return None
+    return {
+        "effect": str(ambient.get("effect", "fire")),
+        "variant": str(ambient.get("variant", "sparks")),
+        "path": Path(str(path)),
+        "opacity": float(ambient.get("opacity", 0.4)),
+        "blend_mode": str(ambient.get("blend_mode", "screen")),
+        "loop": bool(ambient.get("loop", True)),
+        "duration_ms": int(ambient.get("duration_ms", 10_000)),
+        "source": str(ambient.get("source", "auto")),
+        "playback_rate": float(ambient.get("playback_rate", 1.0)),
     }

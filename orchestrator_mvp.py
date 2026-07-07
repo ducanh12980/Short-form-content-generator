@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from collections.abc import Callable
@@ -134,6 +135,36 @@ def _tts_voice_from_env() -> str:
     return os.environ.get("TTS_VOICE", DEFAULT_TTS_VOICE)
 
 
+def _api_error_text(exc: APIError) -> str:
+    """Flatten API error body/message for quota and retry parsing."""
+    parts: list[str] = [str(exc)]
+    if exc.body is not None:
+        parts.append(str(exc.body))
+    return "\n".join(parts)
+
+
+def _is_daily_quota_exhausted(exc: APIError) -> bool:
+    """True when Gemini free-tier daily request cap is hit (retry won't help today)."""
+    text = _api_error_text(exc)
+    return any(
+        marker in text
+        for marker in (
+            "PerDay",
+            "free_tier_requests",
+            "GenerateRequestsPerDay",
+            "exceeded your current quota",
+        )
+    )
+
+
+def _retry_delay_for_api_error(exc: APIError, default_seconds: float) -> float:
+    """Use provider retry hint when present (e.g. Gemini 429 RetryInfo)."""
+    match = re.search(r"retry in ([\d.]+)s", _api_error_text(exc), re.IGNORECASE)
+    if match:
+        return max(default_seconds, float(match.group(1)) + 1.0)
+    return default_seconds
+
+
 def _call_with_api_retry(
     call: Callable[[], T],
     *,
@@ -155,11 +186,21 @@ def _call_with_api_retry(
             return call()
         except APIError as exc:
             last_exc = exc
+            if _is_daily_quota_exhausted(exc):
+                break
             if attempt >= attempts:
                 break
-            time.sleep(delay_seconds)
+            time.sleep(_retry_delay_for_api_error(exc, delay_seconds))
 
     assert last_exc is not None
+    if _is_daily_quota_exhausted(last_exc):
+        raise PipelineError(
+            f"{stage_name} failed: Gemini daily quota exceeded for this API key/model. "
+            "Each slideshow uses ~2 LLM calls (scene script + TTS writer). "
+            "Wait for the free-tier reset, enable billing in Google AI Studio, "
+            "or set SCRIPT_WRITER_MODEL / a new OPENAI_API_KEY. "
+            f"Details: {last_exc}"
+        ) from last_exc
     raise PipelineError(
         f"{stage_name} API call failed after {attempts} attempt(s): {last_exc}"
     ) from last_exc

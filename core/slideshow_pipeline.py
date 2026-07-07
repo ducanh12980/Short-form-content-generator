@@ -1,8 +1,9 @@
-"""Slideshow pipeline — 3-scene script, DALL-E slides, per-scene TTS, timed image cuts."""
+"""Slideshow pipeline — intro/content/ending slides, narration-based timing, per-scene TTS."""
 
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
@@ -16,13 +17,18 @@ from core.caption_tokens import (
 )
 from core.pipeline_log import log_step_done
 from core.music_picker import attach_random_music
+from core.overlay_picker import attach_random_ambient_overlay, resolve_overlays_dir
 from core.project_schema import (
+    CONTENT_SCENE_COUNT,
     DEFAULT_THEME,
-    SCENE_COUNT,
+    TOTAL_SLIDE_COUNT,
     VALID_CAPTION_MODES,
-    build_image_timeline_from_scenes,
+    assign_slide_transitions,
+    build_image_timeline_from_slides,
+    get_content_slides,
 )
 from core.slide_image_stage import generate_scene_images, provider_step_label, resolve_image_provider
+from core.slide_timing import apply_slide_timing
 
 # Re-use orchestrator helpers (avoid circular import at module level for tests)
 from orchestrator_mvp import (
@@ -42,17 +48,55 @@ from core.prompt_loader import DOCS_PROMPTS_DIR, load_fenced_prompt, substitute_
 
 SCENE_SCRIPT_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-script-writer.md"
 TTS_WRITER_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-tts-writer.md"
+SCENES_DRAFT_FILENAME = "scenes_draft.json"
 TTS_WRITER_USER_TEMPLATE = (
     "Dựa trên nội dung các slide dưới đây, hãy tạo script TTS cho từng slide với các yêu cầu trên:\n\n"
     "{{SLIDE_CONTENT}}"
 )
 
 
+def _scenes_draft_path(output_dir: Path) -> Path:
+    return output_dir / SCENES_DRAFT_FILENAME
+
+
+def _save_scenes_draft(output_dir: Path, *, topic: str, slides: list[dict[str, Any]]) -> None:
+    """Persist LLM slide + TTS script so a failed TTS pass can resume without new API calls."""
+    output_dir.mkdir(parents=True, exist_ok=True)
+    payload = {"topic": topic.strip(), "slides": slides}
+    _scenes_draft_path(output_dir).write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def _load_scenes_draft(output_dir: Path, *, topic: str) -> list[dict[str, Any]] | None:
+    """Load cached slides when topic matches and each content slide has tts text."""
+    path = _scenes_draft_path(output_dir)
+    if not path.is_file():
+        return None
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict) or data.get("topic", "").strip() != topic.strip():
+        return None
+    slides = data.get("slides")
+    if not isinstance(slides, list) or len(slides) != TOTAL_SLIDE_COUNT:
+        return None
+    content_slides = get_content_slides(slides)
+    if len(content_slides) != CONTENT_SCENE_COUNT:
+        return None
+    for slide in content_slides:
+        if not isinstance(slide, dict) or not str(slide.get("tts", "")).strip():
+            return None
+    return slides
+
+
 def format_slide_content_for_tts(scenes: list[dict[str, Any]]) -> str:
     """Format scene title/description blocks for the TTS writer user message."""
     blocks: list[str] = []
-    for scene in scenes:
-        scene_id = int(scene.get("id", len(blocks) + 1))
+    for index, scene in enumerate(scenes):
+        scene_id = int(scene.get("content_index", index + 1))
         title = str(scene.get("title", "")).strip()
         description = str(scene.get("description", "")).strip()
         blocks.append(
@@ -61,42 +105,93 @@ def format_slide_content_for_tts(scenes: list[dict[str, Any]]) -> str:
     return "\n\n".join(blocks)
 
 
+def _validate_content_slide_copy(slide: dict[str, Any], label: str) -> tuple[str, str]:
+    for field in ("title", "description"):
+        value = slide.get(field)
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"{label} must include non-empty '{field}'.")
+    return slide["title"].strip(), slide["description"].strip()
+
+
+def _validate_bookend_slide_copy(slide: dict[str, Any], label: str) -> tuple[str, str]:
+    title = slide.get("title")
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError(f"{label} must include non-empty 'title'.")
+    visual = slide.get("visual_concept")
+    if not isinstance(visual, str) or not visual.strip():
+        # Legacy drafts used description as visual brief.
+        visual = slide.get("description")
+    if not isinstance(visual, str) or not visual.strip():
+        raise ValueError(f"{label} must include non-empty 'visual_concept'.")
+    return title.strip(), visual.strip()
+
+
 def parse_scene_script_response(content: str) -> list[dict[str, Any]]:
-    """Parse script writer JSON and return exactly SCENE_COUNT scenes (title + description)."""
+    """Parse script writer JSON and return TOTAL_SLIDE_COUNT slides with roles."""
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError as exc:
         raise ValueError(f"Scene script writer returned invalid JSON: {exc}") from exc
 
-    scenes = parsed.get("scenes") if isinstance(parsed, dict) else None
-    if not isinstance(scenes, list):
-        raise ValueError('Scene script writer JSON must include a "scenes" array.')
+    if not isinstance(parsed, dict):
+        raise ValueError("Scene script writer JSON must be an object.")
 
-    if len(scenes) != SCENE_COUNT:
+    intro = parsed.get("intro")
+    content_scenes = parsed.get("scenes")
+    ending = parsed.get("ending")
+
+    if not isinstance(intro, dict):
+        raise ValueError('Scene script writer JSON must include an "intro" object.')
+    if not isinstance(content_scenes, list):
+        raise ValueError('Scene script writer JSON must include a "scenes" array.')
+    if not isinstance(ending, dict):
+        raise ValueError('Scene script writer JSON must include an "ending" object.')
+
+    if len(content_scenes) != CONTENT_SCENE_COUNT:
         raise ValueError(
-            f"Scene script writer must return exactly {SCENE_COUNT} scenes; got {len(scenes)}."
+            f"Scene script writer must return exactly {CONTENT_SCENE_COUNT} content scenes; "
+            f"got {len(content_scenes)}."
         )
 
-    normalized: list[dict[str, Any]] = []
-    for index, scene in enumerate(scenes):
+    slides: list[dict[str, Any]] = []
+    intro_title, intro_visual = _validate_bookend_slide_copy(intro, "Intro")
+    slides.append(
+        {
+            "id": 1,
+            "role": "intro",
+            "title": intro_title,
+            "visual_concept": intro_visual,
+        }
+    )
+
+    for index, scene in enumerate(content_scenes):
         if not isinstance(scene, dict):
-            raise ValueError(f"Scene {index + 1} must be an object.")
-        for field in ("title", "description"):
-            value = scene.get(field)
-            if not isinstance(value, str) or not value.strip():
-                raise ValueError(f"Scene {index + 1} must include non-empty '{field}'.")
-        normalized.append(
+            raise ValueError(f"Content scene {index + 1} must be an object.")
+        title, description = _validate_content_slide_copy(scene, f"Content scene {index + 1}")
+        slides.append(
             {
-                "id": index + 1,
-                "title": scene["title"].strip(),
-                "description": scene["description"].strip(),
+                "id": index + 2,
+                "role": "content",
+                "content_index": index + 1,
+                "title": title,
+                "description": description,
             }
         )
-    return normalized
+
+    ending_title, ending_visual = _validate_bookend_slide_copy(ending, "Ending")
+    slides.append(
+        {
+            "id": CONTENT_SCENE_COUNT + 2,
+            "role": "ending",
+            "title": ending_title,
+            "visual_concept": ending_visual,
+        }
+    )
+    return slides
 
 
 def parse_tts_writer_response(content: str) -> list[str]:
-    """Parse TTS writer JSON and return exactly SCENE_COUNT tts strings."""
+    """Parse TTS writer JSON and return exactly CONTENT_SCENE_COUNT tts strings."""
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError as exc:
@@ -106,9 +201,9 @@ def parse_tts_writer_response(content: str) -> list[str]:
     if not isinstance(scenes, list):
         raise ValueError('TTS writer JSON must include a "scenes" array.')
 
-    if len(scenes) != SCENE_COUNT:
+    if len(scenes) != CONTENT_SCENE_COUNT:
         raise ValueError(
-            f"TTS writer must return exactly {SCENE_COUNT} scenes; got {len(scenes)}."
+            f"TTS writer must return exactly {CONTENT_SCENE_COUNT} scenes; got {len(scenes)}."
         )
 
     tts_blocks: list[str] = []
@@ -122,16 +217,34 @@ def parse_tts_writer_response(content: str) -> list[str]:
     return tts_blocks
 
 
-def _attach_tts_to_scenes(scenes: list[dict[str, Any]], tts_blocks: list[str]) -> None:
-    """Mutate scenes with tts strings from the TTS writer."""
-    if len(tts_blocks) != len(scenes):
-        raise ValueError("TTS block count must match scene count.")
-    for scene, tts in zip(scenes, tts_blocks):
-        scene["tts"] = tts
+def _attach_tts_to_content_slides(
+    content_slides: list[dict[str, Any]],
+    tts_blocks: list[str],
+) -> None:
+    """Mutate content slides with tts strings from the TTS writer."""
+    if len(tts_blocks) != len(content_slides):
+        raise ValueError("TTS block count must match content slide count.")
+    for slide, tts in zip(content_slides, tts_blocks):
+        slide["tts"] = tts
+
+
+def _apply_tts_timestamps(
+    content_slides: list[dict[str, Any]],
+    scene_timestamps: list[dict[str, Any]],
+) -> None:
+    """Mutate content slides with start_ms/end_ms from TTS scene_timestamps."""
+    by_id = {int(entry["scene_id"]): entry for entry in scene_timestamps}
+    for slide in content_slides:
+        slide_id = int(slide["id"])
+        timing = by_id.get(slide_id)
+        if timing is None:
+            raise PipelineError(f"Missing TTS timing for content slide {slide_id}.")
+        slide["start_ms"] = int(timing["start_ms"])
+        slide["end_ms"] = int(timing["end_ms"])
 
 
 def run_scene_script_writer(client: OpenAI, topic_prompt: str) -> list[dict[str, Any]]:
-    """Generate 3-scene slideshow script from a topic via LLM."""
+    """Generate intro + content + ending slideshow script from a topic via LLM."""
     topic = topic_prompt.strip()
     if not topic:
         raise ValueError("topic_prompt must not be empty.")
@@ -158,13 +271,13 @@ def run_scene_script_writer(client: OpenAI, topic_prompt: str) -> list[dict[str,
     return parse_scene_script_response(content)
 
 
-def run_tts_writer(client: OpenAI, scenes: list[dict[str, Any]]) -> list[str]:
+def run_tts_writer(client: OpenAI, content_slides: list[dict[str, Any]]) -> list[str]:
     """Generate per-scene TTS narration from on-slide title + description."""
-    if not scenes:
-        raise ValueError("scenes must not be empty.")
+    if not content_slides:
+        raise ValueError("content_slides must not be empty.")
 
     system_prompt = load_fenced_prompt(TTS_WRITER_PROMPT_PATH)
-    slide_content = format_slide_content_for_tts(scenes)
+    slide_content = format_slide_content_for_tts(content_slides)
     user_message = substitute_prompt(
         TTS_WRITER_USER_TEMPLATE,
         {"SLIDE_CONTENT": slide_content},
@@ -190,42 +303,36 @@ def run_tts_writer(client: OpenAI, scenes: list[dict[str, Any]]) -> list[str]:
     return parse_tts_writer_response(content)
 
 
-def _apply_scene_timestamps(
-    scenes: list[dict[str, Any]],
-    scene_timestamps: list[dict[str, Any]],
-) -> None:
-    """Mutate scenes with start_ms/end_ms from TTS scene_timestamps."""
-    by_id = {int(entry["scene_id"]): entry for entry in scene_timestamps}
-    for scene in scenes:
-        scene_id = int(scene["id"])
-        timing = by_id.get(scene_id)
-        if timing is None:
-            raise PipelineError(f"Missing TTS timing for scene {scene_id}.")
-        scene["start_ms"] = int(timing["start_ms"])
-        scene["end_ms"] = int(timing["end_ms"])
-
-
 def _build_caption_tokens(
     client: OpenAI,
-    scenes: list[dict[str, Any]],
+    content_slides: list[dict[str, Any]],
     caption_mode: str,
     word_timestamps: list[dict[str, Any]],
     words_by_scene: dict[int, list[dict[str, Any]]],
 ) -> list[dict[str, Any]]:
-    """Build caption tokens based on caption_mode."""
+    """Build caption tokens based on caption_mode (content narration only)."""
     if caption_mode == "none":
         return []
 
     if caption_mode == "sentence":
-        # True karaoke: full sentence visible, each word highlighted as spoken.
-        return build_karaoke_tokens_from_scenes(scenes, words_by_scene)
+        return build_karaoke_tokens_from_scenes(content_slides, words_by_scene)
 
-    # word mode: join all scene tts, run caption styler, merge with word timestamps
-    full_script = " ".join(scene["tts"] for scene in scenes)
+    full_script = " ".join(slide["tts"] for slide in content_slides)
     caption_styler_content = run_caption_styler(client, full_script)
     tokens = parse_caption_styler_response(caption_styler_content)
     tokens = validate_tokens(tokens)
     return merge_styled_tokens_with_timestamps(tokens, word_timestamps)
+
+
+def _narration_duration_ms(
+    word_timestamps: list[dict[str, Any]],
+    scene_timestamps: list[dict[str, Any]],
+) -> int:
+    if word_timestamps:
+        return max(int(entry.get("end_ms", 0)) for entry in word_timestamps)
+    if scene_timestamps:
+        return max(int(entry.get("end_ms", 0)) for entry in scene_timestamps)
+    return 0
 
 
 def run_slideshow_pipeline(
@@ -236,7 +343,7 @@ def run_slideshow_pipeline(
     skip_images: bool = False,
     image_provider: str | None = None,
 ) -> dict[str, Any]:
-    """Run scene script writer → TTS writer → slide images → per-scene TTS → pipeline_payload.json."""
+    """Run script writer → TTS writer → slide images → per-scene TTS → pipeline_payload.json."""
     if caption_mode not in VALID_CAPTION_MODES:
         raise ValueError(
             f"caption_mode must be one of {sorted(VALID_CAPTION_MODES)}; got {caption_mode!r}."
@@ -247,36 +354,70 @@ def run_slideshow_pipeline(
 
     client = _get_client()
     out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
     voice = _tts_voice_from_env()
+    topic = topic_prompt.strip()
 
-    scenes = run_scene_script_writer(client, topic_prompt)
-
-    step_script = "scene script writer (LLM, Gemini)"
-    for scene in scenes:
+    cached_slides = _load_scenes_draft(out, topic=topic)
+    if cached_slides is not None:
+        slides = cached_slides
         log_step_done(
-            step_script,
-            f"scene {scene['id']}/{SCENE_COUNT}: \"{scene['title']}\"",
+            "scene script writer (LLM, Gemini)",
+            f"resumed from {SCENES_DRAFT_FILENAME}",
         )
-    log_step_done(step_script, f"complete ({SCENE_COUNT} scenes)")
+        log_step_done("TTS script writer (LLM)", f"resumed from {SCENES_DRAFT_FILENAME}")
+    else:
+        slides = run_scene_script_writer(client, topic)
 
-    tts_blocks = run_tts_writer(client, scenes)
-    _attach_tts_to_scenes(scenes, tts_blocks)
-    log_step_done("TTS script writer (LLM)", f"complete ({SCENE_COUNT} narration blocks)")
+        step_script = "scene script writer (LLM, Gemini)"
+        for slide in slides:
+            role = slide.get("role", "content")
+            log_step_done(
+                step_script,
+                f"{role} slide {slide['id']}/{TOTAL_SLIDE_COUNT}: \"{slide['title']}\"",
+            )
+        log_step_done(step_script, f"complete ({TOTAL_SLIDE_COUNT} slides)")
 
+        content_slides = get_content_slides(slides)
+        tts_blocks = run_tts_writer(client, content_slides)
+        _attach_tts_to_content_slides(content_slides, tts_blocks)
+        log_step_done(
+            "TTS script writer (LLM)",
+            f"complete ({CONTENT_SCENE_COUNT} narration blocks)",
+        )
+        _save_scenes_draft(out, topic=topic, slides=slides)
+
+    content_slides = get_content_slides(slides)
     narration_path = out / "narration.mp3"
     scene_timestamps, word_timestamps, words_by_scene = synthesize_scene_speech(
-        scenes,
+        content_slides,
         narration_path,
         voice=voice,
     )
     if not word_timestamps:
         raise PipelineError("TTS produced no word boundaries.")
 
-    _apply_scene_timestamps(scenes, scene_timestamps)
+    content_for_captions = deepcopy(content_slides)
+    _apply_tts_timestamps(content_for_captions, scene_timestamps)
+    tokens = _build_caption_tokens(
+        client,
+        content_for_captions,
+        caption_mode,
+        word_timestamps,
+        words_by_scene,
+    )
+
+    narration_duration_ms = _narration_duration_ms(word_timestamps, scene_timestamps)
+    if narration_duration_ms <= 0:
+        raise PipelineError("TTS produced no usable narration duration.")
+    apply_slide_timing(slides, narration_duration_ms)
+
+    content_scenes = deepcopy(content_for_captions)
 
     project_stub: dict[str, Any] = {
         "topic": topic_prompt.strip(),
-        "scenes": scenes,
+        "slides": slides,
+        "scenes": content_scenes,
     }
 
     if not skip_images:
@@ -286,18 +427,17 @@ def run_slideshow_pipeline(
             force=True,
             provider=resolved_provider,
         )
-        log_step_done(image_step, f"complete ({SCENE_COUNT} images)")
+        log_step_done(image_step, f"complete ({TOTAL_SLIDE_COUNT} images)")
     else:
         log_step_done(image_step, "skipped (--skip-images)")
 
-    tokens = _build_caption_tokens(client, scenes, caption_mode, word_timestamps, words_by_scene)
-
-    image_timeline = build_image_timeline_from_scenes(scenes)
+    assign_slide_transitions(slides)
+    image_timeline = build_image_timeline_from_slides(slides)
     timing_summary = ", ".join(
         f"{img['start_ms']}-{img['end_ms']}ms" for img in image_timeline
     )
     log_step_done(
-        "build scenes + video.images timeline",
+        "build slides + video.images timeline",
         f"{len(image_timeline)} images timed ({timing_summary})",
     )
 
@@ -320,12 +460,22 @@ def run_slideshow_pipeline(
             f"skipped — no tracks in {resolve_music_dir()} (add MP3s to assets/music/ or music/)",
         )
 
+    ambient_overlay = attach_random_ambient_overlay(out)
+    if ambient_overlay is not None:
+        log_step_done("ambient overlay", ambient_overlay["original_name"])
+    else:
+        log_step_done(
+            "ambient overlay",
+            f"skipped — no overlays in {resolve_overlays_dir()} (add WebMs to assets/overlays/)",
+        )
+
     payload: dict[str, Any] = {
         "project_version": 1,
         "topic": topic_prompt.strip(),
         "caption_mode": caption_mode,
         "image_provider": resolved_provider,
-        "scenes": scenes,
+        "slides": slides,
+        "scenes": content_scenes,
         "captions": {
             "theme": DEFAULT_THEME,
             "font": None,
@@ -335,6 +485,7 @@ def run_slideshow_pipeline(
             "canvas": {"width": 1080, "height": 1920},
             "images": image_timeline,
             "clips": [],
+            **({"ambient": ambient_overlay} if ambient_overlay else {}),
         },
         "audio": audio_section,
         "render": {
@@ -356,9 +507,11 @@ def run_slideshow_pipeline(
     print(f"  ├── narration.mp3")
     if not skip_images:
         print(f"  ├── images/")
-        print(f"  │     scene_*.png")
+        print(f"  │     intro.png, scene_*.png, ending.png")
     if music is not None:
         print(f"  ├── {Path(str(music['path'])).name}")
+    if ambient_overlay is not None:
+        print(f"  ├── {Path(str(ambient_overlay['path'])).name}")
     print(f"  └── final.mp4  (after: python core/remotion_render_stage.py {payload_path.name})")
     print()
 

@@ -1,15 +1,16 @@
 /**
  * effects.tsx — centralized registry of all visual effects for ShortVideo compositions.
  *
- * Default slide combo (CapCut-style):
- *   • Ken Burns ambient center zoom on holds
- *   • Exit: unified zoom out (~2 s ease-in → sharp mirror reveal + blur)
- *   • Enter: fast zoom back in on the next slide
+ * Per-cut transitions (CapCut-style):
+ *   • pullIn — dolly zoom in + blur at impact
+ *   • teleportShake — shake → white-out → recovery shake to center
+ *   • zoomBlur — slow zoom-out + mirror grid + blur
  *
  * Sections:
- *   1. Image transition effects  — ramp zoom blur + mirror
- *   2. Ambient motion            — Ken Burns
- *   3. Caption animation effects — per-word/token animations (pop scale, …)
+ *   1. Image transition effects
+ *   2. Ambient motion (Ken Burns)
+ *   3. Caption animation effects
+ *   4. Ambient overlays (see AmbientOverlay.tsx)
  */
 
 import React from "react";
@@ -22,16 +23,26 @@ import {
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
-import type { TimelineImage } from "./types";
+import type { SlideTransitionType, TimelineImage } from "./types";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 1. RAMP ZOOM TRANSITION (default)
+// 1. TRANSITION TYPES & CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** Slow pull-back duration before the cut (~2 s). */
+export type { SlideTransitionType };
+
+export const DEFAULT_TRANSITION_ROTATION: SlideTransitionType[] = [
+  "pullIn",
+  "teleportShake",
+  "zoomBlur",
+];
+
+export const DEFAULT_TRANSITION: SlideTransitionType = "pullIn";
+
+/** Slow pull-back duration before zoomBlur cut (~2 s). */
 export const SLOW_ZOOM_OUT_SEC = 2;
 
-/** Tail of the unified zoom-out — sharp acceleration + blur (frames). */
+/** Tail of zoom-out / pull transition past the cut (frames). */
 export const SHARP_ZOOM_OUT_FRAMES = 12;
 
 /** Fast zoom back in on incoming slide (frames). */
@@ -40,17 +51,29 @@ export const FAST_ZOOM_IN_FRAMES = 15;
 /** Scale at end of Ken Burns / start of zoom out. */
 export const HOLD_SCALE_END = 1.08;
 
-/** Deepest scale at end of unified zoom out. */
+/** Deepest scale at end of zoom-out (zoomBlur). */
 export const SHARP_ZOOM_OUT_END = 0.55;
 
-/** Peak CSS blur at the deepest zoom-out. */
+export const PULL_IN_SCALE_MAX = 1.9;
+
+/** Peak CSS blur at deepest zoom. */
 export const ZOOM_BLUR_MAX_PX = 28;
 
 /** Blur stays off until scale drops below this (deeper zoom → more blur). */
 export const ZOOM_BLUR_START_SCALE = 0.85;
 
-/** Enable mirror grid this many seconds before zoom-out starts (avoids black flash). */
+/** Enable mirror grid this many seconds before zoomBlur zoom-out starts. */
 export const MIRROR_PRELOAD_SEC = 0.1;
+
+/** teleportShake phase lengths (frames) — 50% longer than base. */
+export const SHAKE_EXIT_FRAMES = 9;
+export const FLASH_FRAMES = 6;
+export const SHAKE_ENTER_FRAMES = 12;
+
+export const SHAKE_AMPLITUDE_PCT = 2.5;
+export const SHAKE_CYCLES = 2.5;
+export const TELEPORT_ZOOM_PUNCH = 1.08;
+export const WHITE_FLASH_MAX = 0.9;
 
 export const getMirrorPreloadFrames = (fps: number): number =>
   Math.max(1, Math.round(MIRROR_PRELOAD_SEC * fps));
@@ -58,26 +81,34 @@ export const getMirrorPreloadFrames = (fps: number): number =>
 const easeIn = Easing.in(Easing.cubic);
 const easeOut = Easing.out(Easing.cubic);
 
-export type SlideTransitionType = "zoomBlur";
-export const DEFAULT_TRANSITION: SlideTransitionType = "zoomBlur";
+export const resolveSlideTransition = (
+  slide: { transition?: SlideTransitionType },
+  index: number,
+): SlideTransitionType =>
+  slide.transition ?? DEFAULT_TRANSITION_ROTATION[index % DEFAULT_TRANSITION_ROTATION.length];
 
 export const getSlowZoomOutFrames = (fps: number): number =>
   Math.max(1, Math.round(SLOW_ZOOM_OUT_SEC * fps));
 
-/** Total outgoing zoom-out span: slow lead-in + sharp tail past the cut. */
 export const getExitZoomOutFrames = (fps: number): number =>
   getSlowZoomOutFrames(fps) + SHARP_ZOOM_OUT_FRAMES;
 
-export const getTransitionDuration = (_type: SlideTransitionType = "zoomBlur"): number =>
-  SHARP_ZOOM_OUT_FRAMES + FAST_ZOOM_IN_FRAMES;
+export const getTransitionDuration = (type: SlideTransitionType = DEFAULT_TRANSITION): number => {
+  if (type === "teleportShake") {
+    return SHAKE_EXIT_FRAMES + FLASH_FRAMES + SHAKE_ENTER_FRAMES;
+  }
+  return SHARP_ZOOM_OUT_FRAMES + FAST_ZOOM_IN_FRAMES;
+};
 
 export const buildCutTransitionTypes = (
-  slides: { src: string }[],
-): SlideTransitionType[] => Array(Math.max(0, slides.length - 1)).fill(DEFAULT_TRANSITION);
+  slides: { transition?: SlideTransitionType }[],
+): SlideTransitionType[] =>
+  slides.slice(0, -1).map((slide, index) => resolveSlideTransition(slide, index));
 
 type TransitionTransform = {
   scale: number;
   translateXPercent: number;
+  translateYPercent: number;
   opacity: number;
   blurPx: number;
   useMirror: boolean;
@@ -86,12 +117,16 @@ type TransitionTransform = {
 const identityTransition: TransitionTransform = {
   scale: 1,
   translateXPercent: 0,
+  translateYPercent: 0,
   opacity: 1,
   blurPx: 0,
   useMirror: false,
 };
 
-/** Radial-style blur tied to how far we've zoomed out — not transition progress. */
+// ─────────────────────────────────────────────────────────────────────────────
+// BLUR HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const getZoomBlurForScale = (scale: number): number =>
   interpolate(
     scale,
@@ -100,9 +135,16 @@ export const getZoomBlurForScale = (scale: number): number =>
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
   );
 
-/**
- * Unified zoom out — continuous ease-in from the live Ken Burns scale/position.
- */
+const getPullInBlurForScale = (scale: number): number =>
+  interpolate(scale, [1, PULL_IN_SCALE_MAX], [0, ZOOM_BLUR_MAX_PX], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// zoomBlur TRANSFORMS
+// ─────────────────────────────────────────────────────────────────────────────
+
 export const getUnifiedZoomOutTransform = (
   progress: number,
   startScale: number,
@@ -112,13 +154,13 @@ export const getUnifiedZoomOutTransform = (
   return {
     scale,
     translateXPercent: 0,
+    translateYPercent: 0,
     opacity: 1,
     blurPx: getZoomBlurForScale(scale),
     useMirror: true,
   };
 };
 
-/** Fast zoom back in on incoming slide. */
 export const getFastZoomInTransform = (progress: number): TransitionTransform => {
   const clamped = Math.max(0, Math.min(1, progress));
   const t = easeOut(interpolate(clamped, [0, 1], [0, 1]));
@@ -126,11 +168,127 @@ export const getFastZoomInTransform = (progress: number): TransitionTransform =>
   return {
     scale,
     translateXPercent: 0,
+    translateYPercent: 0,
     opacity: 1,
     blurPx: getZoomBlurForScale(scale),
-    // Enter zoom only — no mirror grid so captions stay readable over the cut.
+    useMirror: true,
+  };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// pullIn TRANSFORMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getPullInExitTransform = (
+  progress: number,
+  startScale: number,
+): TransitionTransform => {
+  const t = easeIn(Math.max(0, Math.min(1, progress)));
+  const scale = interpolate(t, [0, 1], [startScale, PULL_IN_SCALE_MAX]);
+  return {
+    scale,
+    translateXPercent: 0,
+    translateYPercent: 0,
+    opacity: 1,
+    blurPx: getPullInBlurForScale(scale),
     useMirror: false,
   };
+};
+
+export const getPullInEnterTransform = (progress: number): TransitionTransform => {
+  const t = easeOut(Math.max(0, Math.min(1, progress)));
+  const scale = interpolate(t, [0, 1], [PULL_IN_SCALE_MAX, 1]);
+  return {
+    scale,
+    translateXPercent: 0,
+    translateYPercent: 0,
+    opacity: 1,
+    blurPx: getPullInBlurForScale(scale),
+    useMirror: false,
+  };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// teleportShake TRANSFORMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getShakeOffsetAtExitEnd = (
+  amplitude: number = SHAKE_AMPLITUDE_PCT,
+): { translateXPercent: number; translateYPercent: number } => {
+  const angle = SHAKE_CYCLES * 2 * Math.PI;
+  return {
+    translateXPercent: amplitude * Math.cos(angle),
+    translateYPercent: amplitude * Math.sin(angle),
+  };
+};
+
+export const getShakeOffset = (
+  progress: number,
+  amplitude: number,
+  phase: "exit" | "enter",
+  exitEnd?: { translateXPercent: number; translateYPercent: number },
+): { translateXPercent: number; translateYPercent: number } => {
+  const p = Math.max(0, Math.min(1, progress));
+  if (phase === "exit") {
+    const envelope = easeIn(p);
+    const angle = p * SHAKE_CYCLES * 2 * Math.PI;
+    return {
+      translateXPercent: amplitude * envelope * Math.cos(angle),
+      translateYPercent: amplitude * envelope * Math.sin(angle),
+    };
+  }
+  const end = exitEnd ?? getShakeOffsetAtExitEnd(amplitude);
+  const decay = 1 - easeOut(p);
+  const wobble = Math.sin((1 - p) * SHAKE_CYCLES * 2 * Math.PI) * 0.25;
+  return {
+    translateXPercent: end.translateXPercent * decay * (1 + wobble),
+    translateYPercent: end.translateYPercent * decay * (1 + wobble),
+  };
+};
+
+export const getTeleportShakeExitTransform = (
+  progress: number,
+  startScale: number,
+): TransitionTransform => {
+  const p = Math.max(0, Math.min(1, progress));
+  const shake = getShakeOffset(p, SHAKE_AMPLITUDE_PCT, "exit");
+  const scale = interpolate(easeIn(p), [0, 1], [startScale, TELEPORT_ZOOM_PUNCH]);
+  return {
+    scale,
+    ...shake,
+    opacity: 1,
+    blurPx: 0,
+    useMirror: false,
+  };
+};
+
+export const getTeleportShakeEnterTransform = (
+  progress: number,
+  exitEndShake = getShakeOffsetAtExitEnd(),
+): TransitionTransform => {
+  const p = Math.max(0, Math.min(1, progress));
+  const shake = getShakeOffset(p, SHAKE_AMPLITUDE_PCT, "enter", exitEndShake);
+  const scale = interpolate(easeOut(p), [0, 1], [TELEPORT_ZOOM_PUNCH, 1]);
+  return {
+    scale,
+    ...shake,
+    opacity: 1,
+    blurPx: 0,
+    useMirror: false,
+  };
+};
+
+export const getWhiteFlashOpacity = (
+  frame: number,
+  cutFrame: number,
+  flashFrames: number = FLASH_FRAMES,
+): number => {
+  const half = flashFrames / 2;
+  const dist = Math.abs(frame - cutFrame);
+  if (dist >= half) return 0;
+  return interpolate(dist, [0, half], [WHITE_FLASH_MAX, 0], {
+    extrapolateRight: "clamp",
+  });
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -161,7 +319,6 @@ const imgBaseStyle: React.CSSProperties = {
   display: "block",
 };
 
-/** 3×3 mirror tile — center cell normal, edges reflected on X, Y, or both. */
 const MIRROR_FLIPS: { flipX: boolean; flipY: boolean }[][] = [
   [
     { flipX: true, flipY: true },
@@ -206,9 +363,10 @@ const MirrorZoomImage: React.FC<{
   src: string;
   scale: number;
   translateXPercent: number;
+  translateYPercent: number;
   blurPx: number;
   useMirror: boolean;
-}> = ({ src, scale, translateXPercent, blurPx, useMirror }) => {
+}> = ({ src, scale, translateXPercent, translateYPercent, blurPx, useMirror }) => {
   const file = staticFile(src);
   const { width: frameW, height: frameH } = useVideoConfig();
   const filter = blurPx > 0.5 ? `blur(${blurPx}px)` : undefined;
@@ -224,7 +382,7 @@ const MirrorZoomImage: React.FC<{
     height: layerH,
     marginLeft: -layerW / 2,
     marginTop: -layerH / 2,
-    transform: `scale(${scale}) translate(${translateXPercent}%, 0%)`,
+    transform: `scale(${scale}) translate(${translateXPercent}%, ${translateYPercent}%)`,
     transformOrigin: "center center",
     filter,
     ...(useMirror
@@ -278,33 +436,82 @@ type SlideRenderStyle = {
   zIndex: number;
   scale: number;
   translateXPercent: number;
+  translateYPercent: number;
   blurPx: number;
   useMirror: boolean;
+  whiteFlash: number;
+};
+
+const computeWhiteFlashAtFrame = (frame: number, slides: SlideSegment[]): number => {
+  let maxFlash = 0;
+  for (let i = 0; i < slides.length - 1; i++) {
+    const exitType = resolveSlideTransition(slides[i], i);
+    if (exitType !== "teleportShake") continue;
+    maxFlash = Math.max(maxFlash, getWhiteFlashOpacity(frame, slides[i].endFrame));
+  }
+  return maxFlash;
 };
 
 const computeSlideStyle = (
   frame: number,
   slide: SlideSegment,
-  _slides: SlideSegment[],
+  slides: SlideSegment[],
   fps: number,
 ): SlideRenderStyle | null => {
-  const { index, startFrame, endFrame } = slide;
-  const slowFrames = getSlowZoomOutFrames(fps);
-  const hasExit = index < _slides.length - 1;
+  const { index, endFrame } = slide;
+  const hasExit = index < slides.length - 1;
   const hasEnter = index > 0;
   const cutFrame = endFrame;
 
-  const enterFastStart = hasEnter ? startFrame + SHARP_ZOOM_OUT_FRAMES : startFrame;
-  const enterFastEnd = hasEnter
-    ? startFrame + SHARP_ZOOM_OUT_FRAMES + FAST_ZOOM_IN_FRAMES
-    : startFrame + FAST_ZOOM_IN_FRAMES;
+  const exitType = hasExit ? resolveSlideTransition(slide, index) : null;
+  const enterType = hasEnter ? resolveSlideTransition(slides[index - 1], index - 1) : null;
 
-  const holdStart = enterFastEnd;
-  const exitZoomStart = hasExit ? Math.max(holdStart, cutFrame - slowFrames) : endFrame;
-  const exitZoomEnd = hasExit ? cutFrame + SHARP_ZOOM_OUT_FRAMES : endFrame;
+  const slowFrames = getSlowZoomOutFrames(fps);
+  const mirrorPreloadFrames = getMirrorPreloadFrames(fps);
+  const exitEndShake = getShakeOffsetAtExitEnd();
 
-  const showStart = hasEnter ? enterFastStart : startFrame;
-  const showEnd = hasExit ? exitZoomEnd : endFrame;
+  let enterStart = slide.startFrame;
+  let enterEnd = slide.startFrame;
+  let exitStart = cutFrame;
+  let exitEnd = cutFrame;
+  let holdStart = slide.startFrame;
+  let holdEnd = cutFrame;
+
+  if (hasEnter && enterType) {
+    if (enterType === "teleportShake") {
+      enterStart = slide.startFrame;
+      enterEnd = slide.startFrame + SHAKE_ENTER_FRAMES;
+      holdStart = enterEnd;
+    } else {
+      enterStart = slide.startFrame + SHARP_ZOOM_OUT_FRAMES;
+      enterEnd = slide.startFrame + SHARP_ZOOM_OUT_FRAMES + FAST_ZOOM_IN_FRAMES;
+      holdStart = enterEnd;
+    }
+  }
+
+  if (hasExit && exitType) {
+    if (exitType === "teleportShake") {
+      exitStart = cutFrame - SHAKE_EXIT_FRAMES;
+      exitEnd = cutFrame;
+      holdEnd = exitStart;
+    } else if (exitType === "zoomBlur") {
+      exitStart = Math.max(holdStart, cutFrame - slowFrames);
+      exitEnd = cutFrame + SHARP_ZOOM_OUT_FRAMES;
+      holdEnd = exitStart;
+    } else {
+      exitStart = Math.max(holdStart, cutFrame - SHARP_ZOOM_OUT_FRAMES);
+      exitEnd = cutFrame + SHARP_ZOOM_OUT_FRAMES;
+      holdEnd = exitStart;
+    }
+  } else if (!hasExit) {
+    holdEnd = endFrame;
+  }
+
+  const showStart = hasEnter ? enterStart : slide.startFrame;
+  let showEnd = hasExit ? exitEnd : endFrame;
+  if (hasExit && exitType === "teleportShake") {
+    showEnd = cutFrame;
+  }
 
   if (frame < showStart || frame >= showEnd) {
     return null;
@@ -312,31 +519,41 @@ const computeSlideStyle = (
 
   let transition = identityTransition;
   let inTransition = false;
+  const holdDuration = Math.max(1, holdEnd - holdStart);
 
-  const holdDuration = Math.max(1, exitZoomStart - holdStart);
-  const mirrorPreloadFrames = getMirrorPreloadFrames(fps);
-  const mirrorActiveFrom = hasExit ? exitZoomStart - mirrorPreloadFrames : endFrame;
-
-  // Opening / incoming — fast zoom back in.
-  if (frame < enterFastEnd) {
-    const progress =
-      (frame - (hasEnter ? enterFastStart : startFrame)) / FAST_ZOOM_IN_FRAMES;
-    transition = getFastZoomInTransform(progress);
+  if (hasEnter && enterType && frame < enterEnd) {
+    const progress = (frame - enterStart) / Math.max(1, enterEnd - enterStart);
+    switch (enterType) {
+      case "pullIn":
+        transition = getPullInEnterTransform(progress);
+        break;
+      case "teleportShake":
+        transition = getTeleportShakeEnterTransform(progress, exitEndShake);
+        break;
+      case "zoomBlur":
+        transition = getFastZoomInTransform(progress);
+        break;
+    }
     inTransition = true;
-  }
-  // Outgoing — unified zoom out, starting from live Ken Burns scale.
-  else if (hasExit && frame >= exitZoomStart && frame < exitZoomEnd) {
-    const span = Math.max(1, exitZoomEnd - exitZoomStart);
-    const progress = (frame - exitZoomStart) / span;
+  } else if (hasExit && exitType && frame >= exitStart && frame < exitEnd) {
+    const progress = (frame - exitStart) / Math.max(1, exitEnd - exitStart);
     const startScale = getKenBurnsScale(
-      Math.max(0, exitZoomStart - holdStart),
+      Math.max(0, exitStart - holdStart),
       holdDuration,
     );
-    transition = getUnifiedZoomOutTransform(progress, startScale);
+    switch (exitType) {
+      case "pullIn":
+        transition = getPullInExitTransform(progress, startScale);
+        break;
+      case "teleportShake":
+        transition = getTeleportShakeExitTransform(progress, startScale);
+        break;
+      case "zoomBlur":
+        transition = getUnifiedZoomOutTransform(progress, startScale);
+        break;
+    }
     inTransition = true;
-  }
-  // Hold — Ken Burns center zoom.
-  else if (frame >= holdStart && frame < exitZoomStart) {
+  } else if (frame >= holdStart && frame < holdEnd) {
     const holdFrame = frame - holdStart;
     transition = {
       ...identityTransition,
@@ -344,29 +561,37 @@ const computeSlideStyle = (
     };
   }
 
-  const scale = transition.scale;
-  const translateXPercent = transition.translateXPercent;
+  const mirrorActiveFrom =
+    hasExit && exitType === "zoomBlur" ? exitStart - mirrorPreloadFrames : cutFrame;
 
-  const zIndex =
-    inTransition && hasEnter && frame >= enterFastStart ? index + 10 : index;
-
-  // Mirror grid only on outgoing zoom-out (not during incoming zoom-in).
   const useMirror =
     transition.useMirror ||
-    (hasExit && frame >= mirrorActiveFrom && frame < exitZoomEnd);
+    (hasExit && exitType === "zoomBlur" && frame >= mirrorActiveFrom && frame < exitEnd);
+
+  const zIndex =
+    inTransition && hasEnter && frame >= enterStart ? index + 10 : index;
+
+  const whiteFlash =
+    exitType === "teleportShake" && frame >= exitStart && frame <= exitEnd + FLASH_FRAMES / 2
+      ? getWhiteFlashOpacity(frame, cutFrame)
+      : enterType === "teleportShake" && frame >= cutFrame - FLASH_FRAMES / 2 && frame < enterEnd
+        ? getWhiteFlashOpacity(frame, cutFrame)
+        : 0;
 
   return {
     opacity: transition.opacity,
     zIndex,
-    scale,
-    translateXPercent,
+    scale: transition.scale,
+    translateXPercent: transition.translateXPercent,
+    translateYPercent: transition.translateYPercent,
     blurPx: transition.blurPx,
     useMirror,
+    whiteFlash,
   };
 };
 
 /**
- * SlideshowBackground — Ken Burns holds + ramp zoom-blur/mirror transitions.
+ * SlideshowBackground — Ken Burns holds + per-cut CapCut-style transitions.
  */
 export const SlideshowBackground: React.FC<{
   images: TimelineImage[];
@@ -382,6 +607,8 @@ export const SlideshowBackground: React.FC<{
     startFrame: msToFrames(image.start_ms, fps),
     endFrame: msToFrames(image.end_ms, fps),
   }));
+
+  const globalWhiteFlash = computeWhiteFlashAtFrame(frame, slides);
 
   return (
     <>
@@ -402,12 +629,23 @@ export const SlideshowBackground: React.FC<{
               src={slide.src}
               scale={style.scale}
               translateXPercent={style.translateXPercent}
+              translateYPercent={style.translateYPercent}
               blurPx={style.blurPx}
               useMirror={style.useMirror}
             />
           </AbsoluteFill>
         );
       })}
+      {globalWhiteFlash > 0 ? (
+        <AbsoluteFill
+          style={{
+            zIndex: 90,
+            backgroundColor: "#ffffff",
+            opacity: globalWhiteFlash,
+            pointerEvents: "none",
+          }}
+        />
+      ) : null}
     </>
   );
 };

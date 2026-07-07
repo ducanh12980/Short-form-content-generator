@@ -11,11 +11,18 @@ import pytest
 
 from core.caption_tokens import build_sentence_tokens_from_scenes
 from core.project_schema import (
+    CONTENT_SCENE_COUNT,
+    DEFAULT_TRANSITION_ROTATION,
+    TOTAL_SLIDE_COUNT,
+    assign_slide_transitions,
     build_image_timeline_from_scenes,
+    build_image_timeline_from_slides,
     get_caption_mode,
     get_narration_duration_ms,
     get_scenes,
+    get_slides,
     normalize_project,
+    slide_image_filename,
 )
 from core.prompt_loader import substitute_prompt
 from core.slide_image_stage import (
@@ -27,10 +34,86 @@ from core.slide_image_stage import (
 from core.slideshow_pipeline import parse_scene_script_response, run_slideshow_pipeline
 
 
-def _sample_scenes() -> list[dict]:
+def _sample_script_payload() -> dict:
+    return {
+        "intro": {
+            "title": "Hook",
+            "visual_concept": "Dawn light through carved wooden window, mirror reflection.",
+        },
+        "scenes": [
+            {"title": "Hiểu người", "description": "Dòng mô tả một."},
+            {"title": "Hiểu mình", "description": "Dòng mô tả hai."},
+            {"title": "Sống khôn", "description": "Dòng mô tả ba."},
+        ],
+        "ending": {
+            "title": "Kết",
+            "visual_concept": "Stone path at sunset fading into soft mist.",
+        },
+    }
+
+
+def _sample_slides() -> list[dict]:
     return [
         {
             "id": 1,
+            "role": "intro",
+            "title": "Hook",
+            "visual_concept": "Dawn through wooden window.",
+            "start_ms": 0,
+            "end_ms": 2500,
+            "image": {"path": "output/images/intro.png", "source": "dalle"},
+        },
+        {
+            "id": 2,
+            "role": "content",
+            "content_index": 1,
+            "title": "Hiểu người",
+            "description": "Dòng mô tả một.",
+            "tts": "Câu nói scene một.",
+            "start_ms": 2500,
+            "end_ms": 7500,
+            "image": {"path": "output/images/scene_1.png", "source": "dalle"},
+        },
+        {
+            "id": 3,
+            "role": "content",
+            "content_index": 2,
+            "title": "Hiểu mình",
+            "description": "Dòng mô tả hai.",
+            "tts": "Câu nói scene hai.",
+            "start_ms": 7500,
+            "end_ms": 12500,
+            "image": {"path": "output/images/scene_2.png", "source": "dalle"},
+        },
+        {
+            "id": 4,
+            "role": "content",
+            "content_index": 3,
+            "title": "Sống khôn",
+            "description": "Dòng mô tả ba.",
+            "tts": "Câu nói scene ba.",
+            "start_ms": 12500,
+            "end_ms": 17500,
+            "image": {"path": "output/images/scene_3.png", "source": "dalle"},
+        },
+        {
+            "id": 5,
+            "role": "ending",
+            "title": "Kết",
+            "visual_concept": "Sunset stone path.",
+            "start_ms": 17500,
+            "end_ms": 20000,
+            "image": {"path": "output/images/ending.png", "source": "dalle"},
+        },
+    ]
+
+
+def _sample_scenes() -> list[dict]:
+    return [
+        {
+            "id": 2,
+            "role": "content",
+            "content_index": 1,
             "title": "Hiểu người",
             "description": "Dòng mô tả một.",
             "tts": "Câu nói scene một.",
@@ -39,7 +122,9 @@ def _sample_scenes() -> list[dict]:
             "image": {"path": "output/images/scene_1.png", "source": "dalle"},
         },
         {
-            "id": 2,
+            "id": 3,
+            "role": "content",
+            "content_index": 2,
             "title": "Hiểu mình",
             "description": "Dòng mô tả hai.",
             "tts": "Câu nói scene hai.",
@@ -48,7 +133,9 @@ def _sample_scenes() -> list[dict]:
             "image": {"path": "output/images/scene_2.png", "source": "dalle"},
         },
         {
-            "id": 3,
+            "id": 4,
+            "role": "content",
+            "content_index": 3,
             "title": "Sống khôn",
             "description": "Dòng mô tả ba.",
             "tts": "Câu nói scene ba.",
@@ -59,19 +146,17 @@ def _sample_scenes() -> list[dict]:
     ]
 
 
-def test_parse_scene_script_response_accepts_three_scenes() -> None:
-    payload = {
-        "scenes": [
-            {"title": "A", "description": "desc a"},
-            {"title": "B", "description": "desc b"},
-            {"title": "C", "description": "desc c"},
-        ]
-    }
-    scenes = parse_scene_script_response(json.dumps(payload))
-    assert len(scenes) == 3
-    assert scenes[0]["id"] == 1
-    assert scenes[2]["title"] == "C"
-    assert "tts" not in scenes[0]
+def test_parse_scene_script_response_accepts_intro_content_ending() -> None:
+    slides = parse_scene_script_response(json.dumps(_sample_script_payload()))
+    assert len(slides) == TOTAL_SLIDE_COUNT
+    assert slides[0]["role"] == "intro"
+    assert slides[0]["id"] == 1
+    assert "visual_concept" in slides[0]
+    assert "description" not in slides[0]
+    assert slides[1]["role"] == "content"
+    assert slides[1]["content_index"] == 1
+    assert slides[-1]["role"] == "ending"
+    assert "tts" not in slides[0]
 
 
 def test_parse_tts_writer_response_accepts_three_blocks() -> None:
@@ -100,20 +185,19 @@ def test_format_slide_content_for_tts() -> None:
 
 
 def test_parse_scene_script_response_rejects_wrong_count() -> None:
-    payload = {"scenes": [{"title": "A", "description": "d"}]}
-    with pytest.raises(ValueError, match="exactly 3"):
+    payload = {
+        "intro": {"title": "A", "visual_concept": "hero visual"},
+        "scenes": [{"title": "A", "description": "d"}],
+        "ending": {"title": "Z", "visual_concept": "closing visual"},
+    }
+    with pytest.raises(ValueError, match=f"exactly {CONTENT_SCENE_COUNT}"):
         parse_scene_script_response(json.dumps(payload))
 
 
 def test_parse_scene_script_response_rejects_missing_field() -> None:
-    payload = {
-        "scenes": [
-            {"title": "A", "description": "d"},
-            {"title": "B", "description": "d"},
-            {"title": "C", "title": "only title"},
-        ]
-    }
-    with pytest.raises(ValueError, match="description"):
+    payload = _sample_script_payload()
+    payload["ending"] = {"title": "only title"}
+    with pytest.raises(ValueError, match="visual_concept"):
         parse_scene_script_response(json.dumps(payload))
 
 
@@ -150,21 +234,61 @@ def test_build_sentence_tokens_from_scenes_with_word_timestamps() -> None:
     assert tokens[1]["start_ms"] == 800
 
 
+def test_build_image_timeline_from_slides() -> None:
+    timeline = build_image_timeline_from_slides(_sample_slides())
+    assert len(timeline) == TOTAL_SLIDE_COUNT
+    assert timeline[1]["start_ms"] == 2500
+    assert timeline[1]["role"] == "content"
+    assert timeline[0]["transition"] == "pullIn"
+    assert timeline[1]["transition"] == "teleportShake"
+
+
+def test_assign_slide_transitions_rotation() -> None:
+    slides = _sample_slides()
+    assign_slide_transitions(slides)
+    assert slides[0]["transition"] == DEFAULT_TRANSITION_ROTATION[0]
+    assert slides[1]["transition"] == DEFAULT_TRANSITION_ROTATION[1]
+    assert slides[4]["transition"] == DEFAULT_TRANSITION_ROTATION[4 % len(DEFAULT_TRANSITION_ROTATION)]
+
+
+def test_assign_slide_transitions_respects_override() -> None:
+    slides = _sample_slides()
+    slides[1]["transition"] = "teleportShake"
+    assign_slide_transitions(slides)
+    assert slides[1]["transition"] == "teleportShake"
+    assert slides[0]["transition"] == "pullIn"
+
+
+def test_build_image_timeline_preserves_transition_override() -> None:
+    slides = _sample_slides()
+    slides[2]["transition"] = "zoomBlur"
+    timeline = build_image_timeline_from_slides(slides)
+    assert timeline[2]["transition"] == "zoomBlur"
+
+
 def test_build_image_timeline_from_scenes() -> None:
     timeline = build_image_timeline_from_scenes(_sample_scenes())
-    assert len(timeline) == 3
-    assert timeline[1]["start_ms"] == 5000
-    assert timeline[1]["scene_id"] == 2
+    assert len(timeline) == CONTENT_SCENE_COUNT
+    assert timeline[0]["start_ms"] == 0
+    assert timeline[0]["scene_id"] == 2
+
+
+def test_slide_image_filename_by_role() -> None:
+    assert slide_image_filename({"role": "intro"}) == "intro.png"
+    assert slide_image_filename({"role": "ending"}) == "ending.png"
+    assert slide_image_filename({"role": "content", "content_index": 2}) == "scene_2.png"
 
 
 def test_normalize_project_slideshow_shape() -> None:
     data = {
         "topic": "test",
+        "slides": _sample_slides(),
         "scenes": _sample_scenes(),
         "audio": {"path": "output/narration.mp3"},
     }
     project = normalize_project(data)
-    assert get_scenes(project)
+    assert get_slides(project)
+    assert len(get_scenes(project)) == CONTENT_SCENE_COUNT
     assert get_caption_mode(project) == "none"
     assert "captions" in project
 
@@ -192,6 +316,34 @@ def test_build_slide_image_prompt_includes_title() -> None:
     assert "Mô tả" in prompt
     assert "Chủ đề" in prompt
     assert "{{TITLE}}" not in prompt
+
+
+def test_build_bookend_slide_image_prompt_includes_visual_concept() -> None:
+    from core.slide_image_stage import build_bookend_slide_image_prompt
+
+    prompt = build_bookend_slide_image_prompt(
+        title="Mở đầu",
+        visual_concept="Gương đồng trong ánh sáng bình minh.",
+        topic="Nhân tướng học",
+        slide_role="intro",
+    )
+    assert "Mở đầu" in prompt
+    assert "Gương đồng" in prompt
+    assert "no description" in prompt.lower() or "No description" in prompt
+    assert "{{TITLE}}" not in prompt
+
+
+def test_build_pollinations_bookend_prompt_hero_visual() -> None:
+    from core.slide_image_stage import build_pollinations_bookend_prompt
+
+    prompt = build_pollinations_bookend_prompt(
+        title="Kết",
+        visual_concept="Stone path at sunset.",
+        topic="Topic",
+        slide_role="ending",
+    )
+    assert "Stone path" in prompt
+    assert "No description paragraph" in prompt
 
 
 def test_build_pollinations_prompt_is_background_only() -> None:
@@ -293,13 +445,7 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
     client = MagicMock()
     mock_get_client.return_value = client
 
-    scene_payload = {
-        "scenes": [
-            {"title": "A", "description": "da"},
-            {"title": "B", "description": "db"},
-            {"title": "C", "description": "dc"},
-        ]
-    }
+    scene_payload = _sample_script_payload()
     tts_payload = {
         "scenes": [
             {"tts": "ta"},
@@ -314,23 +460,25 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
 
     mock_synthesize.return_value = (
         [
-            {"scene_id": 1, "start_ms": 0, "end_ms": 1000},
-            {"scene_id": 2, "start_ms": 1000, "end_ms": 2000},
-            {"scene_id": 3, "start_ms": 2000, "end_ms": 3000},
+            {"scene_id": 2, "start_ms": 0, "end_ms": 1000},
+            {"scene_id": 3, "start_ms": 1000, "end_ms": 2000},
+            {"scene_id": 4, "start_ms": 2000, "end_ms": 3000},
         ],
         [
             {"text": "ta", "start_ms": 0, "end_ms": 500},
             {"text": "tb", "start_ms": 1000, "end_ms": 1500},
             {"text": "tc", "start_ms": 2000, "end_ms": 2500},
         ],
-        {1: [{"text": "ta", "start_ms": 0, "end_ms": 500}], 2: [], 3: []},
+        {2: [{"text": "ta", "start_ms": 0, "end_ms": 500}], 3: [], 4: []},
     )
 
     def _fake_images(project: dict, **kwargs) -> list[Path]:
         provider = kwargs.get("provider")
-        for scene in project["scenes"]:
-            scene["image"] = {
-                "path": str((tmp_path / "images" / f"scene_{scene['id']}.png").resolve()),
+        for slide in project["slides"]:
+            from core.project_schema import slide_image_filename
+
+            slide["image"] = {
+                "path": str((tmp_path / "images" / slide_image_filename(slide)).resolve()),
                 "source": provider or "pollinations",
             }
         return []
@@ -344,9 +492,13 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
     )
 
     assert result["caption_mode"] == "none"
-    assert len(result["scenes"]) == 3
-    assert result["scenes"][0]["start_ms"] == 0
-    assert len(result["video"]["images"]) == 3
+    assert len(result["slides"]) == TOTAL_SLIDE_COUNT
+    assert len(result["scenes"]) == CONTENT_SCENE_COUNT
+    assert result["slides"][0]["start_ms"] == 0
+    assert result["slides"][0]["end_ms"] == 312
+    assert result["slides"][1]["end_ms"] == 937
+    assert result["slides"][-1]["end_ms"] == 2500
+    assert len(result["video"]["images"]) == TOTAL_SLIDE_COUNT
     assert result["captions"]["tokens"] == []
     assert (tmp_path / "pipeline_payload.json").is_file()
 
@@ -363,13 +515,7 @@ def test_run_slideshow_pipeline_sentence_captions(
 ) -> None:
     client = MagicMock()
     mock_get_client.return_value = client
-    scene_payload = {
-        "scenes": [
-            {"title": "A", "description": "da"},
-            {"title": "B", "description": "db"},
-            {"title": "C", "description": "dc"},
-        ]
-    }
+    scene_payload = _sample_script_payload()
     tts_payload = {
         "scenes": [
             {"tts": "Câu một. Câu hai."},
@@ -383,9 +529,9 @@ def test_run_slideshow_pipeline_sentence_captions(
     ]
     mock_synthesize.return_value = (
         [
-            {"scene_id": 1, "start_ms": 0, "end_ms": 1000},
-            {"scene_id": 2, "start_ms": 1000, "end_ms": 2000},
-            {"scene_id": 3, "start_ms": 2000, "end_ms": 3000},
+            {"scene_id": 2, "start_ms": 0, "end_ms": 1000},
+            {"scene_id": 3, "start_ms": 1000, "end_ms": 2000},
+            {"scene_id": 4, "start_ms": 2000, "end_ms": 3000},
         ],
         [
             {"text": "Câu", "start_ms": 0, "end_ms": 100},
@@ -398,14 +544,14 @@ def test_run_slideshow_pipeline_sentence_captions(
             {"text": "bốn", "start_ms": 2100, "end_ms": 2300},
         ],
         {
-            1: [
+            2: [
                 {"text": "Câu", "start_ms": 0, "end_ms": 100},
                 {"text": "một", "start_ms": 100, "end_ms": 300},
                 {"text": "Câu", "start_ms": 400, "end_ms": 500},
                 {"text": "hai", "start_ms": 500, "end_ms": 700},
             ],
-            2: [{"text": "Câu", "start_ms": 1000, "end_ms": 1100}, {"text": "ba", "start_ms": 1100, "end_ms": 1300}],
-            3: [{"text": "Câu", "start_ms": 2000, "end_ms": 2100}, {"text": "bốn", "start_ms": 2100, "end_ms": 2300}],
+            3: [{"text": "Câu", "start_ms": 1000, "end_ms": 1100}, {"text": "ba", "start_ms": 1100, "end_ms": 1300}],
+            4: [{"text": "Câu", "start_ms": 2000, "end_ms": 2100}, {"text": "bốn", "start_ms": 2100, "end_ms": 2300}],
         },
     )
     mock_images.side_effect = lambda project, **kwargs: []

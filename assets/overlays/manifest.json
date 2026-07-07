@@ -1,0 +1,30 @@
+{
+  "fire/smoke_fire_sparks.webm": {
+    "effect": "fire",
+    "variant": "sparks",
+    "tags": ["fire", "sparks", "smoke", "energy", "intense", "danger", "power", "action", "burning"],
+    "mood": ["dramatic", "urgent", "powerful"],
+    "opacity_default": 0.4,
+    "blend_mode": "screen",
+    "duration_ms": 10000
+  },
+  "snow/snow_storm.webm": {
+    "effect": "snow",
+    "variant": "storm",
+    "tags": ["snow", "winter", "cold", "storm", "christmas", "cozy", "night"],
+    "mood": ["calm", "festive", "dramatic"],
+    "opacity_default": 0.45,
+    "blend_mode": "screen",
+    "duration_ms": 15015,
+    "playback_rate": 0.5
+  },
+  "lights/gold_particles.webm": {
+    "effect": "lights",
+    "variant": "gold",
+    "tags": ["lights", "bokeh", "gold", "particles", "magic", "warm", "celebration", "luxury"],
+    "mood": ["uplifting", "dreamy", "festive"],
+    "opacity_default": 0.42,
+    "blend_mode": "screen",
+    "duration_ms": 12567
+  }
+}

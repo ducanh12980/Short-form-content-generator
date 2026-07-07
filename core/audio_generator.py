@@ -4,14 +4,21 @@ from __future__ import annotations
 
 import asyncio
 import inspect
-import tempfile
+import json
+import os
+import time
 from pathlib import Path
 from typing import Any
 
 import edge_tts
+from edge_tts.exceptions import EdgeTTSException
 from moviepy import AudioFileClip, concatenate_audioclips
 
 from core.pipeline_log import log_step_done
+
+TTS_RETRY_ATTEMPTS = int(os.environ.get("TTS_RETRY_ATTEMPTS", "5"))
+TTS_RETRY_DELAY_SECONDS = float(os.environ.get("TTS_RETRY_DELAY_SECONDS", "5"))
+SCENE_TTS_CACHE_DIR = "scene_tts"
 
 
 def _create_communicate(text: str, voice: str) -> edge_tts.Communicate:
@@ -84,7 +91,87 @@ def synthesize_speech(
     Params: text — narration script; output_path — MP3 file path; voice — edge-tts voice name.
     Output: List of {text, start_ms, end_ms} dicts from WordBoundary events.
     """
-    return asyncio.run(_synthesize_async(text, Path(output_path), voice=voice))
+    script = text.strip()
+    if not script:
+        raise ValueError("TTS text must not be empty.")
+
+    out = Path(output_path)
+    last_exc: EdgeTTSException | None = None
+
+    for attempt in range(1, TTS_RETRY_ATTEMPTS + 1):
+        try:
+            return asyncio.run(_synthesize_async(script, out, voice=voice))
+        except EdgeTTSException as exc:
+            last_exc = exc
+            out.unlink(missing_ok=True)
+            if attempt >= TTS_RETRY_ATTEMPTS:
+                break
+            time.sleep(TTS_RETRY_DELAY_SECONDS * attempt)
+
+    assert last_exc is not None
+    raise RuntimeError(
+        f"edge-tts failed after {TTS_RETRY_ATTEMPTS} attempt(s) "
+        f"(voice={voice!r}, chars={len(script)}): {last_exc}"
+    ) from last_exc
+
+
+def _scene_cache_paths(cache_dir: Path, scene_id: int) -> tuple[Path, Path, Path]:
+    """Return (mp3, words.json, meta.json) paths for a cached scene TTS."""
+    prefix = f"scene_{scene_id}"
+    return (
+        cache_dir / f"{prefix}.mp3",
+        cache_dir / f"{prefix}.words.json",
+        cache_dir / f"{prefix}.meta.json",
+    )
+
+
+def _load_scene_cache(
+    mp3_path: Path,
+    words_path: Path,
+    meta_path: Path,
+    *,
+    tts_text: str,
+    voice: str,
+) -> list[dict[str, Any]] | None:
+    """Load cached word timestamps when mp3 + metadata match the current script."""
+    if not mp3_path.is_file() or mp3_path.stat().st_size == 0:
+        return None
+    if not words_path.is_file() or not meta_path.is_file():
+        return None
+    try:
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        words = json.loads(words_path.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return None
+    if meta.get("tts") != tts_text or meta.get("voice") != voice:
+        return None
+    if not isinstance(words, list) or not words:
+        return None
+    return words
+
+
+def _save_scene_cache(
+    words_path: Path,
+    meta_path: Path,
+    *,
+    word_ts: list[dict[str, Any]],
+    tts_text: str,
+    voice: str,
+) -> None:
+    """Persist word timestamps and script metadata beside the scene mp3."""
+    words_path.write_text(json.dumps(word_ts, ensure_ascii=False), encoding="utf-8")
+    meta_path.write_text(
+        json.dumps({"tts": tts_text, "voice": voice}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+
+def _audio_duration_ms(audio_path: Path) -> int:
+    clip = AudioFileClip(str(audio_path))
+    try:
+        return int(clip.duration * 1000)
+    finally:
+        clip.close()
 
 
 def _offset_word_timestamps(
@@ -121,57 +208,81 @@ def synthesize_scene_speech(
 
     out = Path(output_path)
     out.parent.mkdir(parents=True, exist_ok=True)
+    cache_dir = out.parent / SCENE_TTS_CACHE_DIR
+    cache_dir.mkdir(parents=True, exist_ok=True)
 
     scene_timestamps: list[dict[str, Any]] = []
     merged_words: list[dict[str, Any]] = []
     words_by_scene: dict[int, list[dict[str, Any]]] = {}
-    temp_paths: list[Path] = []
+    scene_paths: list[Path] = []
     cursor_ms = 0
     total = len(scenes)
     step = "per-scene TTS + concat"
+    completed_scene_ids: list[int] = []
 
     try:
-        with tempfile.TemporaryDirectory(prefix="scene_tts_") as tmp_dir:
-            tmp = Path(tmp_dir)
-            for index, scene in enumerate(scenes):
-                tts_text = str(scene.get("tts", "")).strip()
-                if not tts_text:
-                    raise ValueError(f"Scene {index + 1} has empty tts text.")
+        for index, scene in enumerate(scenes):
+            tts_text = str(scene.get("tts", "")).strip()
+            if not tts_text:
+                raise ValueError(f"Scene {index + 1} has empty tts text.")
 
-                scene_path = tmp / f"scene_{index + 1}.mp3"
-                word_ts = synthesize_speech(tts_text, scene_path, voice=voice)
+            scene_id = int(scene.get("id", index + 1))
+            mp3_path, words_path, meta_path = _scene_cache_paths(cache_dir, scene_id)
+            word_ts = _load_scene_cache(
+                mp3_path, words_path, meta_path, tts_text=tts_text, voice=voice
+            )
+
+            if word_ts is None:
+                try:
+                    word_ts = synthesize_speech(tts_text, mp3_path, voice=voice)
+                except RuntimeError as exc:
+                    saved = len(completed_scene_ids)
+                    hint = (
+                        f" Re-run the same pipeline command to resume from "
+                        f"{cache_dir} ({saved}/{total} scene(s) already saved)."
+                        if saved
+                        else ""
+                    )
+                    raise RuntimeError(f"TTS failed on scene {scene_id}/{total}.{hint} {exc}") from exc
                 if not word_ts:
-                    raise ValueError(f"TTS produced no word boundaries for scene {index + 1}.")
+                    raise ValueError(f"TTS produced no word boundaries for scene {scene_id}.")
+                _save_scene_cache(
+                    words_path,
+                    meta_path,
+                    word_ts=word_ts,
+                    tts_text=tts_text,
+                    voice=voice,
+                )
+                log_step_done(step, f"scene {scene_id}/{total} synthesized")
+            else:
+                log_step_done(step, f"scene {scene_id}/{total} reused cache")
 
-                clip = AudioFileClip(str(scene_path))
-                duration_ms = int(clip.duration * 1000)
+            duration_ms = _audio_duration_ms(mp3_path)
+            start_ms = cursor_ms
+            end_ms = cursor_ms + duration_ms
+            offset_words = _offset_word_timestamps(word_ts, start_ms)
+
+            scene_timestamps.append(
+                {"scene_id": scene_id, "start_ms": start_ms, "end_ms": end_ms}
+            )
+            merged_words.extend(offset_words)
+            words_by_scene[scene_id] = offset_words
+            scene_paths.append(mp3_path)
+            cursor_ms = end_ms
+            completed_scene_ids.append(scene_id)
+            log_step_done(
+                step,
+                f"scene {scene_id}/{total} ({start_ms}–{end_ms} ms)",
+            )
+
+        clips = [AudioFileClip(str(path)) for path in scene_paths]
+        try:
+            combined = concatenate_audioclips(clips)
+            combined.write_audiofile(str(out), logger=None)
+            combined.close()
+        finally:
+            for clip in clips:
                 clip.close()
-
-                scene_id = int(scene.get("id", index + 1))
-                start_ms = cursor_ms
-                end_ms = cursor_ms + duration_ms
-                offset_words = _offset_word_timestamps(word_ts, start_ms)
-
-                scene_timestamps.append(
-                    {"scene_id": scene_id, "start_ms": start_ms, "end_ms": end_ms}
-                )
-                merged_words.extend(offset_words)
-                words_by_scene[scene_id] = offset_words
-                temp_paths.append(scene_path)
-                cursor_ms = end_ms
-                log_step_done(
-                    step,
-                    f"scene {scene_id}/{total} ({start_ms}–{end_ms} ms)",
-                )
-
-            clips = [AudioFileClip(str(path)) for path in temp_paths]
-            try:
-                combined = concatenate_audioclips(clips)
-                combined.write_audiofile(str(out), logger=None)
-                combined.close()
-            finally:
-                for clip in clips:
-                    clip.close()
 
     except OSError as exc:
         raise RuntimeError(f"Failed to concatenate scene audio: {exc}") from exc

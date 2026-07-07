@@ -44,21 +44,6 @@ Hãy chủ động tạo nhịp đọc bằng dấu ba chấm ,
 
 Chỉ ngắt ở những vị trí giúp người nghe cảm thấy tự nhiên và có chiều sâu.
 
-Ví dụ:
-
-"Người xưa vẫn có câu,
-
-Muốn hiểu một con người,
-
-Đừng chỉ nhìn điều họ nói.
-
-Hãy quan sát,
-
-Cách họ sống mỗi ngày."
-
-Không lạm dụng dấu ",".
-
-Ưu tiên các câu ngắn, rõ ràng, dễ nghe.
 
 ## Độ dài
 

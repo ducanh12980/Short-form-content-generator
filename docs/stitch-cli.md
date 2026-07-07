@@ -83,6 +83,8 @@ Duration comes entirely from `--audio`. Images are split across that length:
 
 For 4 images and 34 s audio, roughly: ~5.7 s → ~11.3 s → ~11.3 s → ~5.7 s.
 
+The default **slideshow pipeline** uses the same formula in `core/slide_timing.py` (intro + content + ending slides over total narration length).
+
 Image order on the command line is the playback order.
 
 ## Audio mixing
@@ -125,7 +127,15 @@ Timestamps in the folder name avoid overwriting previous runs.
 
 ## Visual effects (default)
 
-Renders use `remotion/src/effects.tsx`:
+Renders use `remotion/src/effects.tsx` for slide motion and `remotion/src/AmbientOverlay.tsx` for optional fire overlay:
+
+| Layer | Component | Notes |
+|-------|-----------|-------|
+| Slides | `SlideshowBackground` | Ken Burns + zoom-blur transitions |
+| Ambient | `AmbientOverlay` | Optional looping fire/sparks (`video.ambient`, z-index 50, `screen` blend) |
+| Captions | `CaptionWord` / `KaraokeLine` | z-index 100 |
+
+Slide transition phases:
 
 | Phase | Effect |
 |-------|--------|
@@ -163,6 +173,8 @@ cd remotion && npm run studio
 | `core/stitch_stage.py` | Builds Remotion props, copies assets |
 | `core/remotion_render_stage.py` | Invokes Remotion CLI |
 | `remotion/src/effects.tsx` | Slide transitions and Ken Burns |
+| `remotion/src/AmbientOverlay.tsx` | Optional fire/sparks ambient layer |
+| `docs/ambient-fire-overlay.md` | Fire overlay asset + pipeline docs |
 | `orchestrator_mvp.py` | Full pipeline (script → TTS → captions → video) |
 
 ## Shell completion (optional)

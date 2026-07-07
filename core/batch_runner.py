@@ -133,7 +133,19 @@ def reset_stale_running(rows: list[dict[str, str]]) -> int:
 
 
 def collect_slideshow_image_paths(payload: dict[str, Any]) -> list[Path]:
-    """Return slide image paths in scene order for stitch."""
+    """Return slide image paths in playback order for stitch."""
+    slides = payload.get("slides")
+    if isinstance(slides, list) and slides:
+        paths: list[Path] = []
+        for slide in sorted(slides, key=lambda s: int(s.get("id", 0))):
+            if not isinstance(slide, dict):
+                continue
+            image = slide.get("image")
+            if isinstance(image, dict) and image.get("path"):
+                paths.append(Path(str(image["path"])))
+        if paths:
+            return paths
+
     scenes = payload.get("scenes", [])
     if isinstance(scenes, list) and scenes:
         paths: list[Path] = []

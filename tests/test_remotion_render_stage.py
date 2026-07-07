@@ -57,6 +57,43 @@ def test_project_to_remotion_props(tmp_path: Path) -> None:
     assert "minimalist" in props["themes"]
 
 
+def test_project_to_remotion_props_includes_transition(tmp_path: Path) -> None:
+    narration = tmp_path / "narration.mp3"
+    narration.write_bytes(b"fake")
+    img = tmp_path / "scene.png"
+    img.write_bytes(b"png")
+    payload = {
+        "topic": "test",
+        "video": {
+            "images": [
+                {
+                    "path": str(img),
+                    "start_ms": 0,
+                    "end_ms": 1000,
+                    "transition": "pullIn",
+                },
+                {
+                    "path": str(img),
+                    "start_ms": 1000,
+                    "end_ms": 2000,
+                },
+            ],
+        },
+        "audio": {"path": str(narration), "word_timestamps": []},
+        "captions": {"theme": "minimalist", "font": None, "tokens": []},
+    }
+    path = tmp_path / "pipeline_payload.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+
+    from core.project_schema import load_project
+
+    project = load_project(path)
+    props, _ = project_to_remotion_props(project)
+    assert len(props["images"]) == 2
+    assert props["images"][0]["transition"] == "pullIn"
+    assert props["images"][1]["transition"] == "teleportShake"
+
+
 def test_normalize_canvas_props_swaps_landscape() -> None:
     fixed = _normalize_canvas_props({"width": 1920, "height": 1080, "fps": 30})
     assert fixed["width"] == CANVAS_WIDTH

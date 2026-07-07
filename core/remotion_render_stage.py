@@ -15,6 +15,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from core.project_schema import (
+    get_ambient_overlay,
     get_canvas_size,
     get_caption_settings,
     get_caption_tokens,
@@ -22,6 +23,7 @@ from core.project_schema import (
     get_narration_duration_ms,
     get_narration_path,
     load_project,
+    resolve_slide_transition,
 )
 
 # Portrait 9:16 — must match remotion/src/types.ts CANVAS_WIDTH / CANVAS_HEIGHT
@@ -132,19 +134,19 @@ def _resolve_image_timeline(
         return []
 
     timeline: list[dict[str, Any]] = []
-    for image in images:
+    for index, image in enumerate(images):
         if not isinstance(image, dict) or not image.get("path"):
             continue
         resolved = Path(str(image["path"])).resolve()
-        timeline.append(
-            {
-                "src": _to_static_src(resolved, public_dir),
-                "start_ms": int(image.get("start_ms", 0)),
-                "end_ms": int(image.get("end_ms", 0)),
-                "source": image.get("source"),
-                "media_type": image.get("media_type"),
-            }
-        )
+        entry: dict[str, Any] = {
+            "src": _to_static_src(resolved, public_dir),
+            "start_ms": int(image.get("start_ms", 0)),
+            "end_ms": int(image.get("end_ms", 0)),
+            "source": image.get("source"),
+            "media_type": image.get("media_type"),
+            "transition": resolve_slide_transition(image, index),
+        }
+        timeline.append(entry)
     return timeline
 
 
@@ -196,6 +198,23 @@ def project_to_remotion_props(
                 music_path = staged
             props["musicSrc"] = _to_static_src(music_path, public_dir)
             props["musicVolume"] = music_settings["volume"]
+
+    ambient_settings = get_ambient_overlay(project)
+    if ambient_settings is not None:
+        overlay_path = ambient_settings["path"].resolve()
+        if overlay_path.is_file():
+            if not overlay_path.is_relative_to(public_dir.resolve()):
+                staged = public_dir / overlay_path.name
+                if staged.resolve() != overlay_path:
+                    shutil.copy2(overlay_path, staged)
+                overlay_path = staged
+            props["ambientOverlaySrc"] = _to_static_src(overlay_path, public_dir)
+            props["ambientOpacity"] = ambient_settings["opacity"]
+            props["ambientBlendMode"] = ambient_settings["blend_mode"]
+            props["ambientLoopDurationMs"] = ambient_settings["duration_ms"]
+            rate = float(ambient_settings.get("playback_rate", 1.0))
+            if rate > 0 and rate != 1.0:
+                props["ambientPlaybackRate"] = rate
 
     return props, public_dir
 
