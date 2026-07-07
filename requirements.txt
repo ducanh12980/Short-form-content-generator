@@ -1,5 +1,4 @@
-# Video timeline compilation, TTS, HTTP, config parsing, LLM agents
-moviepy==2.1.2
+# TTS, HTTP, config parsing, LLM agents
 edge-tts==7.2.8
 requests==2.32.3
 pyyaml==6.0.2

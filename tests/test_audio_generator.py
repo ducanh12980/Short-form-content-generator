@@ -88,12 +88,12 @@ def test_scene_cache_miss_when_tts_changes(tmp_path: Path) -> None:
     ) is None
 
 
-@patch("core.audio_generator.concatenate_audioclips")
-@patch("core.audio_generator.AudioFileClip")
+@patch("core.audio_generator._concat_audio_files")
+@patch("core.audio_generator._audio_duration_ms", return_value=1000)
 @patch("core.audio_generator.synthesize_speech")
 def test_synthesize_scene_speech_reuses_cached_scene(
     mock_synth: MagicMock,
-    mock_clip_cls: MagicMock,
+    mock_duration: MagicMock,
     mock_concat: MagicMock,
     tmp_path: Path,
 ) -> None:
@@ -110,14 +110,9 @@ def test_synthesize_scene_speech_reuses_cached_scene(
         voice="vi-VN-HoaiMyNeural",
     )
 
-    clip = MagicMock()
-    clip.duration = 1.0
-    mock_clip_cls.return_value = clip
-    combined = MagicMock()
-    mock_concat.return_value = combined
-
     scenes = [{"id": 1, "tts": "cached line"}]
     synthesize_scene_speech(scenes, out, voice="vi-VN-HoaiMyNeural")
 
     mock_synth.assert_not_called()
-    combined.write_audiofile.assert_called_once()
+    mock_duration.assert_called_once_with(mp3)
+    mock_concat.assert_called_once_with([mp3], out)

@@ -6,13 +6,15 @@ import asyncio
 import inspect
 import json
 import os
+import shutil
+import subprocess
+import tempfile
 import time
 from pathlib import Path
 from typing import Any
 
 import edge_tts
 from edge_tts.exceptions import EdgeTTSException
-from moviepy import AudioFileClip, concatenate_audioclips
 
 from core.pipeline_log import log_step_done
 
@@ -167,11 +169,61 @@ def _save_scene_cache(
 
 
 def _audio_duration_ms(audio_path: Path) -> int:
-    clip = AudioFileClip(str(audio_path))
     try:
-        return int(clip.duration * 1000)
+        from mutagen import File as MutagenFile
+    except ImportError as exc:
+        raise RuntimeError(
+            "mutagen is required. Install it with: pip install mutagen"
+        ) from exc
+
+    audio = MutagenFile(str(audio_path))
+    if audio is None or audio.info is None:
+        raise ValueError(f"Could not read audio metadata from: {audio_path}")
+    return int(audio.info.length * 1000)
+
+
+def _concat_audio_files(scene_paths: list[Path], output_path: Path) -> None:
+    """Concatenate scene MP3s into one narration track via ffmpeg."""
+    if len(scene_paths) == 1:
+        shutil.copy2(scene_paths[0], output_path)
+        return
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        suffix=".txt",
+        delete=False,
+        dir=output_path.parent,
+    ) as handle:
+        for path in scene_paths:
+            escaped = str(path.resolve()).replace("'", "'\\''")
+            handle.write(f"file '{escaped}'\n")
+        list_path = handle.name
+
+    try:
+        proc = subprocess.run(
+            [
+                "ffmpeg",
+                "-y",
+                "-f",
+                "concat",
+                "-safe",
+                "0",
+                "-i",
+                list_path,
+                "-c",
+                "copy",
+                str(output_path),
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        if proc.returncode != 0:
+            stderr = (proc.stderr or "").strip() or "unknown error"
+            raise RuntimeError(f"ffmpeg audio concat failed: {stderr}")
     finally:
-        clip.close()
+        Path(list_path).unlink(missing_ok=True)
 
 
 def _offset_word_timestamps(
@@ -275,14 +327,7 @@ def synthesize_scene_speech(
                 f"scene {scene_id}/{total} ({start_ms}–{end_ms} ms)",
             )
 
-        clips = [AudioFileClip(str(path)) for path in scene_paths]
-        try:
-            combined = concatenate_audioclips(clips)
-            combined.write_audiofile(str(out), logger=None)
-            combined.close()
-        finally:
-            for clip in clips:
-                clip.close()
+        _concat_audio_files(scene_paths, out)
 
     except OSError as exc:
         raise RuntimeError(f"Failed to concatenate scene audio: {exc}") from exc

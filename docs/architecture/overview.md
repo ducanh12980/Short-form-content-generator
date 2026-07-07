@@ -41,7 +41,7 @@ Agents implementing features should verify current platform limits before hard-c
 | **Slide images** | Gemini (`gemini-2.5-flash-image`) | `core/slide_image_stage.py` — same `OPENAI_API_KEY` as LLM |
 | **Project state** | `project.json` | ADR [0002](../adr/0002-project-file-editability.md) |
 | **Video render** | [Remotion](https://www.remotion.dev/) (`remotion/`) | ADR [0003](../adr/0003-remotion-render-and-editor.md) — captions, b-roll, export |
-| **Audio mix (interim)** | MoviePy | `acoustic_compositor.py` until Remotion/ffmpeg mix |
+| **Audio mix** | Remotion | Background music mixed in `ShortVideo` composition |
 | **Deployment** | TBD | Local Node SSR first; Lambda optional |
 
 ## Data flow (high level)
