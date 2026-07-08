@@ -38,7 +38,7 @@ Agents implementing features should verify current platform limits before hard-c
 | **Generation / orchestration** | Python | `orchestrator_mvp.py`, `core/*` |
 | **LLM** | Gemini via OpenAI-compatible SDK | ADR [0001](../adr/0001-gemini-openai-compatible-sdk.md) |
 | **TTS** | edge-tts | Word-level timestamps for caption sync; per-scene concat in slideshow mode |
-| **Slide images** | Gemini (`gemini-2.5-flash-image`) | `core/slide_image_stage.py` — same `OPENAI_API_KEY` as LLM |
+| **Slide images** | ChatGPT (`gpt-image-2`) or Pollinations (free default) | `core/slide_image_stage.py` — `OPENAI_IMAGE_API_KEY`, `OPENAI_IMAGE_PROMPT_MODE` (compact\|full), `OPENAI_IMAGE_QUALITY`; separate from Gemini text LLM |
 | **Project state** | `project.json` | ADR [0002](../adr/0002-project-file-editability.md) |
 | **Video render** | [Remotion](https://www.remotion.dev/) (`remotion/`) | ADR [0003](../adr/0003-remotion-render-and-editor.md) — captions, b-roll, export |
 | **Audio mix** | Remotion | Background music mixed in `ShortVideo` composition |

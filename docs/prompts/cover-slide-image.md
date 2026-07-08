@@ -15,9 +15,6 @@ The image is designed for short-form educational content and must instantly capt
 
 The artwork should feel like the cover of a premium documentary or a luxury philosophy book rather than a typical social media graphic.
 
-Topic context (for symbolic scene — do not render as literal text):
-{{TOPIC}}
-
 --------------------------------------------------
 ART DIRECTION
 --------------------------------------------------
@@ -152,9 +149,9 @@ The composition should naturally guide the viewer's eyes upward toward the title
 SCENE
 --------------------------------------------------
 
-Design a symbolic scene that supports the meaning of the title (see TEXT CONTENT below).
+Design a symbolic scene that supports the meaning of the title (see scene variables suffix).
 
-The scenery should creatively interpret {{TOPIC}} instead of literally illustrating it.
+The scenery should creatively interpret the video topic instead of literally illustrating it.
 
 Possible inspirations include:
 
@@ -284,22 +281,6 @@ Easy to read.
 Thought-provoking.
 
 --------------------------------------------------
-TEXT CONTENT (from Script writer — relate, do not copy verbatim)
---------------------------------------------------
-
-Use the script writer copy below as the **theme and message** for on-image typography. The text on the image must **relate to** this content — same idea, same tone — but you **may rephrase** for layout, length, or visual impact.
-
-Do not contradict the message. Do not add unrelated claims. Keep fluent natural Vietnamese.
-
-Reference title:
-
-{{TITLE}}
-
-Reference description:
-
-{{DESCRIPTION}}
-
---------------------------------------------------
 BRAND CONSISTENCY
 --------------------------------------------------
 
@@ -385,6 +366,27 @@ Premium cinematic atmosphere.
 Designed specifically for TikTok viewing on a smartphone.
 
 The final artwork should immediately make viewers stop scrolling, feel curious, and continue watching the next slide.
+```
+
+---
+
+## Scene variables suffix (block 2 — appended last for prompt caching)
+
+```
+--------------------------------------------------
+SCENE VARIABLES (apply last — relate, do not copy verbatim)
+--------------------------------------------------
+
+Use the copy below as theme and message for on-image typography. Same idea and tone; you may rephrase for layout. Fluent natural Vietnamese. Do not contradict the message.
+
+Topic context (symbolic scene — do not render as literal text):
+{{TOPIC}}
+
+Reference title for on-image typography:
+{{TITLE}}
+
+Reference description for on-image typography:
+{{DESCRIPTION}}
 ```
 
 ---

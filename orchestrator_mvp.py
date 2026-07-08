@@ -510,7 +510,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--image-provider",
-        choices=("pollinations", "gemini", "mock"),
+        choices=("pollinations", "chatgpt", "mock"),
         default=None,
         help="Slideshow image backend (default: IMAGE_PROVIDER env or pollinations)",
     )

@@ -42,6 +42,9 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T032 | ChatGPT image cost controls | 2026-07-08 | `OPENAI_IMAGE_QUALITY`, `OPENAI_IMAGE_PROMPT_MODE=compact\|full`, cache-friendly prompts, cached token logging. |
+| T031 | Replace Gemini image provider with ChatGPT | 2026-07-08 | `chatgpt` provider, `OPENAI_IMAGE_*` env; model `gpt-image-2`. Text LLM stays on Gemini. |
+| T030 | Multi-platform publish (Facebook Reels) | 2026-07-08 | `core/publish/`, `publish_runner.py`, `PUBLISH_PLATFORMS` env; ADR 0007. **Human:** Meta app + Page token secrets. |
 | T029 | Preserve output/final on default orchestrator run | 2026-07-08 | `prepare_default_run_dir` keeps `scenes_draft.json` + `scene_tts/`; `--fresh` wipes. |
 | T028 | Publish metadata via scene script writer | 2026-07-08 | `publish` block in LLM #1 + `pipeline_payload.json`; Telegram caption from payload. |
 | T027 | Telegram delivery (Phase 2) | 2026-07-08 | `core/telegram_notify.py`, workflow step, tests. **Human:** add `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` secrets. |

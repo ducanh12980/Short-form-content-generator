@@ -133,8 +133,8 @@ def test_resolve_video_caption_prefers_payload_over_jobs_csv(tmp_path: Path) -> 
     assert "#one" in caption
 
 
-@patch("core.telegram_notify.probe_video_metadata")
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.probe_video_metadata")
+@patch("core.publish.telegram.requests.post")
 def test_deliver_video_from_batch_uses_publish_caption(
     mock_post: MagicMock,
     mock_probe: MagicMock,
@@ -210,8 +210,8 @@ def test_assert_video_uploadable_rejects_large_file(tmp_path: Path) -> None:
         assert_video_uploadable(video)
 
 
-@patch("core.telegram_notify.probe_video_metadata")
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.probe_video_metadata")
+@patch("core.publish.telegram.requests.post")
 def test_send_video_posts_multipart(
     mock_post: MagicMock,
     mock_probe: MagicMock,
@@ -240,7 +240,7 @@ def test_send_video_posts_multipart(
     assert "video" in call_kwargs["files"]
 
 
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.requests.post")
 def test_send_message(mock_post: MagicMock) -> None:
     mock_post.return_value = MagicMock(
         ok=True,
@@ -255,7 +255,7 @@ def test_send_message(mock_post: MagicMock) -> None:
     assert mock_post.call_args.kwargs["data"]["text"] == "batch failed"
 
 
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.requests.post")
 def test_deliver_video_from_batch_skips_without_config(
     mock_post: MagicMock,
     tmp_path: Path,
@@ -274,7 +274,7 @@ def test_deliver_video_from_batch_skips_without_config(
     assert "skipped" in capsys.readouterr().out
 
 
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.requests.post")
 def test_deliver_message_raises_on_api_error(mock_post: MagicMock) -> None:
     mock_post.return_value = MagicMock(
         ok=False,
@@ -288,7 +288,7 @@ def test_deliver_message_raises_on_api_error(mock_post: MagicMock) -> None:
         send_message("hello", config=config)
 
 
-@patch("core.telegram_notify.requests.post")
+@patch("core.publish.telegram.requests.post")
 def test_deliver_message_skips_without_config(
     mock_post: MagicMock,
     monkeypatch: pytest.MonkeyPatch,

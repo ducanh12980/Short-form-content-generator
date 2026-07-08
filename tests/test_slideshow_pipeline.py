@@ -26,10 +26,17 @@ from core.project_schema import (
 )
 from core.prompt_loader import substitute_prompt
 from core.slide_image_stage import (
-    _extract_image_bytes,
+    COVER_SLIDE_PROMPT_COMPACT_PATH,
+    COVER_SLIDE_PROMPT_PATH,
+    _extract_openai_image_bytes,
+    _format_openai_image_usage,
+    _parse_openai_image_usage,
+    assemble_cached_image_prompt,
     build_pollinations_prompt,
     build_slide_image_prompt as stage_build_prompt,
+    get_image_prompt_static_prefix,
     resolve_image_provider,
+    resolve_openai_image_prompt_mode,
 )
 from core.slideshow_pipeline import (
     parse_publish_metadata,
@@ -344,11 +351,50 @@ def test_substitute_prompt_replaces_variables() -> None:
 
 
 def test_build_slide_image_prompt_includes_title() -> None:
-    prompt = stage_build_prompt(title="Tiêu đề", description="Mô tả", topic="Chủ đề")
+    prompt = stage_build_prompt(
+        title="Tiêu đề",
+        description="Mô tả",
+        topic="Chủ đề",
+        prompt_mode="full",
+    )
     assert "Tiêu đề" in prompt
     assert "Mô tả" in prompt
     assert "Chủ đề" in prompt
     assert "{{TITLE}}" not in prompt
+
+
+@patch.dict(os.environ, {"OPENAI_IMAGE_PROMPT_MODE": "compact"}, clear=False)
+def test_compact_prompt_shorter_than_full() -> None:
+    kwargs = {"title": "Tiêu đề", "description": "Mô tả dài.", "topic": "Chủ đề"}
+    compact = stage_build_prompt(**kwargs, prompt_mode="compact")
+    full = stage_build_prompt(**kwargs, prompt_mode="full")
+    assert len(compact) < len(full)
+    assert "Tiêu đề" in compact
+    assert "{{TITLE}}" not in compact
+
+
+def test_resolve_openai_image_prompt_mode_defaults_compact() -> None:
+    with patch.dict(os.environ, {}, clear=True):
+        assert resolve_openai_image_prompt_mode() == "compact"
+
+
+def test_cached_prompt_static_prefix_identical_for_same_template() -> None:
+    prefix_a = get_image_prompt_static_prefix(COVER_SLIDE_PROMPT_PATH)
+    prefix_b = get_image_prompt_static_prefix(COVER_SLIDE_PROMPT_COMPACT_PATH)
+    assert prefix_a
+    assert prefix_b
+    prompt_a = assemble_cached_image_prompt(
+        COVER_SLIDE_PROMPT_PATH,
+        {"TITLE": "A", "DESCRIPTION": "Desc A", "TOPIC": "Topic"},
+    )
+    prompt_b = assemble_cached_image_prompt(
+        COVER_SLIDE_PROMPT_PATH,
+        {"TITLE": "B", "DESCRIPTION": "Desc B", "TOPIC": "Topic"},
+    )
+    assert prompt_a.startswith(prefix_a)
+    assert prompt_b.startswith(prefix_a)
+    assert prefix_a == get_image_prompt_static_prefix(COVER_SLIDE_PROMPT_PATH)
+    assert prompt_a.split(prefix_a, 1)[1] != prompt_b.split(prefix_a, 1)[1]
 
 
 def test_build_bookend_slide_image_prompt_includes_visual_concept() -> None:
@@ -359,6 +405,7 @@ def test_build_bookend_slide_image_prompt_includes_visual_concept() -> None:
         visual_concept="Gương đồng trong ánh sáng bình minh.",
         topic="Nhân tướng học",
         slide_role="intro",
+        prompt_mode="full",
     )
     assert "Mở đầu" in prompt
     assert "Gương đồng" in prompt
@@ -401,44 +448,87 @@ def test_resolve_image_provider_rejects_unknown() -> None:
         resolve_image_provider("unknown")
 
 
-def test_extract_image_bytes_from_gemini_response() -> None:
+def test_extract_openai_image_bytes_from_b64_json() -> None:
     payload = {
-        "candidates": [
-            {
-                "content": {
-                    "parts": [
-                        {"inlineData": {"mimeType": "image/png", "data": "aGVsbG8="}}
-                    ]
-                }
-            }
+        "data": [
+            {"b64_json": "aGVsbG8="},
         ]
     }
-    assert _extract_image_bytes(payload) == b"hello"
+    assert _extract_openai_image_bytes(payload) == b"hello"
+
+
+def test_parse_openai_image_usage() -> None:
+    payload = {
+        "usage": {
+            "input_tokens": 1200,
+            "output_tokens": 3400,
+            "total_tokens": 4600,
+            "input_tokens_details": {
+                "text_tokens": 1200,
+                "image_tokens": 0,
+                "cached_tokens": 900,
+            },
+        }
+    }
+    assert _parse_openai_image_usage(payload) == {
+        "input_tokens": 1200,
+        "output_tokens": 3400,
+        "total_tokens": 4600,
+        "cached_tokens": 900,
+    }
+    assert (
+        _format_openai_image_usage(_parse_openai_image_usage(payload))
+        == "in=1200 (cached=900), out=3400"
+    )
+
+
+def test_parse_openai_image_usage_missing() -> None:
+    assert _parse_openai_image_usage({}) is None
+    assert _format_openai_image_usage(None) == "tokens unavailable"
 
 
 @patch("core.slide_image_stage.requests.post")
-@patch.dict(os.environ, {"OPENAI_API_KEY": "gemini-test-key"}, clear=False)
-def test_generate_slide_image_gemini_writes_file(mock_post: MagicMock, tmp_path: Path) -> None:
+@patch.dict(
+    os.environ,
+    {
+        "OPENAI_IMAGE_API_KEY": "openai-test-key",
+        "OPENAI_IMAGE_QUALITY": "medium",
+    },
+    clear=False,
+)
+def test_generate_slide_image_chatgpt_writes_file(mock_post: MagicMock, tmp_path: Path) -> None:
     from core.slide_image_stage import generate_slide_image
 
     mock_post.return_value = MagicMock(
         status_code=200,
         json=lambda: {
-            "candidates": [
-                {
-                    "content": {
-                        "parts": [
-                            {"inlineData": {"mimeType": "image/png", "data": "aGVsbG8="}}
-                        ]
-                    }
-                }
-            ]
+            "data": [
+                {"b64_json": "aGVsbG8="},
+            ],
+            "usage": {
+                "input_tokens": 500,
+                "output_tokens": 1500,
+                "total_tokens": 2000,
+            },
+            "quality": "medium",
         },
     )
     out = tmp_path / "scene_1.png"
-    generate_slide_image("prompt text", out, provider="gemini")
+    usage: list[dict[str, int]] = []
+    qualities: list[str] = []
+    generate_slide_image(
+        "prompt text",
+        out,
+        provider="chatgpt",
+        token_usage_out=usage,
+        resolved_quality_out=qualities,
+    )
     assert out.read_bytes() == b"hello"
-    assert mock_post.call_args.kwargs["headers"]["x-goog-api-key"] == "gemini-test-key"
+    assert usage == [{"input_tokens": 500, "output_tokens": 1500, "total_tokens": 2000}]
+    assert qualities == ["medium"]
+    assert mock_post.call_args.kwargs["headers"]["Authorization"] == "Bearer openai-test-key"
+    assert mock_post.call_args.kwargs["json"]["model"] == "gpt-image-2"
+    assert mock_post.call_args.kwargs["json"]["quality"] == "medium"
 
 
 @patch("core.slide_image_stage.requests.get")

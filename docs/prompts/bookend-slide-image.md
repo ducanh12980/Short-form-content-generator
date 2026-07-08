@@ -5,19 +5,16 @@ Prompt for **intro and ending** slide images. Same luxury series look as content
 - **Top:** large title typography only (same hierarchy as content slides)
 - **Lower ~55–65%:** one **striking hero visual** — no description paragraph, no body text
 
-**Inputs:** `{{TITLE}}`, `{{VISUAL_CONCEPT}}`, `{{TOPIC}}`, `{{SLIDE_ROLE}}` (`intro` or `ending`)
+**Inputs:** `{{TITLE}}`, `{{VISUAL_CONCEPT}}`, `{{TOPIC}}`, `{{SLIDE_ROLE}}` (`intro` or `ending`) — applied via suffix block (block 2) for API prefix caching.
 
 ---
 
-## Image generation prompt
+## Image generation prompt (static — block 1)
 
 ```
 Create a brand-new premium vertical illustration for a TikTok educational slideshow about Vietnamese Physiognomy (Nhân Tướng VN).
 
-This is the {{SLIDE_ROLE}} slide of the video. It has **title typography at the top only** — there is **no description text block** on this slide.
-
-Topic context (symbolism for the hero visual — do not render as literal paragraph text):
-{{TOPIC}}
+This is a bookend slide. It has **title typography at the top only** — there is **no description text block** on this slide.
 
 --------------------------------------------------
 ART DIRECTION
@@ -33,10 +30,6 @@ MOOD
 
 Wisdom, serenity, timeless East Asian philosophy, quiet confidence, traditional Vietnamese cultural identity.
 
-{{SLIDE_ROLE}} slide tone:
-- intro: hook the viewer instantly — bold, intriguing, sets the series tone
-- ending: reflective close — warm, memorable, gentle sense of completion
-
 --------------------------------------------------
 COLOR & LIGHTING
 --------------------------------------------------
@@ -51,21 +44,9 @@ Aspect ratio: 9:16
 
 **Upper ~30–35%:** reserved for **title typography only**. Clean, uncluttered. No objects overlapping the title.
 
-**Lower ~55–65%:** a **single striking hero visual** that directly illustrates the topic and visual concept below. This area should be cinematic, bold, and scroll-stopping — the main visual focus of the slide.
+**Lower ~55–65%:** a **single striking hero visual** that directly illustrates the topic and visual concept. Cinematic, bold, scroll-stopping — the main visual focus.
 
 **No description paragraph.** No subtitle block. No bullet text. No secondary body copy anywhere on the image.
-
-The hero visual must feel directly connected to {{TOPIC}} — not generic stock scenery.
-
---------------------------------------------------
-HERO VISUAL (lower area — paint this, do not write it as text)
---------------------------------------------------
-
-Visual concept from script writer:
-
-{{VISUAL_CONCEPT}}
-
-Make the scene specific, vivid, and memorable. Strong focal point. Dramatic but elegant. Symbolic elements from Vietnamese philosophy and physiognomy when relevant.
 
 --------------------------------------------------
 TITLE TYPOGRAPHY (upper area only)
@@ -73,11 +54,7 @@ TITLE TYPOGRAPHY (upper area only)
 
 Render exactly one large title — same luxury editorial style as other slides in the series:
 
-Reference title (Vietnamese — may rephrase slightly for layout):
-
-{{TITLE}}
-
-Style: very large, elegant, Vietnamese calligraphy-inspired, dark burgundy or deep brown, subtle golden rim light, centered, high contrast, excellent mobile readability.
+Very large, elegant, Vietnamese calligraphy-inspired, dark burgundy or deep brown, subtle golden rim light, centered, high contrast, excellent mobile readability.
 
 --------------------------------------------------
 NEGATIVE PROMPT
@@ -100,6 +77,29 @@ QUALITY
 --------------------------------------------------
 
 Ultra detailed. Scroll-stopping hero visual. Perfect title hierarchy. Premium cinematic atmosphere. Designed for TikTok on a smartphone.
+```
+
+---
+
+## Bookend variables suffix (block 2)
+
+```
+--------------------------------------------------
+BOOKEND VARIABLES (apply last)
+--------------------------------------------------
+
+Slide role: {{SLIDE_ROLE}}
+- intro: hook the viewer instantly — bold, intriguing, sets the series tone
+- ending: reflective close — warm, memorable, gentle sense of completion
+
+Topic context (symbolism for the hero visual — do not render as literal paragraph text):
+{{TOPIC}}
+
+Visual concept from script writer (paint in lower area — do not write as text):
+{{VISUAL_CONCEPT}}
+
+Reference title for upper typography (Vietnamese — may rephrase slightly for layout):
+{{TITLE}}
 ```
 
 ---

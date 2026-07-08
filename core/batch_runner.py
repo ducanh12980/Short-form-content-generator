@@ -12,7 +12,7 @@ from typing import Any, Iterator
 
 VALID_STATUSES = frozenset({"pending", "running", "done", "failed"})
 VALID_MODES = frozenset({"slideshow", "mvp"})
-VALID_IMAGE_PROVIDERS = frozenset({"gemini", "pollinations", "mock"})
+VALID_IMAGE_PROVIDERS = frozenset({"chatgpt", "pollinations", "mock"})
 
 REQUIRED_COLUMNS = ("id", "topic", "status")
 JOB_COLUMNS = (

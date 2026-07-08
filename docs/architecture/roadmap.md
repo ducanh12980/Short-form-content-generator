@@ -45,7 +45,7 @@ flowchart LR
 | `topic` | yes | Input to script/slideshow pipeline |
 | `status` | yes | `pending` \| `running` \| `done` \| `failed` |
 | `mode` | no | `slideshow` (default) or `mvp` |
-| `image_provider` | no | `gemini` \| `pollinations` \| `mock` |
+| `image_provider` | no | `chatgpt` \| `pollinations` \| `mock` |
 | `output_path` | no | Filled by runner on success |
 | `error` | no | Filled by runner on failure |
 | `created_at` | no | ISO timestamp |

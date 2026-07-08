@@ -26,6 +26,7 @@ Create `NNNN-short-title.md` (e.g. `0001-choose-llm-provider.md`):
 | [0004](0004-ambient-fire-overlay.md) | Ambient fire overlay via video loop + random picker | accepted |
 | [0005](0005-slide-timing-narration-based.md) | Narration-based slide timing with intro/ending bookends | accepted |
 | [0006](0006-capcut-transitions.md) | CapCut-style per-cut slide transitions | accepted |
+| [0007](0007-multi-platform-publish.md) | Multi-platform publish adapters (Facebook Reels first) | accepted |
 
 ## When to write an ADR
 

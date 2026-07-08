@@ -442,7 +442,7 @@ def build_image_timeline_from_slides(slides: list[dict[str, Any]]) -> list[dict[
                 "end_ms": int(slide.get("end_ms", 0)),
                 "scene_id": slide.get("id"),
                 "role": slide.get("role"),
-                "source": image.get("source", "gemini"),
+                "source": image.get("source", "chatgpt"),
                 "media_type": "image",
                 "transition": resolve_slide_transition(slide, index),
             }

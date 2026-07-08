@@ -25,6 +25,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Run MVP pipeline | `python orchestrator_mvp.py "your topic"` |
 | Run slideshow pipeline (default) | `python orchestrator_mvp.py "your topic"` or `--mode slideshow` |
 | Slideshow + free images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider pollinations` |
+| Slideshow + ChatGPT images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider chatgpt` — set `OPENAI_IMAGE_*` in `.env` (`PROMPT_MODE=compact\|full`, `QUALITY=auto\|low\|medium\|high`) |
 | Slideshow + mock images | `python orchestrator_mvp.py "topic" --mode slideshow --image-provider mock` |
 | Run slideshow + final MP4 | `python orchestrator_mvp.py "topic"` (no captions by default) |
 | Slideshow + sentence captions | `python orchestrator_mvp.py "topic" --caption-mode sentence` |
@@ -32,6 +33,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | **Daily CSV batch (1 video)** | `python batch_runner.py --csv jobs.csv` — see [docs/batch-demo.md](docs/batch-demo.md) |
 | **Daily batch on GitHub Actions** | `.github/workflows/daily-batch.yml` (scheduled) — see [docs/batch-demo.md](docs/batch-demo.md#github-actions-no-server) |
 | Send MP4 to Telegram | `python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv` |
+| **Publish to platforms** | `python core/publish_runner.py output/final/final.mp4 --jobs-csv jobs.csv` — set `PUBLISH_PLATFORMS=facebook,telegram` |
 | Generate slide images only | `python core/slide_image_stage.py output/final/pipeline_payload.json` |
 | Render final MP4 (Remotion) | `python core/remotion_render_stage.py output/final/pipeline_payload.json` |
 | **Stitch images + audio** | `python stitch.py --images img.jpg --audio voice.mp3` — see [docs/stitch-cli.md](docs/stitch-cli.md) |
@@ -44,7 +46,9 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Path | Purpose |
 |------|---------|
 | `remotion/` | **Main video renderer** — Remotion compositions, Studio, export |
-| `core/remotion_render_stage.py` | Python bridge: `project.json` → Remotion CLI |
+| `core/telegram_notify.py` | Telegram delivery (legacy CLI; also used for failure alerts) |
+| `core/publish_runner.py` | Multi-platform publish CLI (`PUBLISH_PLATFORMS`) |
+| `core/publish/` | Per-platform publish adapters (facebook, telegram) + shared helpers |
 | `docs/` | Human + agent documentation (architecture, workflow, ADRs) |
 | `docs/domain/content-learning-system.md` | **Core product spec** — production, optimization, knowledge loop |
 | `docs/workflow/` | Agentic workflow, task tracking, PR conventions |
