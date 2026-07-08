@@ -43,6 +43,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T025 | Remotion pin for Ubuntu 20.04 | 2026-07-08 | Branch `chore/remotion-ubuntu-2004`: Remotion 4.0.150 + React 18. Docs in `remotion/README.md`. **Human:** verify render on server (`ldd --version` → 2.31, then `npm ci` + full pipeline). |
 | T024 | Remove MoviePy dependency | 2026-07-07 | Dropped `moviepy` from requirements; deleted legacy `caption_renderer.py` + `acoustic_compositor.py`. Scene audio concat uses ffmpeg; duration via mutagen. |
 | T022 | CapCut-style per-cut transitions | 2026-07-07 | `pullIn`, `teleportShake`, `zoomBlur` in `effects.tsx`; per-slide `transition` in payload/props; rotation in `assign_slide_transitions`. ADR 0006. |
 | T021 | Narration-based slide timing + intro/ending bookends | 2026-07-07 | 5 slides (intro + 3 content + ending); visual timing via `core/slide_timing.py`; TTS on content only. ADR 0005. |

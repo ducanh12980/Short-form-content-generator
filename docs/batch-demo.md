@@ -59,6 +59,8 @@ MUSIC_DIR=assets/music   # or music/
 JOBS_CSV=jobs.csv
 ```
 
+**Old Linux servers (Ubuntu 20.04):** use branch `chore/remotion-ubuntu-2004` (pinned Remotion 4.0.150). See [remotion/README.md](../remotion/README.md). Ubuntu 22.04+ can use `main` with current Remotion.
+
 ## Daily schedule
 
 ### Linux / macOS (cron)
