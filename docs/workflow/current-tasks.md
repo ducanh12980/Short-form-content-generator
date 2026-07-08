@@ -8,7 +8,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Owner | Started | Notes |
 |----|------|-------|---------|-------|
-| — | — | — | — | — |
+| T027 | Telegram delivery (Phase 2) | agent | 2026-07-08 | `core/telegram_notify.py`, workflow step, tests. **Human:** add `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` secrets. |
 
 ## Backlog (demo milestone)
 
@@ -42,7 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
-| T026 | GitHub Actions daily batch | 2026-07-08 | `.github/workflows/daily-batch.yml`, tracked `jobs.csv`, docs in `batch-demo.md` + `AGENTS.md`. **Human:** add repo secrets, enable workflow write perms, run `workflow_dispatch` once on `main`. Telegram delivery deferred (Phase 2). |
+| T026 | GitHub Actions daily batch | 2026-07-08 | `.github/workflows/daily-batch.yml`, tracked `jobs.csv`, docs in `batch-demo.md` + `AGENTS.md`. **Human:** add repo secrets, enable workflow write perms, run `workflow_dispatch` once on `main`. |
 | T003 | CI — pytest on GitHub Actions | 2026-07-08 | Partial (was post-demo). `.github/workflows/ci.yml` on `pull_request` + `push` to `main`. No Remotion render in CI. |
 | T024 | Remove MoviePy dependency | 2026-07-07 | Dropped `moviepy` from requirements; deleted legacy `caption_renderer.py` + `acoustic_compositor.py`. Scene audio concat uses ffmpeg; duration via mutagen. |
 | T022 | CapCut-style per-cut transitions | 2026-07-07 | `pullIn`, `teleportShake`, `zoomBlur` in `effects.tsx`; per-slide `transition` in payload/props; rotation in `assign_slide_transitions`. ADR 0006. |

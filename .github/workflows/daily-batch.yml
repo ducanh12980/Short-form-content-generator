@@ -21,6 +21,8 @@ jobs:
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       IMAGE_PROVIDER: pollinations
       CAPTION_MODE: none
       JOBS_CSV: jobs.csv
@@ -74,6 +76,14 @@ jobs:
 
       - name: Run daily batch
         run: python batch_runner.py --csv jobs.csv --max-jobs 1
+
+      - name: Send video to Telegram
+        if: success()
+        run: python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv
+
+      - name: Notify Telegram on failure
+        if: failure()
+        run: python core/telegram_notify.py send-message "Daily batch failed — check GitHub Actions logs."
 
       - name: Upload rendered video
         if: always()

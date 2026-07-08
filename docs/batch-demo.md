@@ -87,6 +87,7 @@ Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — R
 2. Repo **Settings → Secrets and variables → Actions** → add:
    - `OPENAI_API_KEY` (required)
    - `OPENAI_BASE_URL` (recommended — see [`.env.example`](../.env.example))
+   - `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` (optional — sends `final.mp4` after a successful render)
 3. Ensure **Settings → Actions → General → Workflow permissions** is set to **Read and write** so the run can commit `jobs.csv`.
 
 **How it runs:**
@@ -94,6 +95,19 @@ Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — R
 - Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
 - Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
 - The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
+- When Telegram secrets are set, the workflow uploads `final.mp4` via Bot API `sendVideo` (50 MB limit). Caption is `#<job id> — <topic>` from the latest `done` row in `jobs.csv`. On failure, a plain `sendMessage` is sent instead.
+
+**Telegram (local or CI):**
+
+```bash
+# After a successful batch run (reads TELEGRAM_* from .env)
+python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv
+
+# Status message only
+python core/telegram_notify.py send-message "No pending jobs today."
+```
+
+If `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID` are unset, the CLI exits 0 and skips delivery.
 
 **First run:** trigger manually via **Run workflow** rather than waiting for the schedule, to confirm secrets and rendering work.
 

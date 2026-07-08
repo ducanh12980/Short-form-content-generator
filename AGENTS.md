@@ -31,6 +31,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
 | **Daily CSV batch (1 video)** | `python batch_runner.py --csv jobs.csv` — see [docs/batch-demo.md](docs/batch-demo.md) |
 | **Daily batch on GitHub Actions** | `.github/workflows/daily-batch.yml` (scheduled) — see [docs/batch-demo.md](docs/batch-demo.md#github-actions-no-server) |
+| Send MP4 to Telegram | `python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv` |
 | Generate slide images only | `python core/slide_image_stage.py output/final/pipeline_payload.json` |
 | Render final MP4 (Remotion) | `python core/remotion_render_stage.py output/final/pipeline_payload.json` |
 | **Stitch images + audio** | `python stitch.py --images img.jpg --audio voice.mp3` — see [docs/stitch-cli.md](docs/stitch-cli.md) |
