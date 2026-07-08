@@ -23,7 +23,6 @@ Living task board for agent and human work. Agents: update this file when starti
 | T007 | Project schema + partial re-render hooks | Tier 2 edit UI — not needed for CSV batch demo |
 | T009 | Remotion Phase B — Player preview | Editor track |
 | T010 | Remotion Phase C — Timeline editor + regen UI | Blocked on T009 |
-| T003 | Scaffold project structure and CI | GitHub Actions — post-demo |
 | — | Optimization + Knowledge systems | See [content-learning-system.md](../domain/content-learning-system.md) |
 
 ## Out of scope (removed from Phase 2)
@@ -43,6 +42,8 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T026 | GitHub Actions daily batch | 2026-07-08 | `.github/workflows/daily-batch.yml`, tracked `jobs.csv`, docs in `batch-demo.md` + `AGENTS.md`. **Human:** add repo secrets, enable workflow write perms, run `workflow_dispatch` once on `main`. Telegram delivery deferred (Phase 2). |
+| T003 | CI — pytest on GitHub Actions | 2026-07-08 | Partial (was post-demo). `.github/workflows/ci.yml` on `pull_request` + `push` to `main`. No Remotion render in CI. |
 | T024 | Remove MoviePy dependency | 2026-07-07 | Dropped `moviepy` from requirements; deleted legacy `caption_renderer.py` + `acoustic_compositor.py`. Scene audio concat uses ffmpeg; duration via mutagen. |
 | T022 | CapCut-style per-cut transitions | 2026-07-07 | `pullIn`, `teleportShake`, `zoomBlur` in `effects.tsx`; per-slide `transition` in payload/props; rotation in `assign_slide_transitions`. ADR 0006. |
 | T021 | Narration-based slide timing + intro/ending bookends | 2026-07-07 | 5 slides (intro + 3 content + ending); visual timing via `core/slide_timing.py`; TTS on content only. ADR 0005. |

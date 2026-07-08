@@ -77,6 +77,27 @@ JOBS_CSV=jobs.csv
 2. **Trigger:** Daily at your chosen time.
 3. Ensure `.env` and Remotion (`cd remotion && npm install`) are set up on the machine.
 
+### GitHub Actions (no server)
+
+Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — Remotion works without a VPS). Defined in [`.github/workflows/daily-batch.yml`](../.github/workflows/daily-batch.yml).
+
+**Setup (one-time):**
+
+1. Push `jobs.csv` and the workflow to the **default branch** (`main`) — scheduled workflows only run there.
+2. Repo **Settings → Secrets and variables → Actions** → add:
+   - `OPENAI_API_KEY` (required)
+   - `OPENAI_BASE_URL` (recommended — see [`.env.example`](../.env.example))
+3. Ensure **Settings → Actions → General → Workflow permissions** is set to **Read and write** so the run can commit `jobs.csv`.
+
+**How it runs:**
+
+- Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
+- Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
+- The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
+
+**First run:** trigger manually via **Run workflow** rather than waiting for the schedule, to confirm secrets and rendering work.
+
+
 ## Concurrency
 
 A lock file (`jobs.csv.lock`) prevents overlapping runs. If cron fires while a job is still rendering, the second invocation exits quietly (exit code 0).
