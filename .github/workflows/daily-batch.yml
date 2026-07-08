@@ -32,6 +32,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -59,6 +60,16 @@ jobs:
 
       - name: Install Remotion dependencies
         run: npm ci
+        working-directory: remotion
+
+      - name: Cache Chrome Headless Shell
+        uses: actions/cache@v6
+        with:
+          path: remotion/node_modules/.remotion
+          key: remotion-chrome-${{ runner.os }}-${{ hashFiles('remotion/package-lock.json') }}
+
+      - name: Ensure Chrome Headless Shell
+        run: npx remotion browser ensure
         working-directory: remotion
 
       - name: Run daily batch
