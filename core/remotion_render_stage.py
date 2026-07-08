@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -64,9 +65,47 @@ def _summarize_render_props(props: dict[str, Any]) -> str:
     return ", ".join(parts)
 
 
+_RENDER_PROGRESS_RE = re.compile(
+    r"^Rendered (\d+)/(\d+), time remaining: (.+)$"
+)
+
+
+def _remotion_progress_frame(line: str) -> str | None:
+    """Return rendered frame number when line is a Remotion progress update."""
+    match = _RENDER_PROGRESS_RE.match(line.strip())
+    return match.group(1) if match else None
+
+
+def _should_emit_remotion_line(
+    line: str,
+    *,
+    last_line: str | None,
+    last_progress_frame: str | None,
+) -> tuple[bool, str | None, str | None]:
+    """Drop duplicate Remotion progress lines when stdout is piped (non-TTY)."""
+    stripped = line.rstrip("\n")
+    if stripped == last_line:
+        return False, last_line, last_progress_frame
+
+    frame = _remotion_progress_frame(stripped)
+    if frame is not None and frame == last_progress_frame:
+        return False, last_line, last_progress_frame
+
+    next_progress_frame = frame if frame is not None else None
+    return True, stripped, next_progress_frame
+
+
 def _run_remotion_cli(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> None:
     """Run Remotion CLI and stream combined stdout/stderr to the terminal."""
     log_step("Remotion CLI", " ".join(cmd))
+
+    # On a real terminal, inherit stdio so Remotion can overwrite progress in place.
+    if sys.stdout.isatty():
+        returncode = subprocess.run(cmd, cwd=cwd, env=env, check=False).returncode
+        if returncode != 0:
+            raise RuntimeError(f"Remotion render failed (exit {returncode}).")
+        return
+
     proc = subprocess.Popen(
         cmd,
         cwd=cwd,
@@ -78,11 +117,19 @@ def _run_remotion_cli(cmd: list[str], *, cwd: Path, env: dict[str, str]) -> None
         errors="replace",
     )
     output_lines: list[str] = []
+    last_line: str | None = None
+    last_progress_frame: str | None = None
     assert proc.stdout is not None
     for line in proc.stdout:
-        line = line.rstrip("\n")
-        output_lines.append(line)
-        print(line, flush=True)
+        emit, last_line, last_progress_frame = _should_emit_remotion_line(
+            line,
+            last_line=last_line,
+            last_progress_frame=last_progress_frame,
+        )
+        if not emit:
+            continue
+        output_lines.append(last_line or "")
+        print(last_line, flush=True)
 
     returncode = proc.wait()
     if returncode != 0:

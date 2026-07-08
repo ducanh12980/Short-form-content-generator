@@ -13,6 +13,7 @@ from core.remotion_render_stage import (
     render_project_video,
     render_with_remotion,
     _normalize_canvas_props,
+    _should_emit_remotion_line,
 )
 
 
@@ -92,6 +93,34 @@ def test_project_to_remotion_props_includes_transition(tmp_path: Path) -> None:
     assert len(props["images"]) == 2
     assert props["images"][0]["transition"] == "pullIn"
     assert props["images"][1]["transition"] == "teleportShake"
+
+
+def test_should_emit_remotion_line_dedupes_progress() -> None:
+    progress = "Rendered 810/1349, time remaining: 1m 45s"
+    emit, last_line, last_frame = _should_emit_remotion_line(
+        progress,
+        last_line=None,
+        last_progress_frame=None,
+    )
+    assert emit is True
+    assert last_line == progress
+    assert last_frame == "810"
+
+    emit, last_line, last_frame = _should_emit_remotion_line(
+        progress,
+        last_line=last_line,
+        last_progress_frame=last_frame,
+    )
+    assert emit is False
+
+    next_progress = "Rendered 811/1349, time remaining: 1m 44s"
+    emit, last_line, last_frame = _should_emit_remotion_line(
+        next_progress,
+        last_line=last_line,
+        last_progress_frame=last_frame,
+    )
+    assert emit is True
+    assert last_frame == "811"
 
 
 def test_normalize_canvas_props_swaps_landscape() -> None:
