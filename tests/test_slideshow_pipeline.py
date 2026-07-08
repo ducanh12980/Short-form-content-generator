@@ -31,7 +31,19 @@ from core.slide_image_stage import (
     build_slide_image_prompt as stage_build_prompt,
     resolve_image_provider,
 )
-from core.slideshow_pipeline import parse_scene_script_response, run_slideshow_pipeline
+from core.slideshow_pipeline import (
+    parse_publish_metadata,
+    parse_scene_script_response,
+    run_slideshow_pipeline,
+)
+
+
+def _sample_publish() -> dict:
+    return {
+        "title": "Hiểu người qua Nhân tướng học",
+        "description": "Không phải bói toán — đây là cách nhìn người và hiểu mình sâu hơn.",
+        "hashtags": ["#NhanTuongVN", "#trietly", "#hieunguoi", "#fyp"],
+    }
 
 
 def _sample_script_payload() -> dict:
@@ -49,6 +61,7 @@ def _sample_script_payload() -> dict:
             "title": "Kết",
             "visual_concept": "Stone path at sunset fading into soft mist.",
         },
+        "publish": _sample_publish(),
     }
 
 
@@ -157,6 +170,26 @@ def test_parse_scene_script_response_accepts_intro_content_ending() -> None:
     assert slides[1]["content_index"] == 1
     assert slides[-1]["role"] == "ending"
     assert "tts" not in slides[0]
+
+
+def test_parse_publish_metadata_accepts_valid_block() -> None:
+    publish = parse_publish_metadata(_sample_script_payload())
+    assert publish["title"] == "Hiểu người qua Nhân tướng học"
+    assert "#fyp" in publish["hashtags"]
+
+
+def test_parse_publish_metadata_normalizes_hashtags_without_hash() -> None:
+    payload = _sample_script_payload()
+    payload["publish"]["hashtags"] = ["tag1", "tag2", "tag3"]
+    publish = parse_publish_metadata(payload)
+    assert publish["hashtags"] == ["#tag1", "#tag2", "#tag3"]
+
+
+def test_parse_publish_metadata_rejects_missing_block() -> None:
+    payload = _sample_script_payload()
+    del payload["publish"]
+    with pytest.raises(ValueError, match="publish"):
+        parse_publish_metadata(payload)
 
 
 def test_parse_tts_writer_response_accepts_three_blocks() -> None:
@@ -494,6 +527,7 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
     assert result["caption_mode"] == "none"
     assert len(result["slides"]) == TOTAL_SLIDE_COUNT
     assert len(result["scenes"]) == CONTENT_SCENE_COUNT
+    assert result["publish"]["title"] == _sample_publish()["title"]
     assert result["slides"][0]["start_ms"] == 0
     assert result["slides"][0]["end_ms"] == 312
     assert result["slides"][1]["end_ms"] == 937

@@ -83,6 +83,18 @@ Description:
 
 ---
 
+## Publish metadata (platform caption)
+
+Ngoài nội dung trên slide, tạo thêm khối **publish** — metadata đăng video lên TikTok/Reels/Shorts. **Không** trộn hashtag vào `description`; **không** dùng lại nguyên văn title/description trên slide.
+
+| Trường | Quy tắc |
+|--------|---------|
+| title | Tiêu đề nền tảng ngắn, gây tò mò (≤ ~80 ký tự); tiếng Việt; cùng giọng điệu series. |
+| description | 2–4 câu mô tả video cho caption nền tảng; **không** chứa hashtag; không mê tín. |
+| hashtags | Mảng 5–10 hashtag; mỗi phần tử bắt đầu bằng `#`; mix hashtag ngách (#NhanTuongVN) và hashtag rộng (#trietly, #fyp). |
+
+---
+
 ## Đầu ra
 
 Trả về **JSON hợp lệ** (không markdown, không giải thích):
@@ -94,10 +106,15 @@ Trả về **JSON hợp lệ** (không markdown, không giải thích):
     { "title": "...", "description": "..." },
     { "title": "...", "description": "..." }
   ],
-  "ending": { "title": "...", "visual_concept": "..." }
+  "ending": { "title": "...", "visual_concept": "..." },
+  "publish": {
+    "title": "...",
+    "description": "...",
+    "hashtags": ["#NhanTuongVN", "#trietly", "#hieunguoi", "#huyenhoc", "#fyp"]
+  }
 }
 
-Phải có đúng 3 phần tử trong mảng scenes.
+Phải có đúng 3 phần tử trong mảng scenes. Khối **publish** là bắt buộc.
 ```
 
 ---

@@ -49,6 +49,8 @@ from core.prompt_loader import DOCS_PROMPTS_DIR, load_fenced_prompt, substitute_
 SCENE_SCRIPT_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-script-writer.md"
 TTS_WRITER_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-tts-writer.md"
 SCENES_DRAFT_FILENAME = "scenes_draft.json"
+PUBLISH_HASHTAG_MIN = 3
+PUBLISH_HASHTAG_MAX = 12
 TTS_WRITER_USER_TEMPLATE = (
     "Dựa trên nội dung các slide dưới đây, hãy tạo script TTS cho từng slide với các yêu cầu trên:\n\n"
     "{{SLIDE_CONTENT}}"
@@ -59,18 +61,28 @@ def _scenes_draft_path(output_dir: Path) -> Path:
     return output_dir / SCENES_DRAFT_FILENAME
 
 
-def _save_scenes_draft(output_dir: Path, *, topic: str, slides: list[dict[str, Any]]) -> None:
+def _save_scenes_draft(
+    output_dir: Path,
+    *,
+    topic: str,
+    slides: list[dict[str, Any]],
+    publish: dict[str, Any],
+) -> None:
     """Persist LLM slide + TTS script so a failed TTS pass can resume without new API calls."""
     output_dir.mkdir(parents=True, exist_ok=True)
-    payload = {"topic": topic.strip(), "slides": slides}
+    payload = {"topic": topic.strip(), "slides": slides, "publish": publish}
     _scenes_draft_path(output_dir).write_text(
         json.dumps(payload, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
 
 
-def _load_scenes_draft(output_dir: Path, *, topic: str) -> list[dict[str, Any]] | None:
-    """Load cached slides when topic matches and each content slide has tts text."""
+def _load_scenes_draft(
+    output_dir: Path,
+    *,
+    topic: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
+    """Load cached slides + publish when topic matches and each content slide has tts text."""
     path = _scenes_draft_path(output_dir)
     if not path.is_file():
         return None
@@ -89,7 +101,14 @@ def _load_scenes_draft(output_dir: Path, *, topic: str) -> list[dict[str, Any]] 
     for slide in content_slides:
         if not isinstance(slide, dict) or not str(slide.get("tts", "")).strip():
             return None
-    return slides
+    publish_raw = data.get("publish")
+    if not isinstance(publish_raw, dict):
+        return None
+    try:
+        publish = parse_publish_metadata({"publish": publish_raw})
+    except ValueError:
+        return None
+    return slides, publish
 
 
 def format_slide_content_for_tts(scenes: list[dict[str, Any]]) -> str:
@@ -126,13 +145,50 @@ def _validate_bookend_slide_copy(slide: dict[str, Any], label: str) -> tuple[str
     return title.strip(), visual.strip()
 
 
-def parse_scene_script_response(content: str) -> list[dict[str, Any]]:
-    """Parse script writer JSON and return TOTAL_SLIDE_COUNT slides with roles."""
-    try:
-        parsed = json.loads(content)
-    except json.JSONDecodeError as exc:
-        raise ValueError(f"Scene script writer returned invalid JSON: {exc}") from exc
+def _normalize_hashtag(tag: str) -> str:
+    stripped = tag.strip()
+    if not stripped:
+        raise ValueError("Hashtag must not be empty.")
+    return stripped if stripped.startswith("#") else f"#{stripped}"
 
+
+def parse_publish_metadata(parsed: dict[str, Any]) -> dict[str, Any]:
+    """Parse and validate publish metadata from scene script writer JSON."""
+    publish = parsed.get("publish")
+    if not isinstance(publish, dict):
+        raise ValueError('Scene script writer JSON must include a "publish" object.')
+
+    title = publish.get("title")
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError("Publish metadata must include non-empty 'title'.")
+    description = publish.get("description")
+    if not isinstance(description, str) or not description.strip():
+        raise ValueError("Publish metadata must include non-empty 'description'.")
+
+    raw_hashtags = publish.get("hashtags")
+    if not isinstance(raw_hashtags, list):
+        raise ValueError('Publish metadata must include a "hashtags" array.')
+    if not PUBLISH_HASHTAG_MIN <= len(raw_hashtags) <= PUBLISH_HASHTAG_MAX:
+        raise ValueError(
+            f"Publish metadata must include {PUBLISH_HASHTAG_MIN}–{PUBLISH_HASHTAG_MAX} hashtags; "
+            f"got {len(raw_hashtags)}."
+        )
+
+    hashtags: list[str] = []
+    for index, tag in enumerate(raw_hashtags):
+        if not isinstance(tag, str):
+            raise ValueError(f"Hashtag {index + 1} must be a string.")
+        hashtags.append(_normalize_hashtag(tag))
+
+    return {
+        "title": title.strip(),
+        "description": description.strip(),
+        "hashtags": hashtags,
+    }
+
+
+def parse_scene_script_response_from_parsed(parsed: dict[str, Any]) -> list[dict[str, Any]]:
+    """Parse script writer JSON object and return TOTAL_SLIDE_COUNT slides with roles."""
     if not isinstance(parsed, dict):
         raise ValueError("Scene script writer JSON must be an object.")
 
@@ -190,6 +246,16 @@ def parse_scene_script_response(content: str) -> list[dict[str, Any]]:
     return slides
 
 
+def parse_scene_script_response(content: str) -> list[dict[str, Any]]:
+    """Parse script writer JSON and return TOTAL_SLIDE_COUNT slides with roles."""
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Scene script writer returned invalid JSON: {exc}") from exc
+
+    return parse_scene_script_response_from_parsed(parsed)
+
+
 def parse_tts_writer_response(content: str) -> list[str]:
     """Parse TTS writer JSON and return exactly CONTENT_SCENE_COUNT tts strings."""
     try:
@@ -243,8 +309,11 @@ def _apply_tts_timestamps(
         slide["end_ms"] = int(timing["end_ms"])
 
 
-def run_scene_script_writer(client: OpenAI, topic_prompt: str) -> list[dict[str, Any]]:
-    """Generate intro + content + ending slideshow script from a topic via LLM."""
+def run_scene_script_writer(
+    client: OpenAI,
+    topic_prompt: str,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Generate intro + content + ending slideshow script and publish metadata from a topic."""
     topic = topic_prompt.strip()
     if not topic:
         raise ValueError("topic_prompt must not be empty.")
@@ -268,7 +337,14 @@ def run_scene_script_writer(client: OpenAI, topic_prompt: str) -> list[dict[str,
     if not content:
         raise PipelineError("Scene script writer returned an empty response.")
 
-    return parse_scene_script_response(content)
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Scene script writer returned invalid JSON: {exc}") from exc
+
+    slides = parse_scene_script_response_from_parsed(parsed)
+    publish = parse_publish_metadata(parsed)
+    return slides, publish
 
 
 def run_tts_writer(client: OpenAI, content_slides: list[dict[str, Any]]) -> list[str]:
@@ -358,16 +434,16 @@ def run_slideshow_pipeline(
     voice = _tts_voice_from_env()
     topic = topic_prompt.strip()
 
-    cached_slides = _load_scenes_draft(out, topic=topic)
-    if cached_slides is not None:
-        slides = cached_slides
+    cached_draft = _load_scenes_draft(out, topic=topic)
+    if cached_draft is not None:
+        slides, publish = cached_draft
         log_step_done(
             "scene script writer (LLM, Gemini)",
             f"resumed from {SCENES_DRAFT_FILENAME}",
         )
         log_step_done("TTS script writer (LLM)", f"resumed from {SCENES_DRAFT_FILENAME}")
     else:
-        slides = run_scene_script_writer(client, topic)
+        slides, publish = run_scene_script_writer(client, topic)
 
         step_script = "scene script writer (LLM, Gemini)"
         for slide in slides:
@@ -377,6 +453,10 @@ def run_slideshow_pipeline(
                 f"{role} slide {slide['id']}/{TOTAL_SLIDE_COUNT}: \"{slide['title']}\"",
             )
         log_step_done(step_script, f"complete ({TOTAL_SLIDE_COUNT} slides)")
+        log_step_done(
+            "publish metadata (LLM)",
+            f"\"{publish['title']}\" ({len(publish['hashtags'])} hashtags)",
+        )
 
         content_slides = get_content_slides(slides)
         tts_blocks = run_tts_writer(client, content_slides)
@@ -385,7 +465,7 @@ def run_slideshow_pipeline(
             "TTS script writer (LLM)",
             f"complete ({CONTENT_SCENE_COUNT} narration blocks)",
         )
-        _save_scenes_draft(out, topic=topic, slides=slides)
+        _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
 
     content_slides = get_content_slides(slides)
     narration_path = out / "narration.mp3"
@@ -474,6 +554,7 @@ def run_slideshow_pipeline(
         "topic": topic_prompt.strip(),
         "caption_mode": caption_mode,
         "image_provider": resolved_provider,
+        "publish": publish,
         "slides": slides,
         "scenes": content_scenes,
         "captions": {

@@ -95,13 +95,14 @@ Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — R
 - Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
 - Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
 - The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
-- When Telegram secrets are set, the workflow uploads `final.mp4` via Bot API `sendVideo` (50 MB limit). Caption is `#<job id> — <topic>` from the latest `done` row in `jobs.csv`. On failure, a plain `sendMessage` is sent instead.
+- When Telegram secrets are set, the workflow uploads `final.mp4` via Bot API `sendVideo` (50 MB limit). Caption prefers `publish` metadata from `output/final/pipeline_payload.json` (title, description, hashtags); falls back to `#<job id> — <topic>` from `jobs.csv`. On failure, a plain `sendMessage` is sent instead.
 
 **Telegram (local or CI):**
 
 ```bash
 # After a successful batch run (reads TELEGRAM_* from .env)
 python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv
+# Caption: pipeline_payload.json publish block when present, else jobs.csv topic
 
 # Status message only
 python core/telegram_notify.py send-message "No pending jobs today."

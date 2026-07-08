@@ -297,6 +297,31 @@ def get_topic(project: dict[str, Any]) -> str:
     return topic.strip() if isinstance(topic, str) else ""
 
 
+def get_publish_metadata(project: dict[str, Any]) -> dict[str, Any] | None:
+    """Return platform publish metadata when present and well-formed."""
+    publish = project.get("publish")
+    if not isinstance(publish, dict):
+        return None
+
+    title = publish.get("title")
+    description = publish.get("description")
+    hashtags = publish.get("hashtags")
+    if not isinstance(title, str) or not title.strip():
+        return None
+    if not isinstance(description, str) or not description.strip():
+        return None
+    if not isinstance(hashtags, list) or not hashtags:
+        return None
+    if not all(isinstance(tag, str) and tag.strip() for tag in hashtags):
+        return None
+
+    return {
+        "title": title.strip(),
+        "description": description.strip(),
+        "hashtags": [tag.strip() for tag in hashtags],
+    }
+
+
 def get_images_dir(project: dict[str, Any]) -> Path:
     """Resolve the directory for downloaded background image files.
 

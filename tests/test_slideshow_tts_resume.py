@@ -12,6 +12,14 @@ from core.slideshow_pipeline import (
 )
 
 
+def _sample_publish() -> dict:
+    return {
+        "title": "Hiểu người qua Nhân tướng học",
+        "description": "Không phải bói toán — đây là cách nhìn người và hiểu mình sâu hơn.",
+        "hashtags": ["#NhanTuongVN", "#trietly", "#hieunguoi", "#fyp"],
+    }
+
+
 def _sample_slides_with_tts() -> list[dict]:
     return [
         {"id": 1, "role": "intro", "title": "Intro", "visual_concept": "dawn scene"},
@@ -24,16 +32,31 @@ def _sample_slides_with_tts() -> list[dict]:
 
 def test_save_and_load_scenes_draft(tmp_path: Path) -> None:
     slides = _sample_slides_with_tts()
-    _save_scenes_draft(tmp_path, topic="topic", slides=slides)
+    publish = _sample_publish()
+    _save_scenes_draft(tmp_path, topic="topic", slides=slides, publish=publish)
     loaded = _load_scenes_draft(tmp_path, topic="topic")
     assert loaded is not None
-    assert loaded[1]["tts"] == "ta"
+    loaded_slides, loaded_publish = loaded
+    assert loaded_slides[1]["tts"] == "ta"
+    assert loaded_publish["title"] == publish["title"]
 
 
 def test_load_scenes_draft_rejects_topic_mismatch(tmp_path: Path) -> None:
     slides = _sample_slides_with_tts()
-    _save_scenes_draft(tmp_path, topic="topic-a", slides=slides)
+    _save_scenes_draft(tmp_path, topic="topic-a", slides=slides, publish=_sample_publish())
     assert _load_scenes_draft(tmp_path, topic="topic-b") is None
+
+
+def test_load_scenes_draft_rejects_missing_publish(tmp_path: Path) -> None:
+    import json
+
+    slides = _sample_slides_with_tts()
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    (tmp_path / SCENES_DRAFT_FILENAME).write_text(
+        json.dumps({"topic": "topic", "slides": slides}, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    assert _load_scenes_draft(tmp_path, topic="topic") is None
 
 
 @patch("core.slideshow_pipeline.run_scene_script_writer")
@@ -52,7 +75,7 @@ def test_run_slideshow_pipeline_resumes_scenes_draft(
     from core.slideshow_pipeline import run_slideshow_pipeline
 
     slides = _sample_slides_with_tts()
-    _save_scenes_draft(tmp_path, topic="resume topic", slides=slides)
+    _save_scenes_draft(tmp_path, topic="resume topic", slides=slides, publish=_sample_publish())
     mock_tts.return_value = (
         [
             {"scene_id": 2, "start_ms": 0, "end_ms": 1000},

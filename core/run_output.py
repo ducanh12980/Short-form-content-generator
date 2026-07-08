@@ -50,8 +50,13 @@ def resolve_final_output_dir() -> Path:
 
 
 def prepare_default_run_dir() -> Path:
-    """Clear and return the default run folder (``output/final``)."""
-    return reset_run_dir(resolve_final_output_dir())
+    """Create the default run folder (``output/final``) without deleting existing artifacts.
+
+    Preserves ``scenes_draft.json`` and ``scene_tts/`` so slideshow TTS can resume
+    after edge-tts failures. Use ``reset_run_dir`` (or orchestrator ``--fresh``) for
+    a clean slate.
+    """
+    return ensure_run_dir(resolve_final_output_dir())
 
 
 def resolve_generation_output_dir(explicit: str | Path | None = None) -> Path:

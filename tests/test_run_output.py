@@ -57,14 +57,16 @@ def test_reset_run_dir_clears_existing(tmp_path: Path) -> None:
     assert not stale.exists()
 
 
-def test_prepare_default_run_dir_clears_final(monkeypatch, tmp_path: Path) -> None:
+def test_prepare_default_run_dir_preserves_existing(monkeypatch, tmp_path: Path) -> None:
     monkeypatch.setenv("OUTPUT_DIR", str(tmp_path))
     final_dir = tmp_path / FINAL_RUN_DIR_NAME
     final_dir.mkdir()
-    (final_dir / "old.mp4").write_text("old", encoding="utf-8")
+    stale = final_dir / "scenes_draft.json"
+    stale.write_text("{}", encoding="utf-8")
 
     prepared = prepare_default_run_dir()
 
     assert prepared == final_dir.resolve()
     assert prepared.is_dir()
-    assert not (prepared / "old.mp4").exists()
+    assert stale.exists()
+    assert stale.read_text(encoding="utf-8") == "{}"
