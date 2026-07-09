@@ -26,7 +26,12 @@ jobs:
       PUBLISH_PLATFORMS: ${{ secrets.PUBLISH_PLATFORMS }}
       FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
       FACEBOOK_ACCESS_TOKEN: ${{ secrets.FACEBOOK_ACCESS_TOKEN }}
-      IMAGE_PROVIDER: pollinations
+      IMAGE_PROVIDER: chatgpt
+      OPENAI_IMAGE_API_KEY: ${{ secrets.OPENAI_IMAGE_API_KEY }}
+      OPENAI_IMAGE_MODEL: gpt-image-2
+      OPENAI_IMAGE_SIZE: 864x1536
+      OPENAI_IMAGE_QUALITY: low
+      OPENAI_IMAGE_PROMPT_MODE: compact
       CAPTION_MODE: none
       JOBS_CSV: jobs.csv
     steps:

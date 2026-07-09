@@ -42,6 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T033 | GHA ChatGPT image quality/size | 2026-07-09 | `daily-batch.yml`: `IMAGE_PROVIDER=chatgpt`, `OPENAI_IMAGE_SIZE=896x1600`, `OPENAI_IMAGE_QUALITY=low`; pending `jobs.csv` rows → `chatgpt`; docs updated. **Human:** add `OPENAI_IMAGE_API_KEY` secret, push, run workflow. |
 | T032 | ChatGPT image cost controls | 2026-07-08 | `OPENAI_IMAGE_QUALITY`, `OPENAI_IMAGE_PROMPT_MODE=compact\|full`, cache-friendly prompts, cached token logging. |
 | T031 | Replace Gemini image provider with ChatGPT | 2026-07-08 | `chatgpt` provider, `OPENAI_IMAGE_*` env; model `gpt-image-2`. Text LLM stays on Gemini. |
 | T030 | Multi-platform publish (Facebook Reels) | 2026-07-08 | `core/publish/`, `publish_runner.py`, `PUBLISH_PLATFORMS` env; ADR 0007. **Human:** Meta app + Page token secrets. |

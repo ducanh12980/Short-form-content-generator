@@ -94,12 +94,23 @@ Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — R
 
 1. Push `jobs.csv` and the workflow to the **default branch** (`main`) — scheduled workflows only run there.
 2. Repo **Settings → Secrets and variables → Actions** → add:
-   - `OPENAI_API_KEY` (required)
+   - `OPENAI_API_KEY` (required — Gemini text LLM for scripts/TTS writer)
    - `OPENAI_BASE_URL` (recommended — see [`.env.example`](../.env.example))
+   - `OPENAI_IMAGE_API_KEY` (required — ChatGPT slide images; separate from `OPENAI_API_KEY`)
    - `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` (optional — failure alerts via `send-message`; also used when `PUBLISH_PLATFORMS` includes `telegram`)
    - `PUBLISH_PLATFORMS` (optional — comma-separated: `facebook`, `telegram`)
    - `FACEBOOK_PAGE_ID` + `FACEBOOK_ACCESS_TOKEN` (optional — required when `facebook` is in `PUBLISH_PLATFORMS`)
 3. Ensure **Settings → Actions → General → Workflow permissions** is set to **Read and write** so the run can commit `jobs.csv`.
+
+**Image quality and size (workflow `env`, not secrets):** The daily workflow sets `IMAGE_PROVIDER=chatgpt` with defaults in [`.github/workflows/daily-batch.yml`](../.github/workflows/daily-batch.yml):
+
+| Variable | Workflow default | Valid values |
+|----------|------------------|--------------|
+| `OPENAI_IMAGE_SIZE` | `896x1600` | `WxH` portrait; both edges divisible by 16 (e.g. `1152x2048` for higher resolution) |
+| `OPENAI_IMAGE_QUALITY` | `low` | `auto`, `low`, `medium`, `high` |
+| `OPENAI_IMAGE_PROMPT_MODE` | `compact` | `compact`, `full` |
+
+Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IMAGE_SIZE`, `OPENAI_IMAGE_QUALITY`) and reference them in `env:` if you prefer not to commit tuning values.
 
 **How it runs:**
 
