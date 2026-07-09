@@ -303,7 +303,21 @@ def test_assign_slide_transitions_rotation() -> None:
     assign_slide_transitions(slides)
     assert slides[0]["transition"] == DEFAULT_TRANSITION_ROTATION[0]
     assert slides[1]["transition"] == DEFAULT_TRANSITION_ROTATION[1]
+    assert slides[2]["transition"] == "whipPan"
     assert slides[4]["transition"] == DEFAULT_TRANSITION_ROTATION[4 % len(DEFAULT_TRANSITION_ROTATION)]
+
+
+def test_assign_slide_transitions_whip_pan_at_index_two() -> None:
+    slides = _sample_slides()
+    assign_slide_transitions(slides)
+    assert slides[2]["transition"] == "whipPan"
+
+
+def test_build_image_timeline_preserves_whip_pan_override() -> None:
+    slides = _sample_slides()
+    slides[1]["transition"] = "whipPan"
+    timeline = build_image_timeline_from_slides(slides)
+    assert timeline[1]["transition"] == "whipPan"
 
 
 def test_assign_slide_transitions_respects_override() -> None:

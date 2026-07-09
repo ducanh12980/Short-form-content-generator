@@ -16,6 +16,8 @@ from core.publish.common import (
     format_job_caption,
     load_publish_from_payload,
     resolve_publish_metadata,
+    resolve_upload_filename,
+    sanitize_upload_filename,
 )
 
 
@@ -139,3 +141,16 @@ def test_probe_video_metadata_parses_ffprobe(
     assert metadata.width == 1080
     assert metadata.height == 1920
     assert metadata.duration_sec == 46
+
+
+def test_sanitize_upload_filename_strips_invalid_chars() -> None:
+    assert sanitize_upload_filename('Topic: "bad" / name') == "Topic_ _bad_ _ name.mp4"
+
+
+def test_resolve_upload_filename_from_payload(tmp_path: Path) -> None:
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"mp4")
+    payload_path = tmp_path / "pipeline_payload.json"
+    payload_path.write_text('{"topic": "Uống nước đúng"}', encoding="utf-8")
+
+    assert resolve_upload_filename(video, payload_path=payload_path) == "Uống nước đúng.mp4"

@@ -48,7 +48,10 @@ def main() -> None:
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    video_parser = subparsers.add_parser("send-video", help="Upload an MP4 with sendVideo")
+    video_parser = subparsers.add_parser(
+        "send-video",
+        help="Upload to Google Drive and send the link via Telegram",
+    )
     video_parser.add_argument("video", help="Path to final.mp4")
     video_parser.add_argument(
         "--jobs-csv",

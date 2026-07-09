@@ -4,6 +4,7 @@
  * Per-cut transitions (CapCut-style):
  *   • pullIn — dolly zoom in + blur at impact
  *   • teleportShake — shake → white-out → recovery shake to center
+ *   • whipPan — shake → ease-in-out horizontal whip + post-cut shake
  *   • zoomBlur — slow zoom-out + mirror grid + blur
  *
  * Sections:
@@ -34,6 +35,7 @@ export type { SlideTransitionType };
 export const DEFAULT_TRANSITION_ROTATION: SlideTransitionType[] = [
   "pullIn",
   "teleportShake",
+  "whipPan",
   "zoomBlur",
 ];
 
@@ -49,7 +51,7 @@ export const SHARP_ZOOM_OUT_FRAMES = 12;
 export const FAST_ZOOM_IN_FRAMES = 15;
 
 /** Scale at end of Ken Burns / start of zoom out. */
-export const HOLD_SCALE_END = 1.08;
+export const HOLD_SCALE_END = 1.15;
 
 /** Deepest scale at end of zoom-out (zoomBlur). */
 export const SHARP_ZOOM_OUT_END = 0.55;
@@ -65,12 +67,19 @@ export const ZOOM_BLUR_START_SCALE = 0.85;
 /** Enable mirror grid this many seconds before zoomBlur zoom-out starts. */
 export const MIRROR_PRELOAD_SEC = 0.1;
 
-/** teleportShake phase lengths (frames) — 50% longer than base. */
-export const SHAKE_EXIT_FRAMES = 9;
+/** Shared shake phase lengths (frames) — +30% vs original base. */
+export const SHAKE_EXIT_FRAMES = 12;
 export const FLASH_FRAMES = 6;
-export const SHAKE_ENTER_FRAMES = 12;
+export const SHAKE_ENTER_FRAMES = 16;
 
-export const SHAKE_AMPLITUDE_PCT = 2.5;
+export const SHAKE_AMPLITUDE_PCT = 3.75;
+
+/** whipPan pan phase lengths (frames). */
+export const WHIP_EXIT_FRAMES = 10;
+export const WHIP_ENTER_FRAMES = 10;
+export const WHIP_DISTANCE_PCT = 110;
+export const WHIP_BLUR_MAX_PX = 22;
+export const WHIP_SCALE_END = 1.05;
 export const SHAKE_CYCLES = 2.5;
 export const TELEPORT_ZOOM_PUNCH = 1.08;
 export const WHITE_FLASH_MAX = 0.9;
@@ -80,6 +89,10 @@ export const getMirrorPreloadFrames = (fps: number): number =>
 
 const easeIn = Easing.in(Easing.cubic);
 const easeOut = Easing.out(Easing.cubic);
+const easeInOut = Easing.inOut(Easing.cubic);
+
+const endsAtCut = (type: SlideTransitionType): boolean =>
+  type === "teleportShake" || type === "whipPan";
 
 export const resolveSlideTransition = (
   slide: { transition?: SlideTransitionType },
@@ -96,6 +109,9 @@ export const getExitZoomOutFrames = (fps: number): number =>
 export const getTransitionDuration = (type: SlideTransitionType = DEFAULT_TRANSITION): number => {
   if (type === "teleportShake") {
     return SHAKE_EXIT_FRAMES + FLASH_FRAMES + SHAKE_ENTER_FRAMES;
+  }
+  if (type === "whipPan") {
+    return SHAKE_EXIT_FRAMES + WHIP_EXIT_FRAMES + WHIP_ENTER_FRAMES + SHAKE_ENTER_FRAMES;
   }
   return SHARP_ZOOM_OUT_FRAMES + FAST_ZOOM_IN_FRAMES;
 };
@@ -292,6 +308,86 @@ export const getWhiteFlashOpacity = (
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
+// whipPan TRANSFORMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const getWhipDirection = (cutIndex: number): 1 | -1 =>
+  cutIndex % 2 === 0 ? 1 : -1;
+
+export const getWhipPanBlurForProgress = (progress: number): number => {
+  const p = Math.max(0, Math.min(1, progress));
+  return interpolate(Math.sin(p * Math.PI), [0, 1], [0, WHIP_BLUR_MAX_PX], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+};
+
+export const getWhipPanShakeExitTransform = (
+  progress: number,
+  startScale: number,
+): TransitionTransform => {
+  const shake = getShakeOffset(progress, SHAKE_AMPLITUDE_PCT, "exit");
+  return {
+    scale: startScale,
+    ...shake,
+    opacity: 1,
+    blurPx: 0,
+    useMirror: false,
+  };
+};
+
+export const getWhipPanShakeEnterTransform = (
+  progress: number,
+  exitEndShake = getShakeOffsetAtExitEnd(),
+): TransitionTransform => {
+  const shake = getShakeOffset(progress, SHAKE_AMPLITUDE_PCT, "enter", exitEndShake);
+  return {
+    scale: 1,
+    ...shake,
+    opacity: 1,
+    blurPx: 0,
+    useMirror: false,
+  };
+};
+
+export const getWhipPanOutTransform = (
+  progress: number,
+  startScale: number,
+  direction: 1 | -1,
+): TransitionTransform => {
+  const p = Math.max(0, Math.min(1, progress));
+  const t = easeInOut(p);
+  const translateX = interpolate(t, [0, 1], [0, -direction * WHIP_DISTANCE_PCT]);
+  const scale = interpolate(t, [0, 1], [startScale, WHIP_SCALE_END]);
+  return {
+    scale,
+    translateXPercent: translateX,
+    translateYPercent: 0,
+    opacity: 1,
+    blurPx: getWhipPanBlurForProgress(p),
+    useMirror: false,
+  };
+};
+
+export const getWhipPanInTransform = (
+  progress: number,
+  direction: 1 | -1,
+): TransitionTransform => {
+  const p = Math.max(0, Math.min(1, progress));
+  const t = easeInOut(p);
+  const translateX = interpolate(t, [0, 1], [direction * WHIP_DISTANCE_PCT, 0]);
+  const scale = interpolate(t, [0, 1], [WHIP_SCALE_END, 1]);
+  return {
+    scale,
+    translateXPercent: translateX,
+    translateYPercent: 0,
+    opacity: 1,
+    blurPx: getWhipPanBlurForProgress(1 - p),
+    useMirror: false,
+  };
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 2. AMBIENT MOTION (Ken Burns)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -472,8 +568,10 @@ const computeSlideStyle = (
 
   let enterStart = slide.startFrame;
   let enterEnd = slide.startFrame;
+  let enterWhipEnd = slide.startFrame;
   let exitStart = cutFrame;
   let exitEnd = cutFrame;
+  let exitWhipStart = cutFrame;
   let holdStart = slide.startFrame;
   let holdEnd = cutFrame;
 
@@ -481,6 +579,11 @@ const computeSlideStyle = (
     if (enterType === "teleportShake") {
       enterStart = slide.startFrame;
       enterEnd = slide.startFrame + SHAKE_ENTER_FRAMES;
+      holdStart = enterEnd;
+    } else if (enterType === "whipPan") {
+      enterStart = slide.startFrame;
+      enterWhipEnd = slide.startFrame + WHIP_ENTER_FRAMES;
+      enterEnd = enterWhipEnd + SHAKE_ENTER_FRAMES;
       holdStart = enterEnd;
     } else {
       enterStart = slide.startFrame + SHARP_ZOOM_OUT_FRAMES;
@@ -492,6 +595,11 @@ const computeSlideStyle = (
   if (hasExit && exitType) {
     if (exitType === "teleportShake") {
       exitStart = cutFrame - SHAKE_EXIT_FRAMES;
+      exitEnd = cutFrame;
+      holdEnd = exitStart;
+    } else if (exitType === "whipPan") {
+      exitWhipStart = cutFrame - WHIP_EXIT_FRAMES;
+      exitStart = exitWhipStart - SHAKE_EXIT_FRAMES;
       exitEnd = cutFrame;
       holdEnd = exitStart;
     } else if (exitType === "zoomBlur") {
@@ -509,7 +617,7 @@ const computeSlideStyle = (
 
   const showStart = hasEnter ? enterStart : slide.startFrame;
   let showEnd = hasExit ? exitEnd : endFrame;
-  if (hasExit && exitType === "teleportShake") {
+  if (hasExit && exitType && endsAtCut(exitType)) {
     showEnd = cutFrame;
   }
 
@@ -522,35 +630,60 @@ const computeSlideStyle = (
   const holdDuration = Math.max(1, holdEnd - holdStart);
 
   if (hasEnter && enterType && frame < enterEnd) {
-    const progress = (frame - enterStart) / Math.max(1, enterEnd - enterStart);
-    switch (enterType) {
-      case "pullIn":
-        transition = getPullInEnterTransform(progress);
-        break;
-      case "teleportShake":
-        transition = getTeleportShakeEnterTransform(progress, exitEndShake);
-        break;
-      case "zoomBlur":
-        transition = getFastZoomInTransform(progress);
-        break;
+    if (enterType === "whipPan" && frame < enterWhipEnd) {
+      const progress = (frame - enterStart) / Math.max(1, enterWhipEnd - enterStart);
+      const cutIndex = index - 1;
+      transition = getWhipPanInTransform(progress, getWhipDirection(cutIndex));
+    } else if (enterType === "whipPan") {
+      const progress = (frame - enterWhipEnd) / Math.max(1, enterEnd - enterWhipEnd);
+      transition = getWhipPanShakeEnterTransform(progress, exitEndShake);
+    } else {
+      const progress = (frame - enterStart) / Math.max(1, enterEnd - enterStart);
+      switch (enterType) {
+        case "pullIn":
+          transition = getPullInEnterTransform(progress);
+          break;
+        case "teleportShake":
+          transition = getTeleportShakeEnterTransform(progress, exitEndShake);
+          break;
+        case "zoomBlur":
+          transition = getFastZoomInTransform(progress);
+          break;
+      }
     }
     inTransition = true;
   } else if (hasExit && exitType && frame >= exitStart && frame < exitEnd) {
-    const progress = (frame - exitStart) / Math.max(1, exitEnd - exitStart);
-    const startScale = getKenBurnsScale(
-      Math.max(0, exitStart - holdStart),
-      holdDuration,
-    );
-    switch (exitType) {
-      case "pullIn":
-        transition = getPullInExitTransform(progress, startScale);
-        break;
-      case "teleportShake":
-        transition = getTeleportShakeExitTransform(progress, startScale);
-        break;
-      case "zoomBlur":
-        transition = getUnifiedZoomOutTransform(progress, startScale);
-        break;
+    if (exitType === "whipPan" && frame < exitWhipStart) {
+      const progress = (frame - exitStart) / Math.max(1, exitWhipStart - exitStart);
+      const whipStartScale = getKenBurnsScale(
+        Math.max(0, exitWhipStart - holdStart),
+        holdDuration,
+      );
+      transition = getWhipPanShakeExitTransform(progress, whipStartScale);
+    } else if (exitType === "whipPan") {
+      const progress = (frame - exitWhipStart) / Math.max(1, exitEnd - exitWhipStart);
+      const whipStartScale = getKenBurnsScale(
+        Math.max(0, exitWhipStart - holdStart),
+        holdDuration,
+      );
+      transition = getWhipPanOutTransform(progress, whipStartScale, getWhipDirection(index));
+    } else {
+      const progress = (frame - exitStart) / Math.max(1, exitEnd - exitStart);
+      const startScale = getKenBurnsScale(
+        Math.max(0, exitStart - holdStart),
+        holdDuration,
+      );
+      switch (exitType) {
+        case "pullIn":
+          transition = getPullInExitTransform(progress, startScale);
+          break;
+        case "teleportShake":
+          transition = getTeleportShakeExitTransform(progress, startScale);
+          break;
+        case "zoomBlur":
+          transition = getUnifiedZoomOutTransform(progress, startScale);
+          break;
+      }
     }
     inTransition = true;
   } else if (frame >= holdStart && frame < holdEnd) {
