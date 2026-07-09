@@ -62,6 +62,31 @@ def test_deliver_video_uploads_file(tmp_path: Path) -> None:
     assert create_call.kwargs["supportsAllDrives"] is True
 
 
+def test_deliver_video_names_file_from_topic(tmp_path: Path) -> None:
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"fake-video")
+
+    payload_path = tmp_path / "pipeline_payload.json"
+    payload_path.write_text(
+        '{"topic": "Cách uống nước đúng cách"}',
+        encoding="utf-8",
+    )
+
+    service = MagicMock()
+    service.files.return_value.create.return_value.execute.return_value = {"id": "123"}
+
+    with patch("core.publish.drive.build_drive_service", return_value=service):
+        drive.deliver_video(
+            video,
+            payload_path=payload_path,
+            config=drive.DriveConfig(folder_id="folder-123", credentials_json="{}"),
+        )
+
+    create_call = service.files.return_value.create.call_args
+    assert create_call is not None
+    assert create_call.kwargs["body"]["name"] == "Cách uống nước đúng cách.mp4"
+
+
 def test_deliver_video_uses_publish_metadata_as_description(tmp_path: Path) -> None:
     video = tmp_path / "final.mp4"
     video.write_bytes(b"fake-video")

@@ -7,6 +7,12 @@ from pathlib import Path
 
 import pytest
 
+from core.audio_volume import (
+    DEFAULT_MUSIC_VOLUME,
+    DEFAULT_NARRATION_VOLUME,
+    resolve_music_volume,
+    resolve_narration_volume,
+)
 from core.music_picker import (
     FALLBACK_MUSIC_DIR,
     attach_random_music,
@@ -64,6 +70,25 @@ def test_attach_random_music_stages_in_output(tmp_path: Path) -> None:
     assert staged.is_file()
     assert staged.parent == out.resolve()
     assert result["original_name"] == "bed.mp3"
+    assert result["volume"] == DEFAULT_MUSIC_VOLUME
+
+
+def test_resolve_music_volume_prefers_explicit_and_env(monkeypatch) -> None:
+    assert resolve_music_volume(0.2) == 0.2
+    monkeypatch.delenv("MUSIC_VOLUME", raising=False)
+    assert resolve_music_volume() == DEFAULT_MUSIC_VOLUME
+    monkeypatch.setenv("MUSIC_VOLUME", "0.55")
+    assert resolve_music_volume() == 0.55
+    assert resolve_music_volume(0.2) == 0.2
+
+
+def test_resolve_narration_volume_prefers_explicit_and_env(monkeypatch) -> None:
+    assert resolve_narration_volume(1.0) == 1.0
+    monkeypatch.delenv("NARRATION_VOLUME", raising=False)
+    assert resolve_narration_volume() == DEFAULT_NARRATION_VOLUME
+    monkeypatch.setenv("NARRATION_VOLUME", "1.5")
+    assert resolve_narration_volume() == 1.5
+    assert resolve_narration_volume(1.0) == 1.0
 
 
 def test_project_to_remotion_props_includes_music(tmp_path: Path) -> None:

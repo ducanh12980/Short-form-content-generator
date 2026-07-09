@@ -20,6 +20,7 @@ from core.publish.common import (
 
 TELEGRAM_MAX_FILE_BYTES = 50 * 1024 * 1024
 TELEGRAM_CAPTION_MAX_LEN = 1024
+TELEGRAM_MESSAGE_MAX_LEN = 4096
 _API_BASE = "https://api.telegram.org/bot{token}/{method}"
 
 
@@ -95,6 +96,63 @@ def resolve_video_caption(
             )
 
     return None
+
+
+def format_drive_link_message(caption: str | None, drive_link: str) -> str:
+    """Build a Telegram message with optional caption and a Google Drive link."""
+    link = drive_link.strip()
+    if not link:
+        raise TelegramNotifyError("Google Drive link is empty.")
+
+    if caption is None or not caption.strip():
+        return link
+
+    message = f"{caption.strip()}\n\n{link}"
+    if len(message) <= TELEGRAM_MESSAGE_MAX_LEN:
+        return message
+
+    overhead = len(link) + 2
+    max_caption = TELEGRAM_MESSAGE_MAX_LEN - overhead
+    if max_caption <= 0:
+        return link[:TELEGRAM_MESSAGE_MAX_LEN]
+
+    trimmed_caption = caption.strip()
+    if len(trimmed_caption) > max_caption:
+        suffix = "…"
+        trimmed_caption = trimmed_caption[: max(0, max_caption - len(suffix))].rstrip() + suffix
+    return f"{trimmed_caption}\n\n{link}"
+
+
+def resolve_drive_link(
+    video_path: str | Path,
+    *,
+    drive_link: str | None = None,
+    jobs_csv: str | Path | None = None,
+    caption: str | None = None,
+    payload_path: str | Path | None = None,
+) -> str:
+    """Return a Drive web link, uploading the video when no link was provided."""
+    if drive_link and drive_link.strip():
+        return drive_link.strip()
+
+    from core.publish import drive
+
+    result = drive.deliver_video(
+        video_path,
+        jobs_csv=jobs_csv,
+        caption=caption,
+        payload_path=payload_path,
+    )
+    if result is None:
+        raise TelegramNotifyError(
+            "Google Drive is not configured. Set GOOGLE_DRIVE_FOLDER_ID plus OAuth vars "
+            "or GOOGLE_DRIVE_CREDENTIALS_JSON before sending Telegram Drive links."
+        )
+
+    link = result.get("webViewLink")
+    if not isinstance(link, str) or not link.strip():
+        raise TelegramNotifyError("Drive upload succeeded but no webViewLink was returned.")
+    return link.strip()
 
 
 def assert_video_uploadable(video_path: Path) -> int:
@@ -174,8 +232,9 @@ def deliver_video(
     caption: str | None = None,
     payload_path: str | Path | None = None,
     config: TelegramConfig | None = None,
+    drive_link: str | None = None,
 ) -> dict[str, Any] | None:
-    """Send a rendered MP4 with caption from payload publish metadata or jobs.csv."""
+    """Upload to Google Drive and send the link via Telegram (no video upload)."""
     resolved_config = config or load_config_from_env()
     if resolved_config is None:
         print("[telegram] skipped (TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set)")
@@ -188,11 +247,16 @@ def deliver_video(
         payload_path=payload_path,
         jobs_csv=jobs_csv,
     )
-
-    size = assert_video_uploadable(path)
-    result = send_video(path, caption=resolved_caption, config=resolved_config)
-    mb = size / (1024 * 1024)
-    print(f"[telegram] sent video ({mb:.1f} MB) — {path.resolve()}")
+    resolved_drive_link = resolve_drive_link(
+        path,
+        drive_link=drive_link,
+        jobs_csv=jobs_csv,
+        caption=caption,
+        payload_path=payload_path,
+    )
+    message = format_drive_link_message(resolved_caption, resolved_drive_link)
+    result = send_message(message, config=resolved_config)
+    print(f"[telegram] sent drive link — {resolved_drive_link}")
     return result
 
 

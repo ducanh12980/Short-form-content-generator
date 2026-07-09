@@ -16,6 +16,7 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from core.pipeline_log import log_step, log_step_done
+from core.audio_volume import resolve_narration_volume
 from core.project_schema import (
     get_ambient_overlay,
     get_canvas_size,
@@ -301,6 +302,7 @@ def project_to_remotion_props(
         "themes": _normalize_themes_for_remotion(_load_theme_styles()),
         "tokens": tokens,
         "narrationSrc": _to_static_src(narration_path, public_dir),
+        "narrationVolume": resolve_narration_volume(),
         "images": _resolve_image_timeline(project, public_dir),
         "backgroundColor": background_color,
     }

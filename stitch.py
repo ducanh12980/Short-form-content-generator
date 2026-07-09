@@ -17,6 +17,7 @@ try:
 except ImportError:
     _ARGCOMPLETE = False
 
+from core.audio_volume import DEFAULT_MUSIC_VOLUME, resolve_music_volume
 from core.run_output import STITCH_BASE, new_run_dir
 
 def main() -> None:
@@ -54,9 +55,9 @@ def main() -> None:
     parser.add_argument(
         "--music-volume",
         type=float,
-        default=0.3,
+        default=None,
         metavar="VOL",
-        help="Background music volume (0–1). Default: 0.3.",
+        help=f"Background music volume (0–1). Default: MUSIC_VOLUME env or {DEFAULT_MUSIC_VOLUME}.",
     )
     _output_arg = parser.add_argument(
         "--output",
@@ -81,6 +82,7 @@ def main() -> None:
         autocomplete(parser)
 
     args = parser.parse_args()
+    music_volume = resolve_music_volume(args.music_volume)
 
     try:
         from core.stitch_stage import run_stitch
@@ -108,7 +110,7 @@ def main() -> None:
     print(f"Images     : {len(image_paths)} file(s)")
     print(f"Audio      : {audio_path.name}")
     if music_path:
-        print(f"Music      : {music_path.name} (volume {args.music_volume})")
+        print(f"Music      : {music_path.name} (volume {music_volume})")
     print(f"Output     : {output_path}")
 
     try:
@@ -117,7 +119,7 @@ def main() -> None:
             audio_path,
             output_path,
             music_path=music_path,
-            music_volume=args.music_volume,
+            music_volume=music_volume,
             fps=args.fps,
         )
         print(f"Done: {result}")

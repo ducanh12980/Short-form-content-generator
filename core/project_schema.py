@@ -11,6 +11,7 @@ from core.caption_tokens import (
     build_sentence_tokens_from_scenes,
     enrich_tokens_with_timestamps,
 )
+from core.audio_volume import DEFAULT_MUSIC_VOLUME
 
 DEFAULT_CANVAS = {"width": 1080, "height": 1920}
 DEFAULT_THEME = "minimalist"
@@ -19,8 +20,8 @@ CONTENT_SCENE_COUNT = 3
 TOTAL_SLIDE_COUNT = CONTENT_SCENE_COUNT + 2
 SCENE_COUNT = CONTENT_SCENE_COUNT  # backward-compatible alias
 VALID_SLIDE_ROLES = frozenset({"intro", "content", "ending"})
-VALID_TRANSITIONS = frozenset({"pullIn", "teleportShake", "zoomBlur"})
-DEFAULT_TRANSITION_ROTATION = ["pullIn", "teleportShake", "zoomBlur"]
+VALID_TRANSITIONS = frozenset({"pullIn", "teleportShake", "whipPan", "zoomBlur"})
+DEFAULT_TRANSITION_ROTATION = ["pullIn", "teleportShake", "whipPan", "zoomBlur"]
 
 
 def _parse_words_by_scene(audio: dict[str, Any]) -> dict[int, list[dict[str, Any]]]:
@@ -491,7 +492,7 @@ def get_music_settings(project: dict[str, Any]) -> dict[str, Any] | None:
         return None
     return {
         "path": Path(str(path)),
-        "volume": float(music.get("volume", 0.25)),
+        "volume": float(music.get("volume", DEFAULT_MUSIC_VOLUME)),
     }
 
 

@@ -12,6 +12,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+from core.audio_volume import DEFAULT_MUSIC_VOLUME, resolve_music_volume, resolve_narration_volume
 from core.slide_timing import compute_slide_durations_ms
 
 THEME_STYLES_PATH = _REPO_ROOT / "config" / "theme_styles.json"
@@ -67,7 +68,7 @@ def build_stitch_props(
     audio_path: str | Path,
     *,
     music_path: str | Path | None = None,
-    music_volume: float = 0.3,
+    music_volume: float | None = None,
     public_dir: str | Path,
     fps: int = FPS,
 ) -> tuple[dict[str, Any], Path]:
@@ -123,6 +124,9 @@ def build_stitch_props(
 
     themes = _normalize_themes(_load_theme_styles())
 
+    resolved_music_volume = resolve_music_volume(music_volume)
+    resolved_narration_volume = resolve_narration_volume()
+
     props: dict[str, Any] = {
         "width": 1080,
         "height": 1920,
@@ -133,10 +137,11 @@ def build_stitch_props(
         "themes": themes,
         "tokens": [],
         "narrationSrc": dest_audio.name,
+        "narrationVolume": resolved_narration_volume,
         "images": images_timeline,
         "backgroundColor": "#000000",
         "musicSrc": music_src_value,
-        "musicVolume": music_volume,
+        "musicVolume": resolved_music_volume,
     }
 
     return props, pub
@@ -148,7 +153,7 @@ def run_stitch(
     output_path: str | Path,
     *,
     music_path: str | Path | None = None,
-    music_volume: float = 0.3,
+    music_volume: float | None = None,
     fps: int = FPS,
 ) -> Path:
     """Stitch images + audio (+ optional music) into an MP4.

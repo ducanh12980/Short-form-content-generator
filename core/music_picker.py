@@ -10,9 +10,7 @@ from pathlib import Path
 MUSIC_EXTENSIONS = frozenset({".mp3", ".wav", ".m4a", ".ogg", ".aac"})
 DEFAULT_MUSIC_DIR = Path("assets/music")
 FALLBACK_MUSIC_DIR = Path(__file__).resolve().parent.parent / "music"
-DEFAULT_MUSIC_VOLUME = 0.25
-
-
+from core.audio_volume import DEFAULT_MUSIC_VOLUME, resolve_music_volume
 def _legacy_music_file() -> Path | None:
     """Single-track override via BACKGROUND_MUSIC_PATH (file path)."""
     legacy = os.environ.get("BACKGROUND_MUSIC_PATH", "").strip()
@@ -100,7 +98,7 @@ def attach_random_music(
     output_dir: str | Path,
     *,
     music_dir: str | Path | None = None,
-    volume: float = DEFAULT_MUSIC_VOLUME,
+    volume: float | None = None,
     rng: random.Random | None = None,
 ) -> dict[str, str | float] | None:
     """Pick random background music and stage it in output_dir.
@@ -114,7 +112,7 @@ def attach_random_music(
     staged = stage_music_for_output(picked, output_dir)
     return {
         "path": str(staged.resolve()),
-        "volume": volume,
+        "volume": resolve_music_volume(volume),
         "source": "random",
         "original_name": picked.name,
     }

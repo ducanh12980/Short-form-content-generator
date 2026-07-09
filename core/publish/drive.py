@@ -14,6 +14,7 @@ from core.publish.common import (
     find_latest_done_job,
     format_job_caption,
     resolve_publish_metadata,
+    resolve_upload_filename,
 )
 
 DRIVE_DESCRIPTION_MAX_LEN = 4096
@@ -228,7 +229,11 @@ def deliver_video(
         resumable=False,
     )
     body: dict[str, Any] = {
-        "name": path.name,
+        "name": resolve_upload_filename(
+            path,
+            payload_path=payload_path,
+            jobs_csv=jobs_csv,
+        ),
         "parents": [resolved_config.folder_id],
     }
     resolved_description = resolve_upload_description(

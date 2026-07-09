@@ -54,6 +54,7 @@ def test_project_to_remotion_props(tmp_path: Path) -> None:
     assert props["themeName"] == "minimalist"
     assert props["tokens"][0]["text"] == "Hello"
     assert props["narrationSrc"] == "narration.mp3"
+    assert props["narrationVolume"] == 1.2
     assert props["durationMs"] == 500
     assert "minimalist" in props["themes"]
 

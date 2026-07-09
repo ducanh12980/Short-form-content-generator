@@ -133,11 +133,11 @@ def test_resolve_video_caption_prefers_payload_over_jobs_csv(tmp_path: Path) -> 
     assert "#one" in caption
 
 
-@patch("core.publish.telegram.probe_video_metadata")
+@patch("core.publish.drive.deliver_video")
 @patch("core.publish.telegram.requests.post")
 def test_deliver_video_from_batch_uses_publish_caption(
     mock_post: MagicMock,
-    mock_probe: MagicMock,
+    mock_drive_deliver: MagicMock,
     tmp_path: Path,
 ) -> None:
     video = tmp_path / "final.mp4"
@@ -155,7 +155,9 @@ def test_deliver_video_from_batch_uses_publish_caption(
         ),
         encoding="utf-8",
     )
-    mock_probe.return_value = None
+    mock_drive_deliver.return_value = {
+        "webViewLink": "https://drive.google.com/file/d/abc/view",
+    }
     mock_post.return_value = MagicMock(
         ok=True,
         status_code=200,
@@ -163,11 +165,39 @@ def test_deliver_video_from_batch_uses_publish_caption(
     )
     config = TelegramConfig(bot_token="token", chat_id="99")
 
-    deliver_video_from_batch(video, config=config)
+    deliver_video_from_batch(video, config=config, payload_path=payload_path)
 
-    caption = mock_post.call_args.kwargs["data"]["caption"]
-    assert "Publish title" in caption
-    assert "#tag" in caption
+    mock_drive_deliver.assert_called_once()
+    message = mock_post.call_args.kwargs["data"]["text"]
+    assert "Publish title" in message
+    assert "#tag" in message
+    assert "https://drive.google.com/file/d/abc/view" in message
+
+
+@patch("core.publish.telegram.requests.post")
+def test_deliver_video_from_batch_reuses_drive_link(
+    mock_post: MagicMock,
+    tmp_path: Path,
+) -> None:
+    video = tmp_path / "final.mp4"
+    video.write_bytes(b"mp4")
+    mock_post.return_value = MagicMock(
+        ok=True,
+        status_code=200,
+        json=lambda: {"ok": True, "result": {"message_id": 1}},
+    )
+    config = TelegramConfig(bot_token="token", chat_id="99")
+
+    with patch("core.publish.drive.deliver_video") as mock_drive_deliver:
+        deliver_video_from_batch(
+            video,
+            config=config,
+            drive_link="https://drive.google.com/file/d/existing/view",
+        )
+
+    mock_drive_deliver.assert_not_called()
+    message = mock_post.call_args.kwargs["data"]["text"]
+    assert message == "https://drive.google.com/file/d/existing/view"
 
 
 def test_find_latest_done_job(tmp_path: Path) -> None:

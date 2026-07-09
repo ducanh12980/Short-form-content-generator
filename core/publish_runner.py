@@ -14,6 +14,13 @@ if str(_REPO_ROOT) not in sys.path:
 from core.publish.common import PublishError
 from core.publish.registry import ADAPTERS, get_enabled_platforms
 
+_PLATFORM_ORDER = {"drive": 0, "telegram": 1, "facebook": 2}
+
+
+def _order_platforms(platforms: list[str]) -> list[str]:
+    """Run Drive before Telegram so the link can be reused without a second upload."""
+    return sorted(platforms, key=lambda name: _PLATFORM_ORDER.get(name, 99))
+
 
 def _load_env() -> None:
     try:
@@ -42,18 +49,32 @@ def publish_video(
         return True
 
     had_failure = False
-    for name in resolved_platforms:
+    drive_link: str | None = None
+    for name in _order_platforms(resolved_platforms):
         adapter = ADAPTERS.get(name)
         if adapter is None:
             print(f"[publish] warning: unknown platform '{name}' — skipped")
             continue
         try:
-            adapter(
-                video_path,
-                jobs_csv=jobs_csv,
-                caption=caption,
-                payload_path=payload_path,
-            )
+            if name == "telegram":
+                result = adapter(
+                    video_path,
+                    jobs_csv=jobs_csv,
+                    caption=caption,
+                    payload_path=payload_path,
+                    drive_link=drive_link,
+                )
+            else:
+                result = adapter(
+                    video_path,
+                    jobs_csv=jobs_csv,
+                    caption=caption,
+                    payload_path=payload_path,
+                )
+            if name == "drive" and isinstance(result, dict):
+                link = result.get("webViewLink")
+                if isinstance(link, str) and link.strip():
+                    drive_link = link.strip()
         except PublishError as exc:
             print(f"[{name}] publish failed: {exc}", file=sys.stderr)
             had_failure = True

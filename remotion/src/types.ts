@@ -27,7 +27,7 @@ export type ThemeStyle = {
 export type ThemeStyles = Record<string, ThemeStyle>;
 
 /** Outgoing transition at the cut to the next slide. */
-export type SlideTransitionType = "pullIn" | "teleportShake" | "zoomBlur";
+export type SlideTransitionType = "pullIn" | "teleportShake" | "whipPan" | "zoomBlur";
 
 export type TimelineImage = {
   /** Path relative to Remotion --public-dir (for staticFile). */
@@ -68,11 +68,13 @@ export type ShortVideoProps = {
   tokens: CaptionToken[];
   /** Narration file relative to Remotion --public-dir (for staticFile). */
   narrationSrc: string;
+  /** Volume for narration (1.0 = unchanged). Defaults to 1.2. */
+  narrationVolume?: number;
   images: TimelineImage[];
   backgroundColor: string;
   /** Optional background music file relative to Remotion --public-dir. */
   musicSrc?: string;
-  /** Volume for background music (0–1). Defaults to 0.3. */
+  /** Volume for background music (0–1). Defaults to 0.5. */
   musicVolume?: number;
   /** Ambient overlay video relative to Remotion --public-dir. */
   ambientOverlaySrc?: string | null;
