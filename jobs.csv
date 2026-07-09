@@ -1,11 +1,21 @@
 id,topic,status,mode,image_provider,output_path,error,created_at,completed_at
-1,90% mọi người đang uống nước sai cách,done,slideshow,pollinations,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T02:56:43+00:00,2026-07-08T03:24:08+00:00
-2,3 thói quen buổi sáng giúp tỉnh táo cả ngày,failed,slideshow,pollinations,,"TTS writer failed: Gemini daily quota exceeded for this API key/model. Each slideshow uses ~2 LLM calls (scene script + TTS writer). Wait for the free-tier reset, enable billing in Google AI Studio, or set SCRIPT_WRITER_MODEL / a new OPENAI_API_KEY. Details: Error code: 429 - [{'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 10.998866682s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '10s'}]}}]",2026-07-08T02:56:43+00:00,2026-07-08T03:41:49+00:00
-3,5 phút mỗi ngày giúp bạn ngủ ngon hơn,done,slideshow,pollinations,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-08T04:57:07+00:00
-4,Vì sao bạn luôn mệt dù đã ngủ đủ 8 tiếng,done,slideshow,pollinations,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-08T06:49:18+00:00
-5,Ăn sáng sai cách đang phá hủy metabolism của bạn,failed,slideshow,pollinations,,"Publish metadata must include a ""hashtags"" array.",2026-07-08T03:30:00+00:00,2026-07-08T11:14:21+00:00
-6,3 loại thực phẩm nên tránh trước khi ngủ,done,slideshow,chatgpt,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-09T03:15:40+00:00
-7,Cách giảm căng thẳng chỉ trong 60 giây,done,slideshow,chatgpt,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-09T04:49:36+00:00
-8,Đi bộ 10 phút mỗi ngày thay đổi sức khỏe thế nào,done,slideshow,chatgpt,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-09T09:22:10+00:00
-9,Uống cà phê đúng giờ để không mất ngủ,done,slideshow,chatgpt,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-09T09:54:30+00:00
-10,Thói quen nhỏ giúp não minh mẫn hơn mỗi sáng,pending,slideshow,chatgpt,,,2026-07-08T03:30:00+00:00,
+1,Dấu hiệu trên khuôn mặt của người có số đại phú đại quý trước sau gì cũng giàu,pending,slideshow,chatgpt,,,2026-07-10T03:30:00+07:00,
+2,3 nét tướng của người sinh ra đã có lộc cả đời không lo thiếu tiền,pending,slideshow,chatgpt,,,2026-07-11T03:30:00+07:00,
+3,Nhìn đặc điểm này biết ngay ai càng lớn tuổi càng giàu hậu vận rực rỡ,pending,slideshow,chatgpt,,,2026-07-12T03:30:00+07:00,
+4,Sở hữu tướng mũi này bạn là bậc thầy giữ tiền tài lộc tụ lại không phai,pending,slideshow,chatgpt,,,2026-07-13T03:30:00+07:00,
+5,Sự thật về người có tướng tai Phật: Có thực sự giàu sang như lời đồn,pending,slideshow,chatgpt,,,2026-07-14T03:30:00+07:00,
+6,Người có tướng cằm này hậu vận cực sung túc về già tiền tiêu không hết,pending,slideshow,chatgpt,,,2026-07-15T03:30:00+07:00,
+7,Kiểu người có nét tướng này cực kỳ đa tình trong tình yêu rất dễ thay lòng,pending,slideshow,chatgpt,,,2026-07-16T03:30:00+07:00,
+8,Cách nhận biết người chung thủy sắt son chỉ qua một đặc điểm trên khuôn mặt,pending,slideshow,chatgpt,,,2026-07-17T03:30:00+07:00,
+9,Sở hữu nét tướng đào hoa này bạn đi đến đâu cũng có người thầm thương trộm nhớ,pending,slideshow,chatgpt,,,2026-07-18T03:30:00+07:00,
+10,Tướng phụ nữ vượng phu ích tử đàn ông cưới được như rước lộc vào nhà,pending,slideshow,chatgpt,,,2026-07-19T03:30:00+07:00,
+11,Đàn ông có nét tướng này là cực phẩm ai lấy được cả đời sung sướng,pending,slideshow,chatgpt,,,2026-07-20T03:30:00+07:00,
+12,Lý do vì sao những người có nét tướng này thường có xu hướng kết hôn muộn,pending,slideshow,chatgpt,,,2026-07-21T03:30:00+07:00,
+13,Nhìn bộ vị này biết ngay người có tố chất làm sếp lãnh đạo thiên bẩm,pending,slideshow,chatgpt,,,2026-07-22T03:30:00+07:00,
+14,Bạn có số làm chủ hay làm thuê? Hãy nhìn vào đặc điểm này trên gương mặt,pending,slideshow,chatgpt,,,2026-07-23T03:30:00+07:00,
+15,Đừng nản lòng nếu chưa giàu nét tướng này dự báo bạn sẽ thành công vang dội sau tuổi 40,pending,slideshow,chatgpt,,,2026-07-24T03:30:00+07:00,
+16,Người có đặc điểm này luôn có quý nhân phù trợ gặp nguy hóa an,pending,slideshow,chatgpt,,,2026-07-25T03:30:00+07:00,
+17,Tuyệt đối đừng kể bí mật cho người có nét tướng này nếu không muốn tai vách mạch rừng,pending,slideshow,chatgpt,,,2026-07-26T03:30:00+07:00,
+18,Cách nhận diện người nóng tính cộc cằn chỉ sau vài giây quan sát gương mặt,pending,slideshow,chatgpt,,,2026-07-27T03:30:00+07:00,
+19,Người có tâm địa lương thiện sống phúc đức thường sở hữu nét mặt này,pending,slideshow,chatgpt,,,2026-07-28T03:30:00+07:00,
+20,Càng già càng có phúc khí con cháu đề huề nếu bạn sở hữu đặc điểm sau,pending,slideshow,chatgpt,,,2026-07-29T03:30:00+07:00,
