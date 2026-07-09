@@ -98,7 +98,8 @@ Runs the daily batch on GitHub-hosted **ubuntu-22.04** runners (glibc 2.35 — R
    - `OPENAI_BASE_URL` (recommended — see [`.env.example`](../.env.example))
    - `OPENAI_IMAGE_API_KEY` (required — ChatGPT slide images; separate from `OPENAI_API_KEY`)
    - `TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID` (optional — failure alerts via `send-message`; also used when `PUBLISH_PLATFORMS` includes `telegram`)
-   - `PUBLISH_PLATFORMS` (optional — comma-separated: `facebook`, `telegram`)
+   - `GOOGLE_DRIVE_CLIENT_ID`, `GOOGLE_DRIVE_CLIENT_SECRET`, `GOOGLE_DRIVE_REFRESH_TOKEN`, `GOOGLE_DRIVE_FOLDER_ID` (required when `telegram` is in `PUBLISH_PLATFORMS` — Telegram sends a Drive link, not the MP4)
+   - `PUBLISH_PLATFORMS` (optional — comma-separated: `drive`, `facebook`, `telegram`)
    - `FACEBOOK_PAGE_ID` + `FACEBOOK_ACCESS_TOKEN` (optional — required when `facebook` is in `PUBLISH_PLATFORMS`)
 3. Ensure **Settings → Actions → General → Workflow permissions** is set to **Read and write** so the run can commit `jobs.csv`.
 
@@ -117,7 +118,7 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 - Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
 - Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
 - The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
-- When `PUBLISH_PLATFORMS` is set, the workflow publishes `final.mp4` via `core/publish_runner.py`. Caption prefers `publish` metadata from `output/final/pipeline_payload.json` (title, description, hashtags); falls back to `#<job id> — <topic>` from `jobs.csv`. On failure, a plain Telegram `sendMessage` is sent (when `TELEGRAM_*` secrets are set).
+- When `PUBLISH_PLATFORMS` is set, the workflow publishes `final.mp4` via `core/publish_runner.py`. With `telegram`, the bot uploads to Google Drive first and sends the link (not the video file). Caption prefers `publish` metadata from `output/final/pipeline_payload.json` (title, description, hashtags); falls back to `#<job id> — <topic>` from `jobs.csv`. On failure, a plain Telegram `sendMessage` is sent (when `TELEGRAM_*` secrets are set).
 
 **Multi-platform publish (local or CI):**
 
