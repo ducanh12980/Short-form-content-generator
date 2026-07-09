@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -51,6 +52,7 @@ TTS_WRITER_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-tts-writer.md"
 SCENES_DRAFT_FILENAME = "scenes_draft.json"
 PUBLISH_HASHTAG_MIN = 3
 PUBLISH_HASHTAG_MAX = 12
+DEFAULT_PUBLISH_HASHTAGS = ("#NhanTuongVn", "#huyenhoc", "#fyp", "#vietnam", "#learnontiktok")
 TTS_WRITER_USER_TEMPLATE = (
     "Dựa trên nội dung các slide dưới đây, hãy tạo script TTS cho từng slide với các yêu cầu trên:\n\n"
     "{{SLIDE_CONTENT}}"
@@ -152,6 +154,53 @@ def _normalize_hashtag(tag: str) -> str:
     return stripped if stripped.startswith("#") else f"#{stripped}"
 
 
+def _coerce_hashtag_list(raw: Any) -> list[str]:
+    """Accept list, comma/space-separated string, or missing — return string tags."""
+    if raw is None:
+        return []
+    if isinstance(raw, list):
+        return [str(tag) for tag in raw if tag is not None and str(tag).strip()]
+    if isinstance(raw, str) and raw.strip():
+        return [part for part in re.split(r"[\s,]+", raw.strip()) if part]
+    return []
+
+
+def _repair_publish_hashtags(raw_hashtags: list[str]) -> list[str]:
+    """Normalize tags and pad with defaults when the LLM returns too few."""
+    hashtags: list[str] = []
+    seen: set[str] = set()
+    for tag in raw_hashtags:
+        try:
+            normalized = _normalize_hashtag(tag)
+        except ValueError:
+            continue
+        key = normalized.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+        hashtags.append(normalized)
+
+    if len(hashtags) < PUBLISH_HASHTAG_MIN:
+        print(
+            "[slideshow] publish metadata missing or sparse hashtags; "
+            f"padding from defaults (got {len(raw_hashtags)})"
+        )
+        for fallback in DEFAULT_PUBLISH_HASHTAGS:
+            if len(hashtags) >= PUBLISH_HASHTAG_MIN:
+                break
+            key = fallback.lower()
+            if key not in seen:
+                seen.add(key)
+                hashtags.append(fallback)
+
+    if len(hashtags) < PUBLISH_HASHTAG_MIN:
+        raise ValueError(
+            f"Publish metadata must include {PUBLISH_HASHTAG_MIN}–{PUBLISH_HASHTAG_MAX} hashtags; "
+            f"got {len(hashtags)} after repair."
+        )
+    return hashtags[:PUBLISH_HASHTAG_MAX]
+
+
 def parse_publish_metadata(parsed: dict[str, Any]) -> dict[str, Any]:
     """Parse and validate publish metadata from scene script writer JSON."""
     publish = parsed.get("publish")
@@ -165,20 +214,8 @@ def parse_publish_metadata(parsed: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(description, str) or not description.strip():
         raise ValueError("Publish metadata must include non-empty 'description'.")
 
-    raw_hashtags = publish.get("hashtags")
-    if not isinstance(raw_hashtags, list):
-        raise ValueError('Publish metadata must include a "hashtags" array.')
-    if not PUBLISH_HASHTAG_MIN <= len(raw_hashtags) <= PUBLISH_HASHTAG_MAX:
-        raise ValueError(
-            f"Publish metadata must include {PUBLISH_HASHTAG_MIN}–{PUBLISH_HASHTAG_MAX} hashtags; "
-            f"got {len(raw_hashtags)}."
-        )
-
-    hashtags: list[str] = []
-    for index, tag in enumerate(raw_hashtags):
-        if not isinstance(tag, str):
-            raise ValueError(f"Hashtag {index + 1} must be a string.")
-        hashtags.append(_normalize_hashtag(tag))
+    raw_hashtags = _coerce_hashtag_list(publish.get("hashtags"))
+    hashtags = _repair_publish_hashtags(raw_hashtags)
 
     return {
         "title": title.strip(),

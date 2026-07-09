@@ -192,6 +192,21 @@ def test_parse_publish_metadata_normalizes_hashtags_without_hash() -> None:
     assert publish["hashtags"] == ["#tag1", "#tag2", "#tag3"]
 
 
+def test_parse_publish_metadata_repairs_missing_hashtags() -> None:
+    payload = _sample_script_payload()
+    del payload["publish"]["hashtags"]
+    publish = parse_publish_metadata(payload)
+    assert len(publish["hashtags"]) >= 3
+    assert "#fyp" in publish["hashtags"]
+
+
+def test_parse_publish_metadata_coerces_string_hashtags() -> None:
+    payload = _sample_script_payload()
+    payload["publish"]["hashtags"] = "#tag1 #tag2 #tag3"
+    publish = parse_publish_metadata(payload)
+    assert publish["hashtags"] == ["#tag1", "#tag2", "#tag3"]
+
+
 def test_parse_publish_metadata_rejects_missing_block() -> None:
     payload = _sample_script_payload()
     del payload["publish"]
