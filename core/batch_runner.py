@@ -217,12 +217,13 @@ def execute_job(
             output_dir=job_dir,
             caption_mode=resolved_caption_mode,
             image_provider=image_provider,
+            publish=False,
         )
         return final
 
     from orchestrator_mvp import run_mvp_with_render
 
-    _, final = run_mvp_with_render(topic, output_dir=job_dir)
+    _, final = run_mvp_with_render(topic, output_dir=job_dir, publish=False)
     return final
 
 

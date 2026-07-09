@@ -79,6 +79,48 @@ def test_batch_lock_exclusive(tmp_path: Path) -> None:
                 pass
 
 
+@patch("orchestrator_mvp.run_slideshow_with_render")
+def test_execute_job_slideshow_disables_inline_publish(mock_run, tmp_path: Path) -> None:
+    from core.batch_runner import execute_job
+
+    final = tmp_path / "final" / "final.mp4"
+    mock_run.return_value = ({}, final)
+    row = {
+        "id": "1",
+        "topic": "topic one",
+        "status": "pending",
+        "mode": "slideshow",
+        "image_provider": "mock",
+    }
+
+    result = execute_job(row, output_dir=tmp_path / "final")
+
+    assert result == final
+    mock_run.assert_called_once()
+    assert mock_run.call_args.kwargs["publish"] is False
+
+
+@patch("orchestrator_mvp.run_mvp_with_render")
+def test_execute_job_mvp_disables_inline_publish(mock_run, tmp_path: Path) -> None:
+    from core.batch_runner import execute_job
+
+    final = tmp_path / "final" / "final.mp4"
+    mock_run.return_value = ({}, final)
+    row = {
+        "id": "1",
+        "topic": "topic one",
+        "status": "pending",
+        "mode": "mvp",
+        "image_provider": "",
+    }
+
+    result = execute_job(row, output_dir=tmp_path / "final")
+
+    assert result == final
+    mock_run.assert_called_once()
+    assert mock_run.call_args.kwargs["publish"] is False
+
+
 @patch("core.batch_runner.execute_job")
 def test_process_pending_jobs_updates_csv(mock_execute, tmp_path: Path) -> None:
     mock_execute.return_value = tmp_path / "output" / "final.mp4"
