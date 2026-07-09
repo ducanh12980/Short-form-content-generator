@@ -4,7 +4,7 @@ id,topic,status,mode,image_provider,output_path,error,created_at,completed_at
 3,5 phút mỗi ngày giúp bạn ngủ ngon hơn,done,slideshow,pollinations,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-08T04:57:07+00:00
 4,Vì sao bạn luôn mệt dù đã ngủ đủ 8 tiếng,done,slideshow,pollinations,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-08T06:49:18+00:00
 5,Ăn sáng sai cách đang phá hủy metabolism của bạn,failed,slideshow,pollinations,,"Publish metadata must include a ""hashtags"" array.",2026-07-08T03:30:00+00:00,2026-07-08T11:14:21+00:00
-6,3 loại thực phẩm nên tránh trước khi ngủ,pending,slideshow,chatgpt,,,2026-07-08T03:30:00+00:00,
+6,3 loại thực phẩm nên tránh trước khi ngủ,done,slideshow,chatgpt,/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/final.mp4,,2026-07-08T03:30:00+00:00,2026-07-09T03:15:40+00:00
 7,Cách giảm căng thẳng chỉ trong 60 giây,pending,slideshow,chatgpt,,,2026-07-08T03:30:00+00:00,
 8,Đi bộ 10 phút mỗi ngày thay đổi sức khỏe thế nào,pending,slideshow,chatgpt,,,2026-07-08T03:30:00+00:00,
 9,Uống cà phê đúng giờ để không mất ngủ,pending,slideshow,chatgpt,,,2026-07-08T03:30:00+00:00,
