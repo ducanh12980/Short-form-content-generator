@@ -61,12 +61,22 @@ def expected_image_paths(job_id: str, *, root: str | Path | None = None) -> list
     return [images / name for name in REQUIRED_IMAGE_NAMES]
 
 
+def job_assets_dir_exists(job_id: str, *, root: str | Path | None = None) -> bool:
+    """True when ``assets/jobs/<id>/`` exists as a directory."""
+    return job_assets_dir(job_id, root=root).is_dir()
+
+
+def has_all_required_images(job_id: str, *, root: str | Path | None = None) -> bool:
+    """True when all five slide PNGs exist under ``assets/jobs/<id>/images/``."""
+    return all(path.is_file() for path in expected_image_paths(job_id, root=root))
+
+
 def has_complete_job_assets(job_id: str, *, root: str | Path | None = None) -> bool:
-    """True when scenes_draft.json and all five slide PNGs exist."""
+    """True when scenes_draft.json and all five slide PNGs exist (files only)."""
     draft = job_scenes_draft_path(job_id, root=root)
     if not draft.is_file():
         return False
-    return all(path.is_file() for path in expected_image_paths(job_id, root=root))
+    return has_all_required_images(job_id, root=root)
 
 
 def missing_job_asset_paths(job_id: str, *, root: str | Path | None = None) -> list[Path]:
@@ -92,6 +102,150 @@ def require_complete_job_assets(job_id: str, *, root: str | Path | None = None) 
         f"Run: python scripts/pregenerate_job_assets.py --csv jobs.csv --job-id {job_id}. "
         f"Missing: {rel}"
     )
+
+
+def try_load_job_scenes_draft(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
+    """Load draft when present and valid for topic (images may still be incomplete)."""
+    if not job_scenes_draft_path(job_id, root=root).is_file():
+        return None
+    try:
+        return load_job_scenes_draft(job_id, topic=topic, root=root)
+    except JobAssetsError:
+        return None
+
+
+def try_load_reusable_job_assets(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
+    """Return slides+publish only when draft is valid **and** all images exist."""
+    if not job_assets_dir_exists(job_id, root=root):
+        return None
+    if not has_all_required_images(job_id, root=root):
+        return None
+    return try_load_job_scenes_draft(job_id, topic=topic, root=root)
+
+
+def missing_image_names(job_id: str, *, root: str | Path | None = None) -> list[str]:
+    """Return required PNG filenames that are not yet on disk."""
+    return [path.name for path in expected_image_paths(job_id, root=root) if not path.is_file()]
+
+
+def inventory_job_assets(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Scan **all** library parts once: script + each required PNG.
+
+    Returns a dict used by the pipeline to fill only gaps::
+
+        {
+          "folder_exists": bool,
+          "script_ok": bool,
+          "slides": list | None,
+          "publish": dict | None,
+          "present_images": ["intro.png", ...],
+          "missing_images": ["scene_2.png", ...],
+          "complete": bool,  # script_ok and no missing images
+        }
+
+    Call this before any GPT work so one missing part still triggers a full
+    scan of every remaining part.
+    """
+    folder_exists = job_assets_dir_exists(job_id, root=root)
+    present_images: list[str] = []
+    missing_images: list[str] = []
+    for path in expected_image_paths(job_id, root=root):
+        if path.is_file():
+            present_images.append(path.name)
+        else:
+            missing_images.append(path.name)
+
+    slides: list[dict[str, Any]] | None = None
+    publish: dict[str, Any] | None = None
+    script_ok = False
+    if folder_exists or job_scenes_draft_path(job_id, root=root).is_file():
+        loaded = try_load_job_scenes_draft(job_id, topic=topic, root=root)
+        if loaded is not None:
+            slides, publish = loaded
+            script_ok = True
+
+    return {
+        "folder_exists": folder_exists,
+        "script_ok": script_ok,
+        "slides": slides,
+        "publish": publish,
+        "present_images": present_images,
+        "missing_images": missing_images,
+        "complete": script_ok and not missing_images,
+    }
+
+
+def format_inventory_summary(inventory: dict[str, Any]) -> str:
+    """Human-readable one-line inventory for pipeline logs."""
+    if inventory.get("complete"):
+        return "complete (script + 5 images)"
+    parts: list[str] = []
+    if inventory.get("script_ok"):
+        parts.append("script OK")
+    else:
+        parts.append("script MISSING")
+    present = inventory.get("present_images") or []
+    missing = inventory.get("missing_images") or []
+    if present:
+        parts.append(f"images present={','.join(present)}")
+    if missing:
+        parts.append(f"images missing={','.join(missing)}")
+    elif not present:
+        parts.append("images missing=all")
+    return "; ".join(parts)
+
+
+def copy_existing_job_images_into(
+    run_dir: str | Path,
+    job_id: str,
+    *,
+    root: str | Path | None = None,
+    slides: list[dict[str, Any]] | None = None,
+) -> list[Path]:
+    """Copy whatever library PNGs already exist into run_dir/images/ (partial OK)."""
+    src_dir = job_images_dir(job_id, root=root)
+    dest_dir = Path(run_dir) / "images"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    copied: list[Path] = []
+    if not src_dir.is_dir():
+        return copied
+
+    for src in expected_image_paths(job_id, root=root):
+        if not src.is_file():
+            continue
+        dest = dest_dir / src.name
+        shutil.copy2(src, dest)
+        copied.append(dest.resolve())
+
+    if slides is not None:
+        for slide in slides:
+            if not isinstance(slide, dict):
+                continue
+            name = slide_image_filename(slide)
+            image_path = dest_dir / name
+            if image_path.is_file():
+                slide["image"] = {
+                    "path": str(image_path.resolve()),
+                    "source": "job_assets",
+                }
+
+    return copied
 
 
 def load_job_scenes_draft(
@@ -169,31 +323,9 @@ def copy_job_images_into(
     root: str | Path | None = None,
     slides: list[dict[str, Any]] | None = None,
 ) -> list[Path]:
-    """Copy library PNGs into run_dir/images/ and optionally attach paths on slides."""
+    """Copy all library PNGs into run_dir/images/ (requires a complete library)."""
     require_complete_job_assets(job_id, root=root)
-    src_dir = job_images_dir(job_id, root=root)
-    dest_dir = Path(run_dir) / "images"
-    dest_dir.mkdir(parents=True, exist_ok=True)
-
-    copied: list[Path] = []
-    for src in expected_image_paths(job_id, root=root):
-        dest = dest_dir / src.name
-        shutil.copy2(src, dest)
-        copied.append(dest.resolve())
-
-    if slides is not None:
-        for slide in slides:
-            if not isinstance(slide, dict):
-                continue
-            name = slide_image_filename(slide)
-            image_path = dest_dir / name
-            if image_path.is_file():
-                slide["image"] = {
-                    "path": str(image_path.resolve()),
-                    "source": "job_assets",
-                }
-
-    return copied
+    return copy_existing_job_images_into(run_dir, job_id, root=root, slides=slides)
 
 
 def attach_slide_images_from_dir(slides: list[dict[str, Any]], images_dir: Path) -> None:
@@ -210,3 +342,31 @@ def attach_slide_images_from_dir(slides: list[dict[str, Any]], images_dir: Path)
             if isinstance(slide.get("image"), dict)
             else "job_assets",
         }
+
+
+def persist_job_assets_from_run_dir(
+    job_id: str,
+    run_dir: str | Path,
+    *,
+    topic: str,
+    slides: list[dict[str, Any]],
+    publish: dict[str, Any],
+    root: str | Path | None = None,
+) -> Path:
+    """Save script draft + slide PNGs from a run folder into ``assets/jobs/<id>/``."""
+    save_job_scenes_draft(
+        job_id,
+        topic=topic,
+        slides=slides,
+        publish=publish,
+        root=root,
+    )
+    src_images = Path(run_dir) / "images"
+    dest_images = job_images_dir(job_id, root=root)
+    dest_images.mkdir(parents=True, exist_ok=True)
+    for name in REQUIRED_IMAGE_NAMES:
+        src = src_images / name
+        if not src.is_file():
+            raise JobAssetsError(f"Cannot persist job {job_id}: missing {src}")
+        shutil.copy2(src, dest_images / name)
+    return job_assets_dir(job_id, root=root)

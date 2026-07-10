@@ -64,11 +64,11 @@ def main() -> None:
         help="After each successful render, publish that MP4 via publish_runner",
     )
     parser.add_argument(
-        "--allow-generate",
+        "--require-job-assets",
         action="store_true",
         help=(
-            "Allow slideshow jobs without assets/jobs/<id>/ "
-            "(calls LLM script + image APIs). Default requires pregenerated assets."
+            "Fail slideshow jobs when assets/jobs/<id>/ is incomplete "
+            "(default: generate + persist missing script/images)."
         ),
     )
     parser.add_argument(
@@ -101,7 +101,7 @@ def main() -> None:
             dry_run=args.dry_run,
             select=args.select,
             publish=args.publish,
-            require_job_assets=not args.allow_generate,
+            require_job_assets=args.require_job_assets,
         )
 
         if not results:

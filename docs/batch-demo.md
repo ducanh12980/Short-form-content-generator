@@ -8,19 +8,50 @@ Run the slideshow pipeline on **pending CSV rows** (by date or retry). Schedule 
 # Create jobs.csv with example rows
 python batch_runner.py --init
 
-# One-time: freeze script + images into assets/jobs/<id>/ (commit + push to GitHub)
+# Optional: pre-freeze script + images into assets/jobs/<id>/ (or let the first batch run do it)
 python scripts/pregenerate_job_assets.py --csv jobs.csv
 
-# Daily: render using frozen assets (TTS + Remotion + optional publish)
+# Daily: reuse assets when present; otherwise generate + persist, then TTS + Remotion + publish
 python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish
 
 # Preview queue without running
 python batch_runner.py --csv jobs.csv --dry-run
 ```
 
-### Job asset library (script + images on GitHub)
+### Job asset library (`assets/jobs/<id>/`)
 
-Daily batch **requires** pregenerated assets under `assets/jobs/<id>/` (tracked in git so Actions can checkout them):
+```
+CSV
+ │
+ ▼
+Đọc job
+ │
+ ▼
+assets/jobs/<id> tồn tại?
+ │
+ ▼
+Soát HẾT (inventory): script + từng PNG
+ │
+ ├─ Đủ hết ─────────────────────────┐
+ │                                  │
+ ├─ Thiếu bất kỳ phần nào ──────────┤
+ │     → liệt kê toàn bộ phần thiếu │
+ │     → GPT chỉ tạo phần còn thiếu │
+ │       (giữ phần đã có)           │
+ │                                  │
+                ▼                   │
+      Lưu assets/jobs/<id>/ ◄───────┘
+                ▼
+              TTS
+                ▼
+           Remotion
+                ▼
+            Publish
+```
+
+Khi phát hiện thiếu 1 phần, vẫn **soát hết** các phần còn lại rồi mới generate — không dừng ở phần đầu tiên thiếu, và không render lại phần đã có.
+
+Layout:
 
 ```
 assets/jobs/<id>/
@@ -34,14 +65,14 @@ assets/jobs/<id>/
 ```
 
 ```bash
-# All pending rows in jobs.csv
+# Optional: freeze all rows ahead of cron
 python scripts/pregenerate_job_assets.py --csv jobs.csv
 
-# One job only / regenerate
+# One job / regenerate
 python scripts/pregenerate_job_assets.py --csv jobs.csv --job-id 1 --force
 ```
 
-Then `git add assets/jobs && git commit && git push`. Cron runs only TTS + Remotion + publish (no script/image API). Use `--allow-generate` on `batch_runner.py` only for local experiments without the library.
+Commit `assets/jobs/` when you want GitHub Actions to reuse without calling script/image APIs. Without committed assets, the first run generates and writes the library locally (CI runners are ephemeral unless you commit). Use `--require-job-assets` to fail instead of generating.
 
 Each successful job writes artifacts under `output/final/` (the folder is cleared before each run):
 
@@ -147,12 +178,13 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 
 **How it runs:**
 
-- Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7):
+- Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7). **Cron only runs from the default branch (`main`)** — merge workflow changes from `Dung` before expecting schedule to update.
   - `cron: "0 17 * * *"` → **00:00 VN** — `--select due-today --max-jobs 0 --publish` (all `pending` rows whose `created_at` **date** is today in Asia/Ho_Chi_Minh)
   - `cron: "0 23 * * *"` → **06:00 VN** — `--select failed --max-jobs 0 --publish` (retry **all** `failed` rows, any day)
-  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today` or `failed`
+  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today`, `pending`, or `failed`
+  - GitHub may delay scheduled runs by minutes–hours (or skip a day on low-activity repos). Prefer **Run workflow** to verify.
 - One day may have **multiple** jobs; set each row’s `created_at` to that calendar day (e.g. `2026-07-10T00:00:00+07:00`). Empty `created_at` is skipped by `due-today`.
-- Slideshow jobs **require** `assets/jobs/<id>/` (pregenerate + commit). Missing assets → job `failed` with a clear error. Daily runs reuse frozen script + PNGs; only TTS + Remotion + publish hit the network.
+- Slideshow jobs reuse `assets/jobs/<id>/` when complete; otherwise generate script + images, persist there, then TTS + Remotion + publish. Optional `--require-job-assets` fails if the library is missing. Pregenerate + commit still recommended for cheaper/faster CI.
 - After each successful render, the batch publishes that MP4 via `publish_runner` (`--publish`) so multi-job runs do not lose earlier videos when `output/final/` is overwritten.
 - Then commits the updated `jobs.csv` back to the repo.
 - The last rendered `final.mp4` is also uploaded as a build **artifact** (retained 90 days). Artifacts are not committed to git.

@@ -42,10 +42,14 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
-| — | Job asset library (script + images) | 2026-07-10 | `assets/jobs/<id>/`; `scripts/pregenerate_job_assets.py`; daily batch requires library (TTS+Remotion only). |
+| T040 | Fix GHA daily-batch cron + mode match | 2026-07-10 | Retry cron `0 23 * * *` (06:00 VN); explicit schedule→select mapping; docs note cron only on `main`. |
+| T039 | Batch: reset run dir + stop on Gemini quota | 2026-07-10 | Each job clears `output/final`; stop remaining pending rows when API quota exhausted. |
+| T038 | Full inventory then fill gaps only | 2026-07-10 | `inventory_job_assets` soát hết script+từng PNG trước; chỉ GPT phần còn thiếu. |
+| T037 | Partial image fill for job assets | 2026-07-10 | Script OK + thiếu ảnh → giữ PNG có sẵn, `force=False` chỉ generate phần còn thiếu. |
+| T035 | Job asset cache auto generate+persist | 2026-07-10 | Flow: tồn tại → đọc draft+images → đủ thì reuse / không đủ thì GPT script+ảnh → lưu → TTS → Remotion → Publish. `try_load_reusable_job_assets`. ADR 0008. |
 | — | Dual cron: due-today + retry-failed | 2026-07-10 | `--select due-today\|failed`, `--max-jobs 0`, per-job `--publish`; GHA crons 00:00 + 06:00 VN. |
 | — | Shift daily-batch cron to 00:00 VN | 2026-07-10 | `cron: "0 17 * * *"` (17:00 UTC = 00:00 UTC+7); docs updated. |
-| T035 | Fix duplicate Drive uploads in GitHub Actions | 2026-07-09 | Batch jobs now render with `publish=False`; GitHub workflow remains the single publish step, preventing duplicate Drive uploads. |
+| T036 | Fix duplicate Drive uploads in GitHub Actions | 2026-07-09 | Batch jobs now render with `publish=False`; GitHub workflow remains the single publish step, preventing duplicate Drive uploads. |
 | T034 | Teleport shake tuning + whipPan transition | 2026-07-09 | Stronger/longer shake (+30% frames, 3.75 amplitude); new `whipPan` with ease-in-out pan + shake bookends; 4-item rotation. ADR 0006 updated. |
 | T033 | GHA ChatGPT image quality/size | 2026-07-09 | `daily-batch.yml`: `IMAGE_PROVIDER=chatgpt`, `OPENAI_IMAGE_SIZE=896x1600`, `OPENAI_IMAGE_QUALITY=low`; pending `jobs.csv` rows → `chatgpt`; docs updated. **Human:** add `OPENAI_IMAGE_API_KEY` secret, push, run workflow. |
 | T032 | ChatGPT image cost controls | 2026-07-08 | `OPENAI_IMAGE_QUALITY`, `OPENAI_IMAGE_PROMPT_MODE=compact\|full`, cache-friendly prompts, cached token logging. |

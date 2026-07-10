@@ -30,8 +30,20 @@ def parse_platform_list(raw: str | None) -> list[str]:
     return platforms
 
 
+def _auto_detect_platforms() -> list[str]:
+    """Enable platforms whose required env vars are all set."""
+    platforms: list[str] = []
+    if drive.load_config_from_env() is not None:
+        platforms.append("drive")
+    if telegram.load_config_from_env() is not None:
+        platforms.append("telegram")
+    if facebook.load_config_from_env() is not None:
+        platforms.append("facebook")
+    return platforms
+
+
 def get_enabled_platforms(*, cli_override: str | None = None) -> list[str]:
-    """Return platform names from CLI override, env override, or auto-detect Drive."""
+    """Return platform names from CLI override, env override, or auto-detect."""
     if cli_override is not None:
         return parse_platform_list(cli_override)
 
@@ -39,9 +51,7 @@ def get_enabled_platforms(*, cli_override: str | None = None) -> list[str]:
     if raw:
         return parse_platform_list(raw)
 
-    if drive.load_config_from_env() is not None:
-        return ["drive"]
-    return []
+    return _auto_detect_platforms()
 
 
 def deliver_to_platforms(

@@ -57,16 +57,21 @@ flowchart LR
 ### Slideshow mode (3-scene)
 
 ```mermaid
-flowchart LR
-  topic[Topic] --> sw[SceneScriptWriter]
-  sw --> scenes["scenes x3"]
-  scenes --> dalle[DALL-E3 slides]
-  scenes --> tts[PerScene TTS]
-  dalle --> remotion[Remotion]
-  tts --> remotion
+flowchart TD
+  csv[CSV] --> readJob[Đọc job]
+  readJob --> inv[Soát hết inventory script + từng PNG]
+  inv --> enough{"Đủ hết?"}
+  enough -->|Có| reuse[Reuse toàn bộ]
+  enough -->|Thiếu| gaps[Liệt kê mọi phần thiếu]
+  gaps --> fill[GPT chỉ tạo phần còn thiếu]
+  fill --> save[Lưu assets/jobs/id]
+  reuse --> tts[TTS]
+  save --> tts
+  tts --> remotion[Remotion]
+  remotion --> publish[Publish]
 ```
 
-Entry: `python orchestrator_mvp.py "topic"` (default: slideshow). Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none` (typography baked into slides). Export: `python core/remotion_render_stage.py output/pipeline_payload.json`.
+Batch passes `job_assets_id` (ADR [0008](../adr/0008-job-asset-cache.md)). Entry: `python orchestrator_mvp.py "topic"` (default: slideshow). Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none`. Export: `python core/remotion_render_stage.py output/pipeline_payload.json`.
 
 ## Roadmap
 
