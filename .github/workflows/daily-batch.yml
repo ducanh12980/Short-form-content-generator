@@ -3,7 +3,7 @@ name: Daily video batch
 on:
   schedule:
     # 17:00 UTC = 00:00 UTC+7 — pending jobs due today (created_at date == today VN)
-    - cron: "0 4 * * *"
+    - cron: "0 5 * * *"
     # 23:00 UTC = 06:00 UTC+7 — retry all failed jobs
     - cron: "0 23 * * *"
   workflow_dispatch:
