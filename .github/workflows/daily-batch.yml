@@ -1,11 +1,13 @@
 name: Daily video batch
 
 on:
+  # schedule:
+  #   # 06:15 UTC = 13:15 Asia/Ho_Chi_Minh — due-today
+  #   - cron: "15 6 * * *"
+  #   # 23:00 UTC = 06:00 Asia/Ho_Chi_Minh — retry failed
+  #   - cron: "0 23 * * *"
   schedule:
-    # 06:15 UTC = 13:15 Asia/Ho_Chi_Minh — due-today
-    - cron: "15 6 * * *"
-    # 23:00 UTC = 06:00 Asia/Ho_Chi_Minh — retry failed
-    - cron: "0 23 * * *"
+  - cron: "*/5 * * * *" 
 
   workflow_dispatch:
     inputs:
