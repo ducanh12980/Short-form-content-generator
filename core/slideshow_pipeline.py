@@ -458,17 +458,13 @@ def run_slideshow_pipeline(
     job_assets_id: str | None = None,
     require_job_assets: bool = False,
 ) -> dict[str, Any]:
-    """CSV job flow: read assets/jobs/<id> → reuse what exists → fill gaps only → TTS.
+    """CSV job flow: inventory all parts → fill only gaps → TTS.
 
     Detailed branch (when ``job_assets_id`` is set)::
 
-        assets/jobs/<id> tồn tại?
-          Có → đọc scenes_draft.json + images/*.png
-                → đủ? reuse toàn bộ
-                → thiếu ảnh? giữ script + ảnh có sẵn, GPT chỉ tạo PNG còn thiếu → lưu
-                → thiếu/hỏng script? GPT script (+ chỉ PNG còn thiếu) → lưu
-          Không → GPT script → GPT ảnh → lưu
-        → TTS → (Remotion / Publish happen outside this function)
+        1. Soát hết assets/jobs/<id>/ (script + từng PNG) — inventory đầy đủ
+        2. Nếu thiếu bất kỳ phần nào → chỉ GPT phần còn thiếu (không render lại phần đã có)
+        3. Lưu lại library → TTS → (Remotion / Publish ngoài hàm này)
     """
     if caption_mode not in VALID_CAPTION_MODES:
         raise ValueError(
@@ -486,12 +482,10 @@ def run_slideshow_pipeline(
     from core.job_assets import (
         copy_existing_job_images_into,
         copy_job_images_into,
-        has_all_required_images,
-        job_assets_dir_exists,
-        missing_image_names,
+        format_inventory_summary,
+        inventory_job_assets,
         persist_job_assets_from_run_dir,
         require_complete_job_assets,
-        try_load_job_scenes_draft,
     )
 
     assets_id = (job_assets_id or "").strip() or None
@@ -500,8 +494,16 @@ def run_slideshow_pipeline(
     slides: list[dict[str, Any]] | None = None
     publish: dict[str, Any] | None = None
     client = None
+    inventory: dict[str, Any] | None = None
 
     if assets_id:
+        # Always scan every part first (script + all 5 images), even if one is missing.
+        inventory = inventory_job_assets(assets_id, topic=topic)
+        log_step_done(
+            "job assets inventory",
+            f"id={assets_id}: {format_inventory_summary(inventory)}",
+        )
+
         if require_job_assets:
             require_complete_job_assets(assets_id)
             from core.job_assets import load_job_scenes_draft
@@ -509,27 +511,17 @@ def run_slideshow_pipeline(
             slides, publish = load_job_scenes_draft(assets_id, topic=topic)
             script_from_library = True
             images_complete = True
+        elif inventory["complete"]:
+            slides = inventory["slides"]
+            publish = inventory["publish"]
+            script_from_library = True
+            images_complete = True
         else:
-            if job_assets_dir_exists(assets_id):
-                log_step_done("job assets", f"found assets/jobs/{assets_id}/ — validating")
-            draft = try_load_job_scenes_draft(assets_id, topic=topic)
-            if draft is not None:
-                slides, publish = draft
+            if inventory["script_ok"]:
+                slides = inventory["slides"]
+                publish = inventory["publish"]
                 script_from_library = True
-                if has_all_required_images(assets_id):
-                    images_complete = True
-                else:
-                    missing = missing_image_names(assets_id)
-                    log_step_done(
-                        "job assets",
-                        f"script OK — missing images: {', '.join(missing)} (will generate only those)",
-                    )
-            else:
-                log_step_done(
-                    "job assets",
-                    f"no reusable script for id={assets_id} — generating script"
-                    + (" + missing images" if job_assets_dir_exists(assets_id) else " + images"),
-                )
+            # else: script will be generated below; images filled after with force=False
 
     if script_from_library:
         assert assets_id is not None and slides is not None and publish is not None
@@ -594,12 +586,17 @@ def run_slideshow_pipeline(
     elif not skip_images:
         if assets_id is not None:
             reused_paths = copy_existing_job_images_into(out, assets_id, slides=slides)
-            if reused_paths:
+            missing = (inventory or {}).get("missing_images") or []
+            if reused_paths or missing:
                 log_step_done(
                     image_step,
-                    f"kept {len(reused_paths)} existing image(s) from assets/jobs/{assets_id}/",
+                    (
+                        f"inventory fill: keep {len(reused_paths)} existing, "
+                        f"generate {len(missing) if missing else 'remaining'} missing"
+                        + (f" ({', '.join(missing)})" if missing else "")
+                    ),
                 )
-        # force=False → only call the image API for PNGs that are still missing
+        # force=False → only call the image API for PNGs still absent after inventory copy
         generate_scene_images(
             project_stub,
             images_dir=out / "images",

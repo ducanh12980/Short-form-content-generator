@@ -59,15 +59,11 @@ flowchart LR
 ```mermaid
 flowchart TD
   csv[CSV] --> readJob[Đọc job]
-  readJob --> exists{"assets/jobs/id tồn tại?"}
-  exists -->|Có| readDraft[Đọc scenes_draft.json]
-  readDraft --> readImgs[Đọc images PNG]
-  readImgs --> enough{"Đủ?"}
-  enough -->|Có| reuse[Reuse script + images]
-  enough -->|Script OK thiếu ảnh| fill[GPT chỉ tạo PNG còn thiếu]
-  enough -->|Script hỏng| gptScript[GPT tạo script]
-  exists -->|Không| gptScript
-  gptScript --> fill
+  readJob --> inv[Soát hết inventory script + từng PNG]
+  inv --> enough{"Đủ hết?"}
+  enough -->|Có| reuse[Reuse toàn bộ]
+  enough -->|Thiếu| gaps[Liệt kê mọi phần thiếu]
+  gaps --> fill[GPT chỉ tạo phần còn thiếu]
   fill --> save[Lưu assets/jobs/id]
   reuse --> tts[TTS]
   save --> tts

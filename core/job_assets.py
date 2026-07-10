@@ -138,6 +138,78 @@ def missing_image_names(job_id: str, *, root: str | Path | None = None) -> list[
     return [path.name for path in expected_image_paths(job_id, root=root) if not path.is_file()]
 
 
+def inventory_job_assets(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> dict[str, Any]:
+    """Scan **all** library parts once: script + each required PNG.
+
+    Returns a dict used by the pipeline to fill only gaps::
+
+        {
+          "folder_exists": bool,
+          "script_ok": bool,
+          "slides": list | None,
+          "publish": dict | None,
+          "present_images": ["intro.png", ...],
+          "missing_images": ["scene_2.png", ...],
+          "complete": bool,  # script_ok and no missing images
+        }
+
+    Call this before any GPT work so one missing part still triggers a full
+    scan of every remaining part.
+    """
+    folder_exists = job_assets_dir_exists(job_id, root=root)
+    present_images: list[str] = []
+    missing_images: list[str] = []
+    for path in expected_image_paths(job_id, root=root):
+        if path.is_file():
+            present_images.append(path.name)
+        else:
+            missing_images.append(path.name)
+
+    slides: list[dict[str, Any]] | None = None
+    publish: dict[str, Any] | None = None
+    script_ok = False
+    if folder_exists or job_scenes_draft_path(job_id, root=root).is_file():
+        loaded = try_load_job_scenes_draft(job_id, topic=topic, root=root)
+        if loaded is not None:
+            slides, publish = loaded
+            script_ok = True
+
+    return {
+        "folder_exists": folder_exists,
+        "script_ok": script_ok,
+        "slides": slides,
+        "publish": publish,
+        "present_images": present_images,
+        "missing_images": missing_images,
+        "complete": script_ok and not missing_images,
+    }
+
+
+def format_inventory_summary(inventory: dict[str, Any]) -> str:
+    """Human-readable one-line inventory for pipeline logs."""
+    if inventory.get("complete"):
+        return "complete (script + 5 images)"
+    parts: list[str] = []
+    if inventory.get("script_ok"):
+        parts.append("script OK")
+    else:
+        parts.append("script MISSING")
+    present = inventory.get("present_images") or []
+    missing = inventory.get("missing_images") or []
+    if present:
+        parts.append(f"images present={','.join(present)}")
+    if missing:
+        parts.append(f"images missing={','.join(missing)}")
+    elif not present:
+        parts.append("images missing=all")
+    return "; ".join(parts)
+
+
 def copy_existing_job_images_into(
     run_dir: str | Path,
     job_id: str,

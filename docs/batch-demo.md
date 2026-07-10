@@ -29,22 +29,16 @@ CSV
  ▼
 assets/jobs/<id> tồn tại?
  │
- ├─────────────── Có ───────────────┐
+ ▼
+Soát HẾT (inventory): script + từng PNG
+ │
+ ├─ Đủ hết ─────────────────────────┐
  │                                  │
- ▼                                  │
-Đọc scenes_draft.json               │
-Đọc images/*.png                    │
+ ├─ Thiếu bất kỳ phần nào ──────────┤
+ │     → liệt kê toàn bộ phần thiếu │
+ │     → GPT chỉ tạo phần còn thiếu │
+ │       (giữ phần đã có)           │
  │                                  │
- ├─ Đủ ─────────────────────────────┤
- │                                  │
- ├─ Script OK, thiếu ảnh ───────────┤
- │     → giữ ảnh có sẵn             │
- │     → GPT chỉ tạo PNG còn thiếu  │
- │                                  │
- └─ Script thiếu/hỏng ──────────────┤
-       → GPT tạo script             │
-       → GPT chỉ tạo PNG còn thiếu  │
-                │                   │
                 ▼                   │
       Lưu assets/jobs/<id>/ ◄───────┘
                 ▼
@@ -55,7 +49,7 @@ assets/jobs/<id> tồn tại?
             Publish
 ```
 
-“Đủ” = `scenes_draft.json` hợp lệ (topic khớp, có TTS text + publish) **và** đủ 5 PNG. Thiếu ảnh thì **không** render lại ảnh đã có — chỉ generate phần còn thiếu.
+Khi phát hiện thiếu 1 phần, vẫn **soát hết** các phần còn lại rồi mới generate — không dừng ở phần đầu tiên thiếu, và không render lại phần đã có.
 
 Layout:
 

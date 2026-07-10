@@ -120,6 +120,35 @@ def test_copy_job_images_into(tmp_path: Path) -> None:
     assert slides[0]["image"]["source"] == "job_assets"
 
 
+def test_inventory_job_assets_lists_all_gaps(tmp_path: Path) -> None:
+    from core.job_assets import format_inventory_summary, inventory_job_assets
+
+    root = tmp_path / "assets" / "jobs"
+    empty = inventory_job_assets("9", topic="topic", root=root)
+    assert empty["script_ok"] is False
+    assert empty["complete"] is False
+    assert set(empty["missing_images"]) == {
+        "intro.png",
+        "scene_1.png",
+        "scene_2.png",
+        "scene_3.png",
+        "ending.png",
+    }
+    assert "script MISSING" in format_inventory_summary(empty)
+
+    assets = _write_complete_assets(root, "9", topic="topic one")
+    (assets / "images" / "scene_1.png").unlink()
+    (assets / "images" / "ending.png").unlink()
+    inv = inventory_job_assets("9", topic="topic one", root=root)
+    assert inv["script_ok"] is True
+    assert inv["complete"] is False
+    assert inv["missing_images"] == ["scene_1.png", "ending.png"]
+    assert set(inv["present_images"]) == {"intro.png", "scene_2.png", "scene_3.png"}
+    summary = format_inventory_summary(inv)
+    assert "script OK" in summary
+    assert "scene_1.png" in summary
+
+
 def test_try_load_reusable_job_assets(tmp_path: Path) -> None:
     from core.job_assets import try_load_job_scenes_draft, try_load_reusable_job_assets
 

@@ -9,12 +9,12 @@ assets/jobs/<id>/
 ## Flow (chi tiết)
 
 ```
-CSV → Đọc job → assets/jobs/<id> tồn tại?
-  Có  → Đọc scenes_draft.json + images/*.png
-        → Đủ? reuse
-        → Script OK, thiếu ảnh? giữ ảnh có sẵn + GPT chỉ tạo PNG còn thiếu → Lưu
-        → Script hỏng? GPT script + GPT chỉ tạo PNG còn thiếu → Lưu
-  Không → GPT script → GPT ảnh → Lưu
+CSV → Đọc job → Soát HẾT assets/jobs/<id>/ (script + từng PNG)
+  → Đủ hết? reuse
+  → Thiếu bất kỳ phần nào?
+       liệt kê toàn bộ phần thiếu
+       → GPT chỉ tạo phần còn thiếu (giữ phần đã có)
+       → Lưu
 → TTS → Remotion → Publish
 ```
 

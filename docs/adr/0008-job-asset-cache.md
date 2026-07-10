@@ -5,9 +5,9 @@
 - **Context**: CSV batch must follow: read job → if `assets/jobs/<id>/` exists, read `scenes_draft.json` + `images/*.png` → if incomplete, GPT script + GPT images → always save library → TTS → Remotion → Publish. A hard pregenerate-only gate blocked first runs.
 - **Decision**:
   - Library path: `assets/jobs/<id>/` (`scenes_draft.json` + five PNGs).
-  - Reuse script via `try_load_job_scenes_draft` even when some images are missing.
-  - Full reuse only when draft + all images exist; otherwise copy existing PNGs and call image API with `force=False` so **only missing files** are generated.
-  - Order: script (reuse or GPT) → fill missing images → save → spoken TTS → Remotion → publish.
+  - Always run `inventory_job_assets` first: scan script + **every** required PNG in one pass (even when the first gap is found).
+  - Then fill only gaps: reuse valid script; copy present images; `force=False` image generation for missing PNGs only.
+  - Order: inventory → fill missing → save → spoken TTS → Remotion → publish.
   - Default `require_job_assets=False`; `--require-job-assets` for strict mode.
 - **Consequences**:
   - Topic mismatch / broken draft / missing PNG → regenerate path.
