@@ -201,6 +201,19 @@ def collect_slideshow_image_paths(payload: dict[str, Any]) -> list[Path]:
     raise ValueError("No slide images found in pipeline payload.")
 
 
+def is_quota_exhausted_error(exc: BaseException) -> bool:
+    """True when the failure is an LLM/API daily quota (retrying other jobs won't help)."""
+    text = str(exc).lower()
+    markers = (
+        "quota exceeded",
+        "daily quota",
+        "resource_exhausted",
+        "exceeded your current quota",
+        "generate_content_free_tier",
+    )
+    return any(marker in text for marker in markers)
+
+
 def execute_job(
     row: dict[str, str],
     *,
@@ -213,8 +226,11 @@ def execute_job(
     Slideshow jobs pass ``job_assets_id``. When ``assets/jobs/<id>/`` is complete,
     script + images are reused; otherwise LLM/image APIs run and results are
     persisted there. Set ``require_job_assets=True`` to fail if the library is missing.
+
+    Always clears the run folder first so leftover ``scenes_draft.json`` / images
+    from a previous CSV row cannot be reused under a different job id.
     """
-    from core.run_output import prepare_default_run_dir, reset_run_dir
+    from core.run_output import reset_run_dir, resolve_final_output_dir
 
     job_id = row["id"].strip()
     topic = row["topic"].strip()
@@ -240,10 +256,8 @@ def execute_job(
         or "none"
     )
 
-    if output_dir is not None and str(output_dir).strip():
-        job_dir = reset_run_dir(output_dir)
-    else:
-        job_dir = prepare_default_run_dir()
+    target = output_dir if output_dir is not None and str(output_dir).strip() else resolve_final_output_dir()
+    job_dir = reset_run_dir(target)
 
     if mode == "slideshow":
         from orchestrator_mvp import run_slideshow_with_render
@@ -430,5 +444,19 @@ def process_pending_jobs(
                 row["completed_at"] = _utc_now_iso()
                 results.append({"id": job_id, "status": "failed", "error": row["error"]})
                 save_jobs(path, rows)
+                # Free-tier Gemini quota is shared — continuing only fails every later row.
+                if is_quota_exhausted_error(exc):
+                    remaining = sum(
+                        1
+                        for later in to_run
+                        if later["id"] not in {item["id"] for item in results}
+                    )
+                    if remaining:
+                        print(
+                            f"[batch] stopping early after job {job_id}: API quota exhausted "
+                            f"({remaining} remaining job(s) left pending — retry later).",
+                            flush=True,
+                        )
+                    break
 
     return results

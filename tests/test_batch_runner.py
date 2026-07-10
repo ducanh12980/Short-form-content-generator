@@ -125,6 +125,93 @@ def test_execute_job_mvp_disables_inline_publish(mock_run, tmp_path: Path) -> No
     assert mock_run.call_args.kwargs["publish"] is False
 
 
+@patch("orchestrator_mvp.run_slideshow_with_render")
+def test_execute_job_resets_run_dir_between_jobs(mock_run, tmp_path: Path) -> None:
+    """Leftover scenes_draft/images from a prior CSV row must not leak into the next job."""
+    from core.batch_runner import execute_job
+
+    run_dir = tmp_path / "final"
+    run_dir.mkdir()
+    stale = run_dir / "scenes_draft.json"
+    stale.write_text('{"topic":"old"}', encoding="utf-8")
+    (run_dir / "images").mkdir()
+    (run_dir / "images" / "intro.png").write_bytes(b"old")
+
+    final = run_dir / "final.mp4"
+    mock_run.return_value = ({}, final)
+    row = {
+        "id": "2",
+        "topic": "new topic",
+        "status": "pending",
+        "mode": "slideshow",
+        "image_provider": "mock",
+    }
+
+    execute_job(row, output_dir=run_dir)
+
+    assert not stale.exists()
+    assert not (run_dir / "images" / "intro.png").exists()
+    assert mock_run.call_args.kwargs["job_assets_id"] == "2"
+
+
+def test_is_quota_exhausted_error() -> None:
+    from core.batch_runner import is_quota_exhausted_error
+
+    assert is_quota_exhausted_error(
+        RuntimeError("Gemini daily quota exceeded for this API key/model")
+    )
+    assert is_quota_exhausted_error(RuntimeError("Error 429 RESOURCE_EXHAUSTED"))
+    assert not is_quota_exhausted_error(RuntimeError("network timeout"))
+
+
+@patch("core.batch_runner.execute_job")
+def test_process_pending_jobs_stops_on_quota(mock_execute, tmp_path: Path) -> None:
+    mock_execute.side_effect = RuntimeError(
+        "Scene script writer failed: Gemini daily quota exceeded for this API key/model."
+    )
+
+    csv_path = tmp_path / "jobs.csv"
+    init_jobs_csv(csv_path, examples=False)
+    save_jobs(
+        csv_path,
+        [
+            {
+                "id": "1",
+                "topic": "topic one",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "",
+                "completed_at": "",
+            },
+            {
+                "id": "2",
+                "topic": "topic two",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "",
+                "completed_at": "",
+            },
+        ],
+    )
+
+    results = process_pending_jobs(
+        csv_path, max_jobs=0, output_dir=tmp_path / "final", require_job_assets=False
+    )
+
+    assert len(results) == 1
+    assert results[0]["status"] == "failed"
+    assert mock_execute.call_count == 1
+    rows = load_jobs(csv_path)
+    assert rows[0]["status"] == "failed"
+    assert rows[1]["status"] == "pending"
+
+
 @patch("core.batch_runner.execute_job")
 def test_process_pending_jobs_updates_csv(mock_execute, tmp_path: Path) -> None:
     mock_execute.return_value = tmp_path / "output" / "final.mp4"

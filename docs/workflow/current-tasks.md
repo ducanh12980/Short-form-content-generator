@@ -42,6 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T039 | Batch: reset run dir + stop on Gemini quota | 2026-07-10 | Each job clears `output/final`; stop remaining pending rows when API quota exhausted. |
 | T038 | Full inventory then fill gaps only | 2026-07-10 | `inventory_job_assets` soát hết script+từng PNG trước; chỉ GPT phần còn thiếu. |
 | T037 | Partial image fill for job assets | 2026-07-10 | Script OK + thiếu ảnh → giữ PNG có sẵn, `force=False` chỉ generate phần còn thiếu. |
 | T035 | Job asset cache auto generate+persist | 2026-07-10 | Flow: tồn tại → đọc draft+images → đủ thì reuse / không đủ thì GPT script+ảnh → lưu → TTS → Remotion → Publish. `try_load_reusable_job_assets`. ADR 0008. |
