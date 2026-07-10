@@ -10,6 +10,24 @@ import pytest
 from core.publish.registry import get_enabled_platforms, parse_platform_list
 from core.publish_runner import publish_video
 
+_PUBLISH_ENV_KEYS = (
+    "PUBLISH_PLATFORMS",
+    "TELEGRAM_BOT_TOKEN",
+    "TELEGRAM_CHAT_ID",
+    "GOOGLE_DRIVE_CLIENT_ID",
+    "GOOGLE_DRIVE_CLIENT_SECRET",
+    "GOOGLE_DRIVE_REFRESH_TOKEN",
+    "GOOGLE_DRIVE_FOLDER_ID",
+    "GOOGLE_DRIVE_CREDENTIALS_JSON",
+    "FACEBOOK_PAGE_ID",
+    "FACEBOOK_ACCESS_TOKEN",
+)
+
+
+def _clear_publish_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    for key in _PUBLISH_ENV_KEYS:
+        monkeypatch.delenv(key, raising=False)
+
 
 def test_parse_platform_list_deduplicates_and_lowercases() -> None:
     assert parse_platform_list("Facebook, telegram, FACEBOOK") == ["facebook", "telegram"]
@@ -30,7 +48,7 @@ def test_publish_video_skips_when_no_platforms(
     monkeypatch: pytest.MonkeyPatch,
     capsys: pytest.CaptureFixture[str],
 ) -> None:
-    monkeypatch.delenv("PUBLISH_PLATFORMS", raising=False)
+    _clear_publish_env(monkeypatch)
     video = tmp_path / "final.mp4"
     video.write_bytes(b"mp4")
 
