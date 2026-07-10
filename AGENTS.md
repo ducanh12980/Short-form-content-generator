@@ -30,7 +30,8 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Run slideshow + final MP4 | `python orchestrator_mvp.py "topic"` (no captions by default) |
 | Slideshow + sentence captions | `python orchestrator_mvp.py "topic" --caption-mode sentence` |
 | Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
-| **Daily CSV batch (1 video)** | `python batch_runner.py --csv jobs.csv` — see [docs/batch-demo.md](docs/batch-demo.md) |
+| **Pregenerate job assets** | `python scripts/pregenerate_job_assets.py --csv jobs.csv` — freeze script+images into `assets/jobs/<id>/` |
+| **Daily CSV batch** | `python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish` — see [docs/batch-demo.md](docs/batch-demo.md) |
 | **Daily batch on GitHub Actions** | `.github/workflows/daily-batch.yml` (scheduled) — see [docs/batch-demo.md](docs/batch-demo.md#github-actions-no-server) |
 | Send MP4 to Telegram | `python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv` |
 | **Publish to platforms** | `python core/publish_runner.py output/final/final.mp4 --jobs-csv jobs.csv` — set `PUBLISH_PLATFORMS=facebook,telegram` |

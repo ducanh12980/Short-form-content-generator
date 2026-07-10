@@ -422,6 +422,9 @@ def run_slideshow_with_render(
     caption_mode: str = "none",
     skip_images: bool = False,
     image_provider: str | None = None,
+    publish: bool = True,
+    job_assets_id: str | None = None,
+    require_job_assets: bool = False,
 ) -> tuple[dict[str, Any], Path]:
     """Run slideshow generation then Remotion export → final.mp4 in output_dir."""
     from core.publish_runner import publish_video
@@ -435,10 +438,13 @@ def run_slideshow_with_render(
         caption_mode=caption_mode,
         skip_images=skip_images,
         image_provider=image_provider,
+        job_assets_id=job_assets_id,
+        require_job_assets=require_job_assets,
     )
     payload_path = out / "pipeline_payload.json"
     final = render_project_video(payload_path, out / "final.mp4")
-    publish_video(final, payload_path=payload_path)
+    if publish:
+        publish_video(final, payload_path=payload_path)
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     return payload, final
 
@@ -447,6 +453,7 @@ def run_mvp_with_render(
     topic_prompt: str,
     *,
     output_dir: str | Path,
+    publish: bool = True,
 ) -> tuple[dict[str, Any], Path]:
     """Run MVP generation then Remotion export → final.mp4 in output_dir."""
     from core.publish_runner import publish_video
@@ -456,7 +463,8 @@ def run_mvp_with_render(
     run_mvp_pipeline(topic_prompt, output_dir=out)
     payload_path = out / "pipeline_payload.json"
     final = render_project_video(payload_path, out / "final.mp4")
-    publish_video(final, payload_path=payload_path)
+    if publish:
+        publish_video(final, payload_path=payload_path)
     payload = json.loads(payload_path.read_text(encoding="utf-8"))
     return payload, final
 

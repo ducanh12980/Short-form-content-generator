@@ -1,6 +1,6 @@
 # CSV batch demo — one video per day
 
-Run the slideshow pipeline on **one pending CSV row** per invocation. Schedule with cron (Linux/macOS) or Task Scheduler (Windows) for daily production.
+Run the slideshow pipeline on **pending CSV rows** (by date or retry). Schedule with cron / Task Scheduler / GitHub Actions for daily production.
 
 ## Quick start
 
@@ -8,12 +8,40 @@ Run the slideshow pipeline on **one pending CSV row** per invocation. Schedule w
 # Create jobs.csv with example rows
 python batch_runner.py --init
 
-# Process the next pending row (generation + Remotion → final.mp4)
-python batch_runner.py --csv jobs.csv
+# One-time: freeze script + images into assets/jobs/<id>/ (commit + push to GitHub)
+python scripts/pregenerate_job_assets.py --csv jobs.csv
+
+# Daily: render using frozen assets (TTS + Remotion + optional publish)
+python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish
 
 # Preview queue without running
 python batch_runner.py --csv jobs.csv --dry-run
 ```
+
+### Job asset library (script + images on GitHub)
+
+Daily batch **requires** pregenerated assets under `assets/jobs/<id>/` (tracked in git so Actions can checkout them):
+
+```
+assets/jobs/<id>/
+  scenes_draft.json    # frozen LLM script + TTS text + publish metadata
+  images/
+    intro.png
+    scene_1.png
+    scene_2.png
+    scene_3.png
+    ending.png
+```
+
+```bash
+# All pending rows in jobs.csv
+python scripts/pregenerate_job_assets.py --csv jobs.csv
+
+# One job only / regenerate
+python scripts/pregenerate_job_assets.py --csv jobs.csv --job-id 1 --force
+```
+
+Then `git add assets/jobs && git commit && git push`. Cron runs only TTS + Remotion + publish (no script/image API). Use `--allow-generate` on `batch_runner.py` only for local experiments without the library.
 
 Each successful job writes artifacts under `output/final/` (the folder is cleared before each run):
 
@@ -44,10 +72,10 @@ The CSV row is updated: `status=done`, `output_path=<path to final.mp4>`. Copy `
 | `image_provider` | no | `pollinations` \| `chatgpt` \| `mock` |
 | `output_path` | no | Filled on success |
 | `error` | no | Filled on failure |
-| `created_at` | no | ISO timestamp |
+| `created_at` | no | ISO timestamp; for GitHub **due-today** mode, the **calendar date in Asia/Ho_Chi_Minh** must match today |
 | `completed_at` | no | ISO timestamp |
 
-Add many `pending` rows to the CSV. With the default **`--max-jobs 1`**, each scheduled run processes **only the next pending row** — suitable for one video per day.
+Add many `pending` rows to the CSV. Set each row’s `created_at` to the Vietnam calendar day you want it to run. GitHub **00:00 VN** uses `--select due-today --max-jobs 0` (all matching rows that day). **06:00 VN** retries every `failed` row. Local default remains `--select pending --max-jobs 1` (next pending only).
 
 ## Environment
 
@@ -73,17 +101,21 @@ FACEBOOK_ACCESS_TOKEN=                  # Page token with pages_manage_posts
 ### Linux / macOS (cron)
 
 ```cron
-# Every day at 08:00 — one pending video
-0 8 * * * cd /path/to/Short-form-content-generator && .venv/bin/python batch_runner.py --csv jobs.csv --max-jobs 1 >> logs/batch.log 2>&1
+# Every day at 00:00 — all pending jobs due today (created_at date == today VN)
+0 0 * * * cd /path/to/Short-form-content-generator && .venv/bin/python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish >> logs/batch.log 2>&1
+
+# Every day at 06:00 — retry all failed jobs
+0 6 * * * cd /path/to/Short-form-content-generator && .venv/bin/python batch_runner.py --csv jobs.csv --select failed --max-jobs 0 --publish >> logs/batch.log 2>&1
 ```
 
 ### Windows (Task Scheduler)
 
 1. **Action:** Start a program  
    - Program: `C:\path\to\Short-form-content-generator\.venv\Scripts\python.exe`  
-   - Arguments: `batch_runner.py --csv jobs.csv --max-jobs 1`  
+   - Arguments (00:00): `batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish`  
+   - Arguments (06:00 retry): `batch_runner.py --csv jobs.csv --select failed --max-jobs 0 --publish`  
    - Start in: `C:\path\to\Short-form-content-generator`
-2. **Trigger:** Daily at your chosen time.
+2. **Trigger:** Two daily triggers (midnight + 06:00), or one trigger per mode.
 3. Ensure `.env` and Remotion (`cd remotion && npm install`) are set up on the machine.
 
 ### GitHub Actions (no server)
@@ -115,10 +147,29 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 
 **How it runs:**
 
-- Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
-- Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
-- The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
-- When `PUBLISH_PLATFORMS` is set, the workflow publishes `final.mp4` via `core/publish_runner.py`. With `telegram`, the bot uploads to Google Drive first and sends the link (not the video file). Caption prefers `publish` metadata from `output/final/pipeline_payload.json` (title, description, hashtags); falls back to `#<job id> — <topic>` from `jobs.csv`. On failure, a plain Telegram `sendMessage` is sent (when `TELEGRAM_*` secrets are set).
+- Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7):
+  - `cron: "0 17 * * *"` → **00:00 VN** — `--select due-today --max-jobs 0 --publish` (all `pending` rows whose `created_at` **date** is today in Asia/Ho_Chi_Minh)
+  - `cron: "0 23 * * *"` → **06:00 VN** — `--select failed --max-jobs 0 --publish` (retry **all** `failed` rows, any day)
+  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today` or `failed`
+- One day may have **multiple** jobs; set each row’s `created_at` to that calendar day (e.g. `2026-07-10T00:00:00+07:00`). Empty `created_at` is skipped by `due-today`.
+- Slideshow jobs **require** `assets/jobs/<id>/` (pregenerate + commit). Missing assets → job `failed` with a clear error. Daily runs reuse frozen script + PNGs; only TTS + Remotion + publish hit the network.
+- After each successful render, the batch publishes that MP4 via `publish_runner` (`--publish`) so multi-job runs do not lose earlier videos when `output/final/` is overwritten.
+- Then commits the updated `jobs.csv` back to the repo.
+- The last rendered `final.mp4` is also uploaded as a build **artifact** (retained 90 days). Artifacts are not committed to git.
+- With `telegram` in `PUBLISH_PLATFORMS`, the bot uploads to Google Drive first and sends the link. Caption prefers `publish` metadata from `pipeline_payload.json`; falls back to `#<job id> — <topic>` from `jobs.csv`. On workflow failure, a plain Telegram `sendMessage` is sent (when `TELEGRAM_*` secrets are set).
+
+**CLI select modes:**
+
+```bash
+# All pending due today (VN calendar date on created_at)
+python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish
+
+# Retry every failed row
+python batch_runner.py --csv jobs.csv --select failed --max-jobs 0 --publish
+
+# Legacy: next pending only (no date filter)
+python batch_runner.py --csv jobs.csv --select pending --max-jobs 1
+```
 
 **Multi-platform publish (local or CI):**
 
