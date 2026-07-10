@@ -73,8 +73,8 @@ FACEBOOK_ACCESS_TOKEN=                  # Page token with pages_manage_posts
 ### Linux / macOS (cron)
 
 ```cron
-# Every day at 08:00 — one pending video
-0 8 * * * cd /path/to/Short-form-content-generator && .venv/bin/python batch_runner.py --csv jobs.csv --max-jobs 1 >> logs/batch.log 2>&1
+# Every day at 00:00 — one pending video
+0 0 * * * cd /path/to/Short-form-content-generator && .venv/bin/python batch_runner.py --csv jobs.csv --max-jobs 1 >> logs/batch.log 2>&1
 ```
 
 ### Windows (Task Scheduler)
@@ -115,7 +115,7 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 
 **How it runs:**
 
-- Trigger: daily `cron: "0 1 * * *"` (01:00 UTC = 08:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
+- Trigger: daily `cron: "0 17 * * *"` (17:00 UTC = 00:00 UTC+7) or manual **Run workflow** (`workflow_dispatch`).
 - Processes one pending row (`--max-jobs 1`), then commits the updated `jobs.csv` (`status=done`, `output_path`) back to the repo.
 - The rendered `final.mp4` is uploaded as a build **artifact** (retained 90 days) — download it from the run page. Artifacts are not committed to git.
 - When `PUBLISH_PLATFORMS` is set, the workflow publishes `final.mp4` via `core/publish_runner.py`. With `telegram`, the bot uploads to Google Drive first and sends the link (not the video file). Caption prefers `publish` metadata from `output/final/pipeline_payload.json` (title, description, hashtags); falls back to `#<job id> — <topic>` from `jobs.csv`. On failure, a plain Telegram `sendMessage` is sent (when `TELEGRAM_*` secrets are set).

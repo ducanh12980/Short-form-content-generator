@@ -2,8 +2,8 @@ name: Daily video batch
 
 on:
   schedule:
-    # 01:00 UTC = 08:00 UTC+7 — one pending video per day
-    - cron: "0 1 * * *"
+    # 17:00 UTC = 00:00 UTC+7 — one pending video per day
+    - cron: "0 17 * * *"
   workflow_dispatch: {}
 
 # Prevent overlapping runs (a render can outlast the next trigger)
