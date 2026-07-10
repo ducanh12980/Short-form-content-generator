@@ -178,10 +178,11 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 
 **How it runs:**
 
-- Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7):
+- Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7). **Cron only runs from the default branch (`main`)** — merge workflow changes from `Dung` before expecting schedule to update.
   - `cron: "0 17 * * *"` → **00:00 VN** — `--select due-today --max-jobs 0 --publish` (all `pending` rows whose `created_at` **date** is today in Asia/Ho_Chi_Minh)
   - `cron: "0 23 * * *"` → **06:00 VN** — `--select failed --max-jobs 0 --publish` (retry **all** `failed` rows, any day)
-  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today` or `failed`
+  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today`, `pending`, or `failed`
+  - GitHub may delay scheduled runs by minutes–hours (or skip a day on low-activity repos). Prefer **Run workflow** to verify.
 - One day may have **multiple** jobs; set each row’s `created_at` to that calendar day (e.g. `2026-07-10T00:00:00+07:00`). Empty `created_at` is skipped by `due-today`.
 - Slideshow jobs reuse `assets/jobs/<id>/` when complete; otherwise generate script + images, persist there, then TTS + Remotion + publish. Optional `--require-job-assets` fails if the library is missing. Pregenerate + commit still recommended for cheaper/faster CI.
 - After each successful render, the batch publishes that MP4 via `publish_runner` (`--publish`) so multi-job runs do not lose earlier videos when `output/final/` is overwritten.
