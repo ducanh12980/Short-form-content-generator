@@ -458,11 +458,11 @@ def run_slideshow_pipeline(
     job_assets_id: str | None = None,
     require_job_assets: bool = False,
 ) -> dict[str, Any]:
-    """Run script writer → TTS writer → slide images → per-scene TTS → pipeline_payload.json.
+    """Run script → images → TTS → pipeline_payload.json.
 
-    When ``job_assets_id`` points at a complete ``assets/jobs/<id>/`` library entry,
-    script LLM writers and image APIs are skipped; frozen draft + PNGs are reused.
-    TTS audio is still synthesized each run.
+    When ``job_assets_id`` points at a complete ``assets/jobs/<id>/`` entry, script
+    LLM + image APIs are skipped. Otherwise generate and (if ``job_assets_id`` is
+    set) persist into that library. TTS always runs each time.
     """
     if caption_mode not in VALID_CAPTION_MODES:
         raise ValueError(
@@ -478,10 +478,10 @@ def run_slideshow_pipeline(
     topic = topic_prompt.strip()
 
     from core.job_assets import (
-        JobAssetsError,
         copy_job_images_into,
         has_complete_job_assets,
         load_job_scenes_draft,
+        persist_job_assets_from_run_dir,
         require_complete_job_assets,
     )
 
@@ -542,6 +542,38 @@ def run_slideshow_pipeline(
             )
             _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
 
+    # Images before spoken TTS so durable assets can be saved even if TTS fails later.
+    project_stub: dict[str, Any] = {
+        "topic": topic_prompt.strip(),
+        "slides": slides,
+        "scenes": get_content_slides(slides),
+    }
+
+    if using_job_assets:
+        assert assets_id is not None
+        copy_job_images_into(out, assets_id, slides=slides)
+        log_step_done(image_step, f"reused assets/jobs/{assets_id}/images ({TOTAL_SLIDE_COUNT})")
+        resolved_provider = "job_assets"
+    elif not skip_images:
+        generate_scene_images(
+            project_stub,
+            images_dir=out / "images",
+            force=True,
+            provider=resolved_provider,
+        )
+        log_step_done(image_step, f"complete ({TOTAL_SLIDE_COUNT} images)")
+        if assets_id is not None:
+            persist_job_assets_from_run_dir(
+                assets_id,
+                out,
+                topic=topic,
+                slides=slides,
+                publish=publish,
+            )
+            log_step_done("job assets", f"persisted assets/jobs/{assets_id}/")
+    else:
+        log_step_done(image_step, "skipped (--skip-images)")
+
     content_slides = get_content_slides(slides)
     narration_path = out / "narration.mp3"
     scene_timestamps, word_timestamps, words_by_scene = synthesize_scene_speech(
@@ -573,28 +605,6 @@ def run_slideshow_pipeline(
     apply_slide_timing(slides, narration_duration_ms)
 
     content_scenes = deepcopy(content_for_captions)
-
-    project_stub: dict[str, Any] = {
-        "topic": topic_prompt.strip(),
-        "slides": slides,
-        "scenes": content_scenes,
-    }
-
-    if using_job_assets:
-        assert assets_id is not None
-        copy_job_images_into(out, assets_id, slides=slides)
-        log_step_done(image_step, f"reused assets/jobs/{assets_id}/images ({TOTAL_SLIDE_COUNT})")
-        resolved_provider = "job_assets"
-    elif not skip_images:
-        generate_scene_images(
-            project_stub,
-            images_dir=out / "images",
-            force=True,
-            provider=resolved_provider,
-        )
-        log_step_done(image_step, f"complete ({TOTAL_SLIDE_COUNT} images)")
-    else:
-        log_step_done(image_step, "skipped (--skip-images)")
 
     assign_slide_transitions(slides)
     image_timeline = build_image_timeline_from_slides(slides)

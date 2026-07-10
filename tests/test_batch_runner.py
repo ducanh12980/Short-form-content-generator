@@ -95,7 +95,7 @@ def test_execute_job_slideshow_disables_inline_publish(mock_run, tmp_path: Path)
         "image_provider": "mock",
     }
 
-    result = execute_job(row, output_dir=tmp_path / "final", require_job_assets=False)
+    result = execute_job(row, output_dir=tmp_path / "final")
 
     assert result == final
     mock_run.assert_called_once()

@@ -206,13 +206,13 @@ def execute_job(
     *,
     output_dir: str | Path | None = None,
     caption_mode: str | None = None,
-    require_job_assets: bool = True,
+    require_job_assets: bool = False,
 ) -> Path:
     """Run one job row through generation and render. Returns path to final MP4.
 
-    Slideshow jobs require a complete ``assets/jobs/<id>/`` library by default
-    (frozen script + images). Set ``require_job_assets=False`` only for local
-    experiments that still call LLM/image APIs.
+    Slideshow jobs pass ``job_assets_id``. When ``assets/jobs/<id>/`` is complete,
+    script + images are reused; otherwise LLM/image APIs run and results are
+    persisted there. Set ``require_job_assets=True`` to fail if the library is missing.
     """
     from core.run_output import prepare_default_run_dir, reset_run_dir
 
@@ -246,14 +246,7 @@ def execute_job(
         job_dir = prepare_default_run_dir()
 
     if mode == "slideshow":
-        from core.job_assets import JobAssetsError, require_complete_job_assets
         from orchestrator_mvp import run_slideshow_with_render
-
-        if require_job_assets:
-            try:
-                require_complete_job_assets(job_id)
-            except JobAssetsError:
-                raise
 
         _, final = run_slideshow_with_render(
             topic,
@@ -344,7 +337,7 @@ def process_pending_jobs(
     select: str = "pending",
     publish: bool = False,
     today: date | None = None,
-    require_job_assets: bool = True,
+    require_job_assets: bool = False,
 ) -> list[dict[str, str]]:
     """Process selected job rows. Returns summary dicts for each attempted row.
 
@@ -355,7 +348,8 @@ def process_pending_jobs(
 
     ``max_jobs``: positive int limits how many; ``None`` or ``0`` means all matched.
     ``publish``: after each successful render, publish that MP4 via publish_runner.
-    ``require_job_assets``: slideshow jobs must have ``assets/jobs/<id>/`` (default True).
+    ``require_job_assets``: if True, slideshow jobs fail when ``assets/jobs/<id>/``
+    is incomplete; default False generates and persists missing assets.
     """
     path = Path(csv_path)
     lock = Path(lock_path) if lock_path else path.with_suffix(path.suffix + ".lock")

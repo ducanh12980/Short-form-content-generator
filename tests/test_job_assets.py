@@ -185,7 +185,7 @@ def test_pipeline_reuses_job_assets(
     assert payload["publish"]["title"] == "Test title"
 
 
-def test_execute_job_requires_assets(tmp_path: Path) -> None:
+def test_execute_job_requires_assets_when_flag_set(tmp_path: Path) -> None:
     from core.batch_runner import execute_job
 
     row = {
@@ -197,3 +197,74 @@ def test_execute_job_requires_assets(tmp_path: Path) -> None:
     }
     with pytest.raises(JobAssetsError, match="Missing job assets"):
         execute_job(row, output_dir=tmp_path / "final", require_job_assets=True)
+
+
+@patch("core.slideshow_pipeline.synthesize_scene_speech")
+@patch("core.slideshow_pipeline.generate_scene_images")
+@patch("core.slideshow_pipeline.run_tts_writer")
+@patch("core.slideshow_pipeline.run_scene_script_writer")
+@patch("core.slideshow_pipeline.attach_random_ambient_overlay", return_value=None)
+@patch("core.slideshow_pipeline.attach_random_music", return_value=None)
+def test_pipeline_persists_job_assets_when_missing(
+    _mock_music,
+    _mock_overlay,
+    mock_script,
+    mock_tts_writer,
+    mock_images,
+    mock_speech,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from core.slideshow_pipeline import run_slideshow_pipeline
+
+    root = tmp_path / "assets" / "jobs"
+    monkeypatch.setattr("core.job_assets.DEFAULT_JOBS_ASSETS_ROOT", root)
+
+    slides = _sample_slides()
+    publish = _sample_publish()
+    mock_script.return_value = (slides, publish)
+    mock_tts_writer.return_value = [
+        {"tts": "Narration for slide 1."},
+        {"tts": "Narration for slide 2."},
+        {"tts": "Narration for slide 3."},
+    ]
+
+    def _fake_images(project: dict, **kwargs) -> list[Path]:
+        images_dir = kwargs["images_dir"]
+        images_dir.mkdir(parents=True, exist_ok=True)
+        paths: list[Path] = []
+        for slide in project["slides"]:
+            from core.project_schema import slide_image_filename
+
+            path = images_dir / slide_image_filename(slide)
+            path.write_bytes(b"png")
+            slide["image"] = {"path": str(path.resolve()), "source": "mock"}
+            paths.append(path)
+        return paths
+
+    mock_images.side_effect = _fake_images
+    mock_speech.return_value = (
+        [
+            {"scene_id": 2, "start_ms": 0, "end_ms": 1000},
+            {"scene_id": 3, "start_ms": 1000, "end_ms": 2000},
+            {"scene_id": 4, "start_ms": 2000, "end_ms": 3000},
+        ],
+        [{"word": "hi", "start_ms": 0, "end_ms": 500}],
+        {
+            2: [{"word": "hi", "start_ms": 0, "end_ms": 500}],
+            3: [{"word": "hi", "start_ms": 1000, "end_ms": 1500}],
+            4: [{"word": "hi", "start_ms": 2000, "end_ms": 2500}],
+        },
+    )
+
+    run_slideshow_pipeline(
+        "topic one",
+        output_dir=tmp_path / "out",
+        caption_mode="none",
+        job_assets_id="7",
+        image_provider="mock",
+    )
+
+    mock_script.assert_called_once()
+    mock_images.assert_called_once()
+    assert has_complete_job_assets("7", root=root)

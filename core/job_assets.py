@@ -210,3 +210,31 @@ def attach_slide_images_from_dir(slides: list[dict[str, Any]], images_dir: Path)
             if isinstance(slide.get("image"), dict)
             else "job_assets",
         }
+
+
+def persist_job_assets_from_run_dir(
+    job_id: str,
+    run_dir: str | Path,
+    *,
+    topic: str,
+    slides: list[dict[str, Any]],
+    publish: dict[str, Any],
+    root: str | Path | None = None,
+) -> Path:
+    """Save script draft + slide PNGs from a run folder into ``assets/jobs/<id>/``."""
+    save_job_scenes_draft(
+        job_id,
+        topic=topic,
+        slides=slides,
+        publish=publish,
+        root=root,
+    )
+    src_images = Path(run_dir) / "images"
+    dest_images = job_images_dir(job_id, root=root)
+    dest_images.mkdir(parents=True, exist_ok=True)
+    for name in REQUIRED_IMAGE_NAMES:
+        src = src_images / name
+        if not src.is_file():
+            raise JobAssetsError(f"Cannot persist job {job_id}: missing {src}")
+        shutil.copy2(src, dest_images / name)
+    return job_assets_dir(job_id, root=root)
