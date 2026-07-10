@@ -51,6 +51,8 @@ def test_publish_video_auto_uses_drive_when_configured(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("PUBLISH_PLATFORMS", raising=False)
+    monkeypatch.delenv("TELEGRAM_BOT_TOKEN", raising=False)
+    monkeypatch.delenv("TELEGRAM_CHAT_ID", raising=False)
     monkeypatch.setenv("GOOGLE_DRIVE_CREDENTIALS_JSON", "{}")
     monkeypatch.setenv("GOOGLE_DRIVE_FOLDER_ID", "folder-123")
 
@@ -62,6 +64,16 @@ def test_publish_video_auto_uses_drive_when_configured(
         assert publish_video(video) is True
 
     mock_drive.assert_called_once()
+
+
+def test_get_enabled_platforms_auto_detects_telegram(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("PUBLISH_PLATFORMS", raising=False)
+    monkeypatch.delenv("GOOGLE_DRIVE_CREDENTIALS_JSON", raising=False)
+    monkeypatch.delenv("GOOGLE_DRIVE_FOLDER_ID", raising=False)
+    monkeypatch.setenv("TELEGRAM_BOT_TOKEN", "token")
+    monkeypatch.setenv("TELEGRAM_CHAT_ID", "123")
+
+    assert get_enabled_platforms() == ["telegram"]
 
 
 @patch("core.publish_runner.ADAPTERS")
