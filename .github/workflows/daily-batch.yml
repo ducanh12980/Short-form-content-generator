@@ -1,146 +1,23 @@
-name: Daily video batch
+name: Test Cron
 
 on:
   schedule:
-    # TEMP test: 06:15 UTC = 13:15 Asia/Ho_Chi_Minh — due-today
-    - cron: "15 6 * * *"
-    # 23:00 UTC = 06:00 Asia/Ho_Chi_Minh — retry all failed jobs
-    - cron: "0 23 * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
-    inputs:
-      mode:
-        description: "Batch select mode"
-        type: choice
-        options:
-          - due-today
-          - pending
-          - failed
-        default: due-today
-
-# Prevent overlapping runs (a render can outlast the next trigger)
-concurrency:
-  group: daily-video-batch
-  cancel-in-progress: false
-
-permissions:
-  contents: write
 
 jobs:
-  render:
-    runs-on: ubuntu-22.04
-    timeout-minutes: 180
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
+  test:
+    runs-on: ubuntu-latest
 
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      PUBLISH_PLATFORMS: drive,telegram
-      GOOGLE_DRIVE_CLIENT_ID: ${{ secrets.GOOGLE_DRIVE_CLIENT_ID }}
-      GOOGLE_DRIVE_CLIENT_SECRET: ${{ secrets.GOOGLE_DRIVE_CLIENT_SECRET }}
-      GOOGLE_DRIVE_REFRESH_TOKEN: ${{ secrets.GOOGLE_DRIVE_REFRESH_TOKEN }}
-      GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-      FACEBOOK_PAGE_ID: ${{ secrets.FACEBOOK_PAGE_ID }}
-      FACEBOOK_ACCESS_TOKEN: ${{ secrets.FACEBOOK_ACCESS_TOKEN }}
-      IMAGE_PROVIDER: chatgpt
-      OPENAI_IMAGE_API_KEY: ${{ secrets.OPENAI_IMAGE_API_KEY }}
-      OPENAI_IMAGE_MODEL: gpt-image-2
-      OPENAI_IMAGE_SIZE: 864x1536
-      OPENAI_IMAGE_QUALITY: low
-      OPENAI_IMAGE_PROMPT_MODE: compact
-      CAPTION_MODE: none
-      JOBS_CSV: jobs.csv
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Resolve batch mode
-        id: mode
+      - name: Print trigger
         run: |
-          # github.event.schedule is the exact cron string that fired (must match on: schedule).
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "select=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "15 6 * * *" ]; then
-            echo "select=due-today" >> "$GITHUB_OUTPUT"
-          elif [ "${{ github.event.schedule }}" = "0 23 * * *" ]; then
-            echo "select=failed" >> "$GITHUB_OUTPUT"
-          else
-            echo "Unknown schedule cron: '${{ github.event.schedule }}' — defaulting to due-today" >&2
-            echo "select=due-today" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Set up Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: remotion/package-lock.json
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            ffmpeg \
-            libnss3 \
-            libatk1.0-0 \
-            libatk-bridge2.0-0 \
-            libcups2 \
-            libgbm1 \
-            libasound2 \
-            libpangocairo-1.0-0 \
-            libgtk-3-0
-
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-
-      - name: Install Remotion dependencies
-        run: npm ci
-        working-directory: remotion
-
-      - name: Cache Chrome Headless Shell
-        uses: actions/cache@v6
-        with:
-          path: remotion/node_modules/.remotion
-          key: remotion-chrome-${{ runner.os }}-${{ hashFiles('remotion/package-lock.json') }}
-
-      - name: Ensure Chrome Headless Shell
-        run: npx remotion browser ensure
-        working-directory: remotion
-
-      - name: Run daily batch
-        run: >
-          python batch_runner.py
-          --csv jobs.csv
-          --select ${{ steps.mode.outputs.select }}
-          --max-jobs 0
-          --publish
-
-      - name: Notify Telegram on failure
-        if: failure()
-        run: python core/telegram_notify.py send-message "Daily batch failed — check GitHub Actions logs."
-
-      - name: Upload rendered video
-        if: always()
-        uses: actions/upload-artifact@v6
-        with:
-          name: final-video
-          path: |
-            output/final/final.mp4
-            output/final/pipeline_payload.json
-          if-no-files-found: ignore
-          retention-days: 90
-
-      - name: Commit updated jobs.csv
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add jobs.csv
-          git diff --staged --quiet || git commit -m "chore: update jobs.csv after daily batch"
-          git push
+          echo "=================================="
+          echo "Event: ${{ github.event_name }}"
+          echo "Schedule: ${{ github.event.schedule }}"
+          echo "UTC Time:"
+          date -u
+          echo "Local Time:"
+          date
+          echo "Cron is working!"
+          echo "=================================="
