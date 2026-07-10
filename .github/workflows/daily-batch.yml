@@ -4,6 +4,7 @@ on:
   schedule:
     # Ví dụ đặt chạy lúc 16:05 giờ VN = 09:05 giờ UTC
     - cron: "9 9 * * *"
+    - cron: "9 10 * * *"
   workflow_dispatch:
 
 jobs:
