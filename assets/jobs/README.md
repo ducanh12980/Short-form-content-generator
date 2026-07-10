@@ -6,14 +6,18 @@ assets/jobs/<id>/
   images/intro.png … ending.png
 ```
 
-## Flow
+## Flow (chi tiết)
 
-1. Batch reads a job.
-2. If this folder is **complete** for the job topic → reuse script + images.
-3. Else → LLM script + AI images → **save here** → continue.
-4. Always: TTS → Remotion → Publish.
+```
+CSV → Đọc job → assets/jobs/<id> tồn tại?
+  Có  → Đọc scenes_draft.json + images/*.png
+        → Đủ? reuse
+        → Không đủ? GPT script → GPT ảnh → Lưu
+  Không → GPT script → GPT ảnh → Lưu
+→ TTS → Remotion → Publish
+```
 
-Optional one-shot freeze (same result as a first batch run):
+Optional one-shot freeze:
 
 ```bash
 python scripts/pregenerate_job_assets.py --csv jobs.csv

@@ -58,12 +58,17 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  job[CSV job id + topic] --> cache{"assets/jobs/id complete?"}
-  cache -->|yes| reuse[Reuse script + images]
-  cache -->|no| sw[Scene + TTS script LLM]
-  sw --> imgs[Slide images]
-  imgs --> save[Persist assets/jobs/id]
-  reuse --> tts[Per-scene TTS]
+  csv[CSV] --> readJob[Đọc job]
+  readJob --> exists{"assets/jobs/id tồn tại?"}
+  exists -->|Có| readDraft[Đọc scenes_draft.json]
+  readDraft --> readImgs[Đọc images PNG]
+  readImgs --> enough{"Đủ + topic khớp?"}
+  enough -->|Có| reuse[Reuse script + images]
+  enough -->|Không| gptScript[GPT tạo script]
+  exists -->|Không| gptScript
+  gptScript --> gptImg[GPT tạo ảnh]
+  gptImg --> save[Lưu assets/jobs/id]
+  reuse --> tts[TTS]
   save --> tts
   tts --> remotion[Remotion]
   remotion --> publish[Publish]

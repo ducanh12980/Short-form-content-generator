@@ -458,11 +458,16 @@ def run_slideshow_pipeline(
     job_assets_id: str | None = None,
     require_job_assets: bool = False,
 ) -> dict[str, Any]:
-    """Run script → images → TTS → pipeline_payload.json.
+    """CSV job flow: read assets/jobs/<id> → reuse if complete else GPT script+images → save → TTS.
 
-    When ``job_assets_id`` points at a complete ``assets/jobs/<id>/`` entry, script
-    LLM + image APIs are skipped. Otherwise generate and (if ``job_assets_id`` is
-    set) persist into that library. TTS always runs each time.
+    Detailed branch (when ``job_assets_id`` is set)::
+
+        assets/jobs/<id> exists?
+          Yes → read scenes_draft.json + images/*.png
+                → complete for topic? reuse
+                → incomplete / invalid? GPT script → GPT images → save
+          No  → GPT script → GPT images → save
+        → TTS → (Remotion / Publish happen outside this function)
     """
     if caption_mode not in VALID_CAPTION_MODES:
         raise ValueError(
@@ -479,24 +484,40 @@ def run_slideshow_pipeline(
 
     from core.job_assets import (
         copy_job_images_into,
-        has_complete_job_assets,
-        load_job_scenes_draft,
+        job_assets_dir_exists,
         persist_job_assets_from_run_dir,
         require_complete_job_assets,
+        try_load_reusable_job_assets,
     )
 
     assets_id = (job_assets_id or "").strip() or None
     using_job_assets = False
+    slides: list[dict[str, Any]] | None = None
+    publish: dict[str, Any] | None = None
+    client = None
+
     if assets_id:
         if require_job_assets:
             require_complete_job_assets(assets_id)
+            from core.job_assets import load_job_scenes_draft
+
+            slides, publish = load_job_scenes_draft(assets_id, topic=topic)
             using_job_assets = True
-        elif has_complete_job_assets(assets_id):
-            using_job_assets = True
+        else:
+            if job_assets_dir_exists(assets_id):
+                log_step_done("job assets", f"found assets/jobs/{assets_id}/ — validating")
+            reused = try_load_reusable_job_assets(assets_id, topic=topic)
+            if reused is not None:
+                slides, publish = reused
+                using_job_assets = True
+            else:
+                log_step_done(
+                    "job assets",
+                    f"incomplete or missing for id={assets_id} — generating script + images",
+                )
 
     if using_job_assets:
-        assert assets_id is not None
-        slides, publish = load_job_scenes_draft(assets_id, topic=topic)
+        assert assets_id is not None and slides is not None and publish is not None
         log_step_done(
             "scene script writer (LLM, Gemini)",
             f"reused assets/jobs/{assets_id}/{SCENES_DRAFT_FILENAME}",
@@ -506,7 +527,6 @@ def run_slideshow_pipeline(
             f"reused assets/jobs/{assets_id}/{SCENES_DRAFT_FILENAME}",
         )
         _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
-        client = None
     else:
         client = _get_client()
         cached_draft = _load_scenes_draft(out, topic=topic)
@@ -542,6 +562,8 @@ def run_slideshow_pipeline(
             )
             _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
 
+    assert slides is not None and publish is not None
+
     # Images before spoken TTS so durable assets can be saved even if TTS fails later.
     project_stub: dict[str, Any] = {
         "topic": topic_prompt.strip(),
@@ -570,7 +592,7 @@ def run_slideshow_pipeline(
                 slides=slides,
                 publish=publish,
             )
-            log_step_done("job assets", f"persisted assets/jobs/{assets_id}/")
+            log_step_done("job assets", f"saved assets/jobs/{assets_id}/")
     else:
         log_step_done(image_step, "skipped (--skip-images)")
 

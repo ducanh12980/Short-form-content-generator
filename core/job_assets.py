@@ -61,12 +61,22 @@ def expected_image_paths(job_id: str, *, root: str | Path | None = None) -> list
     return [images / name for name in REQUIRED_IMAGE_NAMES]
 
 
+def job_assets_dir_exists(job_id: str, *, root: str | Path | None = None) -> bool:
+    """True when ``assets/jobs/<id>/`` exists as a directory."""
+    return job_assets_dir(job_id, root=root).is_dir()
+
+
+def has_all_required_images(job_id: str, *, root: str | Path | None = None) -> bool:
+    """True when all five slide PNGs exist under ``assets/jobs/<id>/images/``."""
+    return all(path.is_file() for path in expected_image_paths(job_id, root=root))
+
+
 def has_complete_job_assets(job_id: str, *, root: str | Path | None = None) -> bool:
-    """True when scenes_draft.json and all five slide PNGs exist."""
+    """True when scenes_draft.json and all five slide PNGs exist (files only)."""
     draft = job_scenes_draft_path(job_id, root=root)
     if not draft.is_file():
         return False
-    return all(path.is_file() for path in expected_image_paths(job_id, root=root))
+    return has_all_required_images(job_id, root=root)
 
 
 def missing_job_asset_paths(job_id: str, *, root: str | Path | None = None) -> list[Path]:
@@ -92,6 +102,30 @@ def require_complete_job_assets(job_id: str, *, root: str | Path | None = None) 
         f"Run: python scripts/pregenerate_job_assets.py --csv jobs.csv --job-id {job_id}. "
         f"Missing: {rel}"
     )
+
+
+def try_load_reusable_job_assets(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
+    """Read ``assets/jobs/<id>/`` and return slides+publish only when complete for topic.
+
+    Flow mirror:
+      - folder missing → None (generate)
+      - read scenes_draft.json + images/*.png
+      - draft invalid / topic mismatch / images incomplete → None (generate)
+      - otherwise → reusable payload
+    """
+    if not job_assets_dir_exists(job_id, root=root):
+        return None
+    if not has_complete_job_assets(job_id, root=root):
+        return None
+    try:
+        return load_job_scenes_draft(job_id, topic=topic, root=root)
+    except JobAssetsError:
+        return None
 
 
 def load_job_scenes_draft(

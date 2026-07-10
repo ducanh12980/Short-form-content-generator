@@ -42,7 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
-| T035 | Job asset cache auto generate+persist | 2026-07-10 | Reuse `assets/jobs/<id>/` when complete; else LLM/AI → persist → TTS → Remotion → Publish. Default no longer requires pregenerate. ADR 0008. |
+| T035 | Job asset cache auto generate+persist | 2026-07-10 | Flow: tồn tại → đọc draft+images → đủ thì reuse / không đủ thì GPT script+ảnh → lưu → TTS → Remotion → Publish. `try_load_reusable_job_assets`. ADR 0008. |
 | — | Dual cron: due-today + retry-failed | 2026-07-10 | `--select due-today\|failed`, `--max-jobs 0`, per-job `--publish`; GHA crons 00:00 + 06:00 VN. |
 | — | Shift daily-batch cron to 00:00 VN | 2026-07-10 | `cron: "0 17 * * *"` (17:00 UTC = 00:00 UTC+7); docs updated. |
 | T036 | Fix duplicate Drive uploads in GitHub Actions | 2026-07-09 | Batch jobs now render with `publish=False`; GitHub workflow remains the single publish step, preventing duplicate Drive uploads. |

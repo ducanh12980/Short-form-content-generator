@@ -21,12 +21,39 @@ python batch_runner.py --csv jobs.csv --dry-run
 ### Job asset library (`assets/jobs/<id>/`)
 
 ```
-Read job
-  → assets/jobs/<id>/ complete for this topic?
-      Yes → reuse script + images (skip LLM / image API)
-      No  → LLM script + AI images → save under assets/jobs/<id>/
-  → TTS → Remotion → Publish
+CSV
+ │
+ ▼
+Đọc job
+ │
+ ▼
+assets/jobs/<id> tồn tại?
+ │
+ ├─────────────── Có ───────────────┐
+ │                                  │
+ ▼                                  │
+Đọc scenes_draft.json               │
+Đọc images/*.png                    │
+ │                                  │
+ └──────────────┐                   │
+                ▼                   │
+           Không đủ                 │
+                │                   │
+                ▼                   │
+          GPT tạo script            │
+                ▼                   │
+           GPT tạo ảnh              │
+                ▼                   │
+      Lưu assets/jobs/<id>/ ◄───────┘
+                ▼
+              TTS
+                ▼
+           Remotion
+                ▼
+            Publish
 ```
+
+“Đủ” = `scenes_draft.json` hợp lệ (topic khớp, có TTS text + publish) **và** đủ 5 PNG (`intro`, `scene_1..3`, `ending`). Folder tồn tại nhưng thiếu/hỏng → nhánh GPT như trên.
 
 Layout:
 

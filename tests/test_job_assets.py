@@ -120,6 +120,24 @@ def test_copy_job_images_into(tmp_path: Path) -> None:
     assert slides[0]["image"]["source"] == "job_assets"
 
 
+def test_try_load_reusable_job_assets(tmp_path: Path) -> None:
+    from core.job_assets import try_load_reusable_job_assets
+
+    root = tmp_path / "assets" / "jobs"
+    assert try_load_reusable_job_assets("1", topic="topic", root=root) is None
+
+    assets = _write_complete_assets(root, "1", topic="topic one")
+    # Partial: remove one image → incomplete
+    (assets / "images" / "ending.png").unlink()
+    assert try_load_reusable_job_assets("1", topic="topic one", root=root) is None
+
+    (assets / "images" / "ending.png").write_bytes(b"png")
+    loaded = try_load_reusable_job_assets("1", topic="topic one", root=root)
+    assert loaded is not None
+    assert loaded[1]["title"] == "Test title"
+    assert try_load_reusable_job_assets("1", topic="other", root=root) is None
+
+
 @patch("core.slideshow_pipeline.synthesize_scene_speech")
 @patch("core.slideshow_pipeline.generate_scene_images")
 @patch("core.slideshow_pipeline.run_tts_writer")
@@ -134,10 +152,12 @@ def test_pipeline_reuses_job_assets(
     mock_images,
     mock_speech,
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from core.slideshow_pipeline import run_slideshow_pipeline
 
     root = tmp_path / "assets" / "jobs"
+    monkeypatch.setattr("core.job_assets.DEFAULT_JOBS_ASSETS_ROOT", root)
     topic = "topic one"
     _write_complete_assets(root, "42", topic=topic)
 
@@ -155,27 +175,12 @@ def test_pipeline_reuses_job_assets(
         },
     )
 
-    with (
-        patch("core.job_assets.has_complete_job_assets", return_value=True),
-        patch("core.job_assets.require_complete_job_assets", return_value=root / "42"),
-        patch(
-            "core.job_assets.load_job_scenes_draft",
-            return_value=load_job_scenes_draft("42", topic=topic, root=root),
-        ),
-        patch(
-            "core.job_assets.copy_job_images_into",
-            side_effect=lambda out, job_id, slides=None, **kw: copy_job_images_into(
-                out, job_id, root=root, slides=slides
-            ),
-        ),
-    ):
-        payload = run_slideshow_pipeline(
-            topic,
-            output_dir=tmp_path / "out",
-            caption_mode="none",
-            job_assets_id="42",
-            require_job_assets=True,
-        )
+    payload = run_slideshow_pipeline(
+        topic,
+        output_dir=tmp_path / "out",
+        caption_mode="none",
+        job_assets_id="42",
+    )
 
     mock_script.assert_not_called()
     mock_tts.assert_not_called()

@@ -2,13 +2,14 @@
 
 - **Status**: accepted
 - **Date**: 2026-07-10
-- **Context**: Operators want CSV jobs to reuse script + slide images when already generated, and otherwise generate once, persist under `assets/jobs/<id>/`, then always continue TTS → Remotion → publish. Requiring a separate pregenerate step blocked first-time runs.
+- **Context**: CSV batch must follow: read job → if `assets/jobs/<id>/` exists, read `scenes_draft.json` + `images/*.png` → if incomplete, GPT script + GPT images → always save library → TTS → Remotion → Publish. A hard pregenerate-only gate blocked first runs.
 - **Decision**:
-  - Store durable assets in `assets/jobs/<id>/` (`scenes_draft.json` + five slide PNGs).
-  - Batch slideshow passes `job_assets_id`. Complete cache → reuse; incomplete → LLM/image APIs then `persist_job_assets_from_run_dir`.
-  - Pipeline order for generation path: script (+ TTS writer text) → images → persist → spoken TTS → Remotion → publish.
-  - Default `require_job_assets=False`. Optional `--require-job-assets` / `require_job_assets=True` keeps the strict library mode. `scripts/pregenerate_job_assets.py` remains for offline freeze.
+  - Library path: `assets/jobs/<id>/` (`scenes_draft.json` + five PNGs).
+  - Decision helper: `try_load_reusable_job_assets` (exists → read → validate topic/schema/images → reuse or None).
+  - Incomplete/missing → LLM script + image APIs → `persist_job_assets_from_run_dir`.
+  - Order: script → images → save → spoken TTS → Remotion → publish.
+  - Default `require_job_assets=False`; `--require-job-assets` for strict mode. `scripts/pregenerate_job_assets.py` optional offline freeze.
 - **Consequences**:
-  - Topic mismatch invalidates reuse.
-  - CI still needs committed `assets/jobs/` (or secrets + generate on the runner) because runners are ephemeral.
-  - Spoken TTS is not cached in the library (fresh each run).
+  - Topic mismatch / broken draft / missing PNG → regenerate path.
+  - CI needs committed `assets/jobs/` (or generate on the runner) because runners are ephemeral.
+  - Spoken TTS is not stored in the library.
