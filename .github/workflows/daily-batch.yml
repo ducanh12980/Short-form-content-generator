@@ -2,7 +2,8 @@ name: Test Cron
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    # Ví dụ đặt chạy lúc 16:05 giờ VN = 09:05 giờ UTC
+    - cron: "9 9 * * *"
   workflow_dispatch:
 
 jobs:
