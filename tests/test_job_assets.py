@@ -121,21 +121,97 @@ def test_copy_job_images_into(tmp_path: Path) -> None:
 
 
 def test_try_load_reusable_job_assets(tmp_path: Path) -> None:
-    from core.job_assets import try_load_reusable_job_assets
+    from core.job_assets import try_load_job_scenes_draft, try_load_reusable_job_assets
 
     root = tmp_path / "assets" / "jobs"
     assert try_load_reusable_job_assets("1", topic="topic", root=root) is None
 
     assets = _write_complete_assets(root, "1", topic="topic one")
-    # Partial: remove one image → incomplete
+    # Partial: remove one image → incomplete for full reuse, but draft still loads
     (assets / "images" / "ending.png").unlink()
     assert try_load_reusable_job_assets("1", topic="topic one", root=root) is None
+    assert try_load_job_scenes_draft("1", topic="topic one", root=root) is not None
 
     (assets / "images" / "ending.png").write_bytes(b"png")
     loaded = try_load_reusable_job_assets("1", topic="topic one", root=root)
     assert loaded is not None
     assert loaded[1]["title"] == "Test title"
     assert try_load_reusable_job_assets("1", topic="other", root=root) is None
+
+
+@patch("core.slideshow_pipeline.synthesize_scene_speech")
+@patch("core.slideshow_pipeline.generate_scene_images")
+@patch("core.slideshow_pipeline.run_tts_writer")
+@patch("core.slideshow_pipeline.run_scene_script_writer")
+@patch("core.slideshow_pipeline.attach_random_ambient_overlay", return_value=None)
+@patch("core.slideshow_pipeline.attach_random_music", return_value=None)
+def test_pipeline_fills_only_missing_images(
+    _mock_music,
+    _mock_overlay,
+    mock_script,
+    mock_tts_writer,
+    mock_images,
+    mock_speech,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from core.slideshow_pipeline import run_slideshow_pipeline
+
+    root = tmp_path / "assets" / "jobs"
+    monkeypatch.setattr("core.job_assets.DEFAULT_JOBS_ASSETS_ROOT", root)
+    topic = "topic one"
+    assets = _write_complete_assets(root, "3", topic=topic)
+    (assets / "images" / "ending.png").unlink()
+    (assets / "images" / "scene_2.png").unlink()
+
+    def _fake_images(project: dict, **kwargs) -> list[Path]:
+        assert kwargs.get("force") is False
+        images_dir = kwargs["images_dir"]
+        images_dir.mkdir(parents=True, exist_ok=True)
+        generated: list[Path] = []
+        for slide in project["slides"]:
+            from core.project_schema import slide_image_filename
+
+            path = images_dir / slide_image_filename(slide)
+            if path.is_file():
+                slide["image"] = {"path": str(path.resolve()), "source": "job_assets"}
+                continue
+            path.write_bytes(b"new")
+            slide["image"] = {"path": str(path.resolve()), "source": "mock"}
+            generated.append(path)
+        assert {p.name for p in generated} == {"scene_2.png", "ending.png"}
+        return generated
+
+    mock_images.side_effect = _fake_images
+    mock_speech.return_value = (
+        [
+            {"scene_id": 2, "start_ms": 0, "end_ms": 1000},
+            {"scene_id": 3, "start_ms": 1000, "end_ms": 2000},
+            {"scene_id": 4, "start_ms": 2000, "end_ms": 3000},
+        ],
+        [{"word": "hi", "start_ms": 0, "end_ms": 500}],
+        {
+            2: [{"word": "hi", "start_ms": 0, "end_ms": 500}],
+            3: [{"word": "hi", "start_ms": 1000, "end_ms": 1500}],
+            4: [{"word": "hi", "start_ms": 2000, "end_ms": 2500}],
+        },
+    )
+
+    run_slideshow_pipeline(
+        topic,
+        output_dir=tmp_path / "out",
+        caption_mode="none",
+        job_assets_id="3",
+        image_provider="mock",
+    )
+
+    mock_script.assert_not_called()
+    mock_tts_writer.assert_not_called()
+    mock_images.assert_called_once()
+    assert mock_images.call_args.kwargs["force"] is False
+    assert has_complete_job_assets("3", root=root)
+    assert (assets / "images" / "intro.png").read_bytes() == b"png"
+    assert (assets / "images" / "ending.png").read_bytes() == b"new"
 
 
 @patch("core.slideshow_pipeline.synthesize_scene_speech")

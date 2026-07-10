@@ -12,7 +12,8 @@ assets/jobs/<id>/
 CSV → Đọc job → assets/jobs/<id> tồn tại?
   Có  → Đọc scenes_draft.json + images/*.png
         → Đủ? reuse
-        → Không đủ? GPT script → GPT ảnh → Lưu
+        → Script OK, thiếu ảnh? giữ ảnh có sẵn + GPT chỉ tạo PNG còn thiếu → Lưu
+        → Script hỏng? GPT script + GPT chỉ tạo PNG còn thiếu → Lưu
   Không → GPT script → GPT ảnh → Lưu
 → TTS → Remotion → Publish
 ```

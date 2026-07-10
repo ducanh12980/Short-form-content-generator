@@ -35,14 +35,16 @@ assets/jobs/<id> tồn tại?
 Đọc scenes_draft.json               │
 Đọc images/*.png                    │
  │                                  │
- └──────────────┐                   │
-                ▼                   │
-           Không đủ                 │
+ ├─ Đủ ─────────────────────────────┤
+ │                                  │
+ ├─ Script OK, thiếu ảnh ───────────┤
+ │     → giữ ảnh có sẵn             │
+ │     → GPT chỉ tạo PNG còn thiếu  │
+ │                                  │
+ └─ Script thiếu/hỏng ──────────────┤
+       → GPT tạo script             │
+       → GPT chỉ tạo PNG còn thiếu  │
                 │                   │
-                ▼                   │
-          GPT tạo script            │
-                ▼                   │
-           GPT tạo ảnh              │
                 ▼                   │
       Lưu assets/jobs/<id>/ ◄───────┘
                 ▼
@@ -53,7 +55,7 @@ assets/jobs/<id> tồn tại?
             Publish
 ```
 
-“Đủ” = `scenes_draft.json` hợp lệ (topic khớp, có TTS text + publish) **và** đủ 5 PNG (`intro`, `scene_1..3`, `ending`). Folder tồn tại nhưng thiếu/hỏng → nhánh GPT như trên.
+“Đủ” = `scenes_draft.json` hợp lệ (topic khớp, có TTS text + publish) **và** đủ 5 PNG. Thiếu ảnh thì **không** render lại ảnh đã có — chỉ generate phần còn thiếu.
 
 Layout:
 

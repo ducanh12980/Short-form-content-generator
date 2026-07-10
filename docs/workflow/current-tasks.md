@@ -42,6 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T037 | Partial image fill for job assets | 2026-07-10 | Script OK + thiếu ảnh → giữ PNG có sẵn, `force=False` chỉ generate phần còn thiếu. |
 | T035 | Job asset cache auto generate+persist | 2026-07-10 | Flow: tồn tại → đọc draft+images → đủ thì reuse / không đủ thì GPT script+ảnh → lưu → TTS → Remotion → Publish. `try_load_reusable_job_assets`. ADR 0008. |
 | — | Dual cron: due-today + retry-failed | 2026-07-10 | `--select due-today\|failed`, `--max-jobs 0`, per-job `--publish`; GHA crons 00:00 + 06:00 VN. |
 | — | Shift daily-batch cron to 00:00 VN | 2026-07-10 | `cron: "0 17 * * *"` (17:00 UTC = 00:00 UTC+7); docs updated. |

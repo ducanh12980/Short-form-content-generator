@@ -104,28 +104,76 @@ def require_complete_job_assets(job_id: str, *, root: str | Path | None = None) 
     )
 
 
+def try_load_job_scenes_draft(
+    job_id: str,
+    *,
+    topic: str,
+    root: str | Path | None = None,
+) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
+    """Load draft when present and valid for topic (images may still be incomplete)."""
+    if not job_scenes_draft_path(job_id, root=root).is_file():
+        return None
+    try:
+        return load_job_scenes_draft(job_id, topic=topic, root=root)
+    except JobAssetsError:
+        return None
+
+
 def try_load_reusable_job_assets(
     job_id: str,
     *,
     topic: str,
     root: str | Path | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]] | None:
-    """Read ``assets/jobs/<id>/`` and return slides+publish only when complete for topic.
-
-    Flow mirror:
-      - folder missing → None (generate)
-      - read scenes_draft.json + images/*.png
-      - draft invalid / topic mismatch / images incomplete → None (generate)
-      - otherwise → reusable payload
-    """
+    """Return slides+publish only when draft is valid **and** all images exist."""
     if not job_assets_dir_exists(job_id, root=root):
         return None
-    if not has_complete_job_assets(job_id, root=root):
+    if not has_all_required_images(job_id, root=root):
         return None
-    try:
-        return load_job_scenes_draft(job_id, topic=topic, root=root)
-    except JobAssetsError:
-        return None
+    return try_load_job_scenes_draft(job_id, topic=topic, root=root)
+
+
+def missing_image_names(job_id: str, *, root: str | Path | None = None) -> list[str]:
+    """Return required PNG filenames that are not yet on disk."""
+    return [path.name for path in expected_image_paths(job_id, root=root) if not path.is_file()]
+
+
+def copy_existing_job_images_into(
+    run_dir: str | Path,
+    job_id: str,
+    *,
+    root: str | Path | None = None,
+    slides: list[dict[str, Any]] | None = None,
+) -> list[Path]:
+    """Copy whatever library PNGs already exist into run_dir/images/ (partial OK)."""
+    src_dir = job_images_dir(job_id, root=root)
+    dest_dir = Path(run_dir) / "images"
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    copied: list[Path] = []
+    if not src_dir.is_dir():
+        return copied
+
+    for src in expected_image_paths(job_id, root=root):
+        if not src.is_file():
+            continue
+        dest = dest_dir / src.name
+        shutil.copy2(src, dest)
+        copied.append(dest.resolve())
+
+    if slides is not None:
+        for slide in slides:
+            if not isinstance(slide, dict):
+                continue
+            name = slide_image_filename(slide)
+            image_path = dest_dir / name
+            if image_path.is_file():
+                slide["image"] = {
+                    "path": str(image_path.resolve()),
+                    "source": "job_assets",
+                }
+
+    return copied
 
 
 def load_job_scenes_draft(
@@ -203,31 +251,9 @@ def copy_job_images_into(
     root: str | Path | None = None,
     slides: list[dict[str, Any]] | None = None,
 ) -> list[Path]:
-    """Copy library PNGs into run_dir/images/ and optionally attach paths on slides."""
+    """Copy all library PNGs into run_dir/images/ (requires a complete library)."""
     require_complete_job_assets(job_id, root=root)
-    src_dir = job_images_dir(job_id, root=root)
-    dest_dir = Path(run_dir) / "images"
-    dest_dir.mkdir(parents=True, exist_ok=True)
-
-    copied: list[Path] = []
-    for src in expected_image_paths(job_id, root=root):
-        dest = dest_dir / src.name
-        shutil.copy2(src, dest)
-        copied.append(dest.resolve())
-
-    if slides is not None:
-        for slide in slides:
-            if not isinstance(slide, dict):
-                continue
-            name = slide_image_filename(slide)
-            image_path = dest_dir / name
-            if image_path.is_file():
-                slide["image"] = {
-                    "path": str(image_path.resolve()),
-                    "source": "job_assets",
-                }
-
-    return copied
+    return copy_existing_job_images_into(run_dir, job_id, root=root, slides=slides)
 
 
 def attach_slide_images_from_dir(slides: list[dict[str, Any]], images_dir: Path) -> None:

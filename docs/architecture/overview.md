@@ -62,12 +62,13 @@ flowchart TD
   readJob --> exists{"assets/jobs/id tồn tại?"}
   exists -->|Có| readDraft[Đọc scenes_draft.json]
   readDraft --> readImgs[Đọc images PNG]
-  readImgs --> enough{"Đủ + topic khớp?"}
+  readImgs --> enough{"Đủ?"}
   enough -->|Có| reuse[Reuse script + images]
-  enough -->|Không| gptScript[GPT tạo script]
+  enough -->|Script OK thiếu ảnh| fill[GPT chỉ tạo PNG còn thiếu]
+  enough -->|Script hỏng| gptScript[GPT tạo script]
   exists -->|Không| gptScript
-  gptScript --> gptImg[GPT tạo ảnh]
-  gptImg --> save[Lưu assets/jobs/id]
+  gptScript --> fill
+  fill --> save[Lưu assets/jobs/id]
   reuse --> tts[TTS]
   save --> tts
   tts --> remotion[Remotion]
