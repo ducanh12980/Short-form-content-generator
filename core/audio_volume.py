@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import os
 
-DEFAULT_MUSIC_VOLUME = 0.5
+DEFAULT_MUSIC_VOLUME = 0.25
 DEFAULT_NARRATION_VOLUME = 1.2
 
 

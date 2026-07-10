@@ -198,7 +198,7 @@ export const ShortVideo: React.FC<ShortVideoProps> = (props) => {
         <Audio src={staticFile(props.narrationSrc)} volume={props.narrationVolume ?? 1.2} />
       ) : null}
       {props.musicSrc ? (
-        <Audio src={staticFile(props.musicSrc)} volume={props.musicVolume ?? 0.5} />
+        <Audio src={staticFile(props.musicSrc)} volume={props.musicVolume ?? 0.25} />
       ) : null}
     </AbsoluteFill>
   );
