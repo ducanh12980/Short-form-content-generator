@@ -6,13 +6,21 @@ import csv
 import os
 import tempfile
 from contextlib import contextmanager
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterator
+
+try:
+    from zoneinfo import ZoneInfo
+
+    VN_TZ = ZoneInfo("Asia/Ho_Chi_Minh")
+except Exception:  # ZoneInfoNotFoundError / missing tzdata on Windows
+    VN_TZ = timezone(timedelta(hours=7), name="UTC+7")
 
 VALID_STATUSES = frozenset({"pending", "running", "done", "failed"})
 VALID_MODES = frozenset({"slideshow", "mvp"})
 VALID_IMAGE_PROVIDERS = frozenset({"chatgpt", "pollinations", "mock"})
+VALID_SELECT_MODES = frozenset({"pending", "due-today", "failed"})
 
 REQUIRED_COLUMNS = ("id", "topic", "status")
 JOB_COLUMNS = (
@@ -30,6 +38,28 @@ JOB_COLUMNS = (
 
 def _utc_now_iso() -> str:
     return datetime.now(UTC).replace(microsecond=0).isoformat()
+
+
+def _today_vn(*, now: datetime | None = None) -> date:
+    """Calendar date in Asia/Ho_Chi_Minh."""
+    current = now if now is not None else datetime.now(VN_TZ)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=UTC)
+    return current.astimezone(VN_TZ).date()
+
+
+def job_created_date_vn(created_at: str) -> date | None:
+    """Parse job created_at ISO timestamp to a Vietnam calendar date, or None if empty/invalid."""
+    raw = (created_at or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(VN_TZ).date()
 
 
 def _normalize_row(row: dict[str, str]) -> dict[str, str]:
@@ -176,8 +206,14 @@ def execute_job(
     *,
     output_dir: str | Path | None = None,
     caption_mode: str | None = None,
+    require_job_assets: bool = True,
 ) -> Path:
-    """Run one job row through generation and render. Returns path to final MP4."""
+    """Run one job row through generation and render. Returns path to final MP4.
+
+    Slideshow jobs require a complete ``assets/jobs/<id>/`` library by default
+    (frozen script + images). Set ``require_job_assets=False`` only for local
+    experiments that still call LLM/image APIs.
+    """
     from core.run_output import prepare_default_run_dir, reset_run_dir
 
     job_id = row["id"].strip()
@@ -210,7 +246,14 @@ def execute_job(
         job_dir = prepare_default_run_dir()
 
     if mode == "slideshow":
+        from core.job_assets import JobAssetsError, require_complete_job_assets
         from orchestrator_mvp import run_slideshow_with_render
+
+        if require_job_assets:
+            try:
+                require_complete_job_assets(job_id)
+            except JobAssetsError:
+                raise
 
         _, final = run_slideshow_with_render(
             topic,
@@ -218,6 +261,8 @@ def execute_job(
             caption_mode=resolved_caption_mode,
             image_provider=image_provider,
             publish=False,
+            job_assets_id=job_id,
+            require_job_assets=require_job_assets,
         )
         return final
 
@@ -253,29 +298,82 @@ class BatchRunnerError(RuntimeError):
     """Raised when batch processing fails."""
 
 
+def select_jobs(
+    rows: list[dict[str, str]],
+    *,
+    select: str = "pending",
+    today: date | None = None,
+) -> list[dict[str, str]]:
+    """Filter job rows by select mode. Returns references into ``rows`` (same dict objects)."""
+    mode = (select or "pending").strip().lower()
+    if mode not in VALID_SELECT_MODES:
+        raise ValueError(f"select must be one of {sorted(VALID_SELECT_MODES)}.")
+
+    if mode == "pending":
+        return [row for row in rows if row.get("status") == "pending"]
+
+    if mode == "failed":
+        return [row for row in rows if row.get("status") == "failed"]
+
+    # due-today: pending jobs whose created_at calendar date (VN) is today
+    target = today if today is not None else _today_vn()
+    matched: list[dict[str, str]] = []
+    for row in rows:
+        if row.get("status") != "pending":
+            continue
+        created = job_created_date_vn(row.get("created_at", ""))
+        if created is not None and created == target:
+            matched.append(row)
+    return matched
+
+
+def _resolve_job_limit(max_jobs: int | None) -> int | None:
+    """Return slice size, or None for unlimited (max_jobs is None or <= 0)."""
+    if max_jobs is None or max_jobs <= 0:
+        return None
+    return max_jobs
+
+
 def process_pending_jobs(
     csv_path: str | Path,
     *,
-    max_jobs: int = 1,
+    max_jobs: int | None = 1,
     output_dir: str | Path | None = None,
     dry_run: bool = False,
     lock_path: str | Path | None = None,
+    select: str = "pending",
+    publish: bool = False,
+    today: date | None = None,
+    require_job_assets: bool = True,
 ) -> list[dict[str, str]]:
-    """Process up to max_jobs pending rows. Returns summary dicts for each attempted row."""
+    """Process selected job rows. Returns summary dicts for each attempted row.
+
+    ``select``:
+      - ``pending`` — all pending rows (legacy default)
+      - ``due-today`` — pending rows with created_at date == today (Asia/Ho_Chi_Minh)
+      - ``failed`` — all failed rows (retry)
+
+    ``max_jobs``: positive int limits how many; ``None`` or ``0`` means all matched.
+    ``publish``: after each successful render, publish that MP4 via publish_runner.
+    ``require_job_assets``: slideshow jobs must have ``assets/jobs/<id>/`` (default True).
+    """
     path = Path(csv_path)
     lock = Path(lock_path) if lock_path else path.with_suffix(path.suffix + ".lock")
     results: list[dict[str, str]] = []
+    limit = _resolve_job_limit(max_jobs)
 
     with batch_lock(lock):
         rows = load_jobs(path)
         reset_stale_running(rows)
 
-        pending = [row for row in rows if row.get("status") == "pending"]
-        if not pending:
+        selected = select_jobs(rows, select=select, today=today)
+        if not selected:
             save_jobs(path, rows)
             return results
 
-        for row in pending[: max(1, max_jobs)]:
+        to_run = selected if limit is None else selected[:limit]
+
+        for row in to_run:
             job_id = row["id"]
             if dry_run:
                 results.append({"id": job_id, "status": "dry_run", "topic": row["topic"]})
@@ -290,18 +388,53 @@ def process_pending_jobs(
             save_jobs(path, rows)
 
             try:
-                output = execute_job(row, output_dir=output_dir)
+                output = execute_job(
+                    row,
+                    output_dir=output_dir,
+                    require_job_assets=require_job_assets,
+                )
                 row["status"] = "done"
                 row["output_path"] = str(output.resolve())
                 row["error"] = ""
                 row["completed_at"] = _utc_now_iso()
-                results.append({"id": job_id, "status": "done", "output_path": row["output_path"]})
+                save_jobs(path, rows)
+
+                if publish:
+                    from core.publish_runner import publish_video
+
+                    payload_path = output.resolve().parent / "pipeline_payload.json"
+                    ok = publish_video(
+                        output,
+                        jobs_csv=path,
+                        payload_path=payload_path if payload_path.is_file() else None,
+                    )
+                    if not ok:
+                        results.append(
+                            {
+                                "id": job_id,
+                                "status": "done",
+                                "output_path": row["output_path"],
+                                "publish": "failed",
+                            }
+                        )
+                    else:
+                        results.append(
+                            {
+                                "id": job_id,
+                                "status": "done",
+                                "output_path": row["output_path"],
+                                "publish": "ok",
+                            }
+                        )
+                else:
+                    results.append(
+                        {"id": job_id, "status": "done", "output_path": row["output_path"]}
+                    )
             except Exception as exc:
                 row["status"] = "failed"
                 row["error"] = str(exc)
                 row["completed_at"] = _utc_now_iso()
                 results.append({"id": job_id, "status": "failed", "error": row["error"]})
-
-            save_jobs(path, rows)
+                save_jobs(path, rows)
 
     return results

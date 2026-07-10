@@ -42,6 +42,8 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| — | Job asset library (script + images) | 2026-07-10 | `assets/jobs/<id>/`; `scripts/pregenerate_job_assets.py`; daily batch requires library (TTS+Remotion only). |
+| — | Dual cron: due-today + retry-failed | 2026-07-10 | `--select due-today\|failed`, `--max-jobs 0`, per-job `--publish`; GHA crons 00:00 + 06:00 VN. |
 | — | Shift daily-batch cron to 00:00 VN | 2026-07-10 | `cron: "0 17 * * *"` (17:00 UTC = 00:00 UTC+7); docs updated. |
 | T035 | Fix duplicate Drive uploads in GitHub Actions | 2026-07-09 | Batch jobs now render with `publish=False`; GitHub workflow remains the single publish step, preventing duplicate Drive uploads. |
 | T034 | Teleport shake tuning + whipPan transition | 2026-07-09 | Stronger/longer shake (+30% frames, 3.75 amplitude); new `whipPan` with ease-in-out pan + shake bookends; 4-item rotation. ADR 0006 updated. |

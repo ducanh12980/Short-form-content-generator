@@ -12,10 +12,12 @@ from core.batch_runner import (
     batch_lock,
     collect_slideshow_image_paths,
     init_jobs_csv,
+    job_created_date_vn,
     load_jobs,
     process_pending_jobs,
     reset_stale_running,
     save_jobs,
+    select_jobs,
 )
 
 
@@ -93,11 +95,13 @@ def test_execute_job_slideshow_disables_inline_publish(mock_run, tmp_path: Path)
         "image_provider": "mock",
     }
 
-    result = execute_job(row, output_dir=tmp_path / "final")
+    result = execute_job(row, output_dir=tmp_path / "final", require_job_assets=False)
 
     assert result == final
     mock_run.assert_called_once()
     assert mock_run.call_args.kwargs["publish"] is False
+    assert mock_run.call_args.kwargs["job_assets_id"] == "1"
+    assert mock_run.call_args.kwargs["require_job_assets"] is False
 
 
 @patch("orchestrator_mvp.run_mvp_with_render")
@@ -157,7 +161,9 @@ def test_process_pending_jobs_updates_csv(mock_execute, tmp_path: Path) -> None:
         ],
     )
 
-    results = process_pending_jobs(csv_path, max_jobs=1, output_dir=tmp_path / "final")
+    results = process_pending_jobs(
+        csv_path, max_jobs=1, output_dir=tmp_path / "final", require_job_assets=False
+    )
     assert len(results) == 1
     assert results[0]["status"] == "done"
 
@@ -188,7 +194,9 @@ def test_process_pending_jobs_marks_failed(mock_execute, tmp_path: Path) -> None
         ],
     )
 
-    results = process_pending_jobs(csv_path, output_dir=tmp_path / "final")
+    results = process_pending_jobs(
+        csv_path, output_dir=tmp_path / "final", require_job_assets=False
+    )
     assert results[0]["status"] == "failed"
     rows = load_jobs(csv_path)
     assert rows[0]["status"] == "failed"
@@ -215,3 +223,235 @@ def test_process_pending_skips_done(tmp_path: Path) -> None:
     )
     results = process_pending_jobs(csv_path)
     assert results == []
+
+
+def test_job_created_date_vn_parses_offset() -> None:
+    from datetime import date
+
+    assert job_created_date_vn("2026-07-10T03:30:00+07:00") == date(2026, 7, 10)
+    assert job_created_date_vn("2026-07-09T20:00:00+00:00") == date(2026, 7, 10)  # UTC → VN next day
+    assert job_created_date_vn("") is None
+    assert job_created_date_vn("not-a-date") is None
+
+
+def test_select_jobs_due_today() -> None:
+    from datetime import date
+
+    rows = [
+        {
+            "id": "1",
+            "topic": "today",
+            "status": "pending",
+            "created_at": "2026-07-10T00:00:00+07:00",
+        },
+        {
+            "id": "2",
+            "topic": "tomorrow",
+            "status": "pending",
+            "created_at": "2026-07-11T00:00:00+07:00",
+        },
+        {
+            "id": "3",
+            "topic": "today done",
+            "status": "done",
+            "created_at": "2026-07-10T12:00:00+07:00",
+        },
+        {
+            "id": "4",
+            "topic": "no date",
+            "status": "pending",
+            "created_at": "",
+        },
+    ]
+    matched = select_jobs(rows, select="due-today", today=date(2026, 7, 10))
+    assert [r["id"] for r in matched] == ["1"]
+
+
+def test_select_jobs_failed() -> None:
+    rows = [
+        {"id": "1", "status": "failed", "created_at": "2026-07-01T00:00:00+07:00"},
+        {"id": "2", "status": "pending", "created_at": "2026-07-10T00:00:00+07:00"},
+        {"id": "3", "status": "failed", "created_at": "2026-07-09T00:00:00+07:00"},
+    ]
+    matched = select_jobs(rows, select="failed")
+    assert [r["id"] for r in matched] == ["1", "3"]
+
+
+@patch("core.batch_runner.execute_job")
+def test_process_due_today_all_matched(mock_execute, tmp_path: Path) -> None:
+    from datetime import date
+
+    out = tmp_path / "output" / "final.mp4"
+    (tmp_path / "output").mkdir()
+    out.write_bytes(b"mp4")
+    mock_execute.return_value = out
+
+    csv_path = tmp_path / "jobs.csv"
+    save_jobs(
+        csv_path,
+        [
+            {
+                "id": "1",
+                "topic": "a",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-10T01:00:00+07:00",
+                "completed_at": "",
+            },
+            {
+                "id": "2",
+                "topic": "b",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-10T02:00:00+07:00",
+                "completed_at": "",
+            },
+            {
+                "id": "3",
+                "topic": "c",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-11T00:00:00+07:00",
+                "completed_at": "",
+            },
+        ],
+    )
+
+    results = process_pending_jobs(
+        csv_path,
+        max_jobs=0,
+        select="due-today",
+        today=date(2026, 7, 10),
+        output_dir=tmp_path / "final",
+        require_job_assets=False,
+    )
+    assert len(results) == 2
+    assert all(r["status"] == "done" for r in results)
+    rows = load_jobs(csv_path)
+    by_id = {r["id"]: r for r in rows}
+    assert by_id["1"]["status"] == "done"
+    assert by_id["2"]["status"] == "done"
+    assert by_id["3"]["status"] == "pending"
+
+
+@patch("core.batch_runner.execute_job")
+def test_process_failed_retries_all(mock_execute, tmp_path: Path) -> None:
+    out = tmp_path / "output" / "final.mp4"
+    (tmp_path / "output").mkdir()
+    out.write_bytes(b"mp4")
+    mock_execute.return_value = out
+
+    csv_path = tmp_path / "jobs.csv"
+    save_jobs(
+        csv_path,
+        [
+            {
+                "id": "1",
+                "topic": "fail a",
+                "status": "failed",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "boom",
+                "created_at": "2026-07-08T00:00:00+07:00",
+                "completed_at": "2026-07-08T01:00:00+07:00",
+            },
+            {
+                "id": "2",
+                "topic": "ok",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-10T00:00:00+07:00",
+                "completed_at": "",
+            },
+            {
+                "id": "3",
+                "topic": "fail b",
+                "status": "failed",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "boom2",
+                "created_at": "2026-07-09T00:00:00+07:00",
+                "completed_at": "2026-07-09T01:00:00+07:00",
+            },
+        ],
+    )
+
+    results = process_pending_jobs(
+        csv_path,
+        max_jobs=0,
+        select="failed",
+        output_dir=tmp_path / "final",
+        require_job_assets=False,
+    )
+    assert len(results) == 2
+    assert {r["id"] for r in results} == {"1", "3"}
+    rows = load_jobs(csv_path)
+    by_id = {r["id"]: r for r in rows}
+    assert by_id["1"]["status"] == "done"
+    assert by_id["1"]["error"] == ""
+    assert by_id["2"]["status"] == "pending"
+    assert by_id["3"]["status"] == "done"
+
+
+@patch("core.publish_runner.publish_video", return_value=True)
+@patch("core.batch_runner.execute_job")
+def test_process_publish_per_job(mock_execute, mock_publish, tmp_path: Path) -> None:
+    out = tmp_path / "output" / "final.mp4"
+    (tmp_path / "output").mkdir()
+    out.write_bytes(b"mp4")
+    mock_execute.return_value = out
+
+    csv_path = tmp_path / "jobs.csv"
+    save_jobs(
+        csv_path,
+        [
+            {
+                "id": "1",
+                "topic": "a",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-10T00:00:00+07:00",
+                "completed_at": "",
+            },
+            {
+                "id": "2",
+                "topic": "b",
+                "status": "pending",
+                "mode": "slideshow",
+                "image_provider": "mock",
+                "output_path": "",
+                "error": "",
+                "created_at": "2026-07-10T00:00:00+07:00",
+                "completed_at": "",
+            },
+        ],
+    )
+
+    results = process_pending_jobs(
+        csv_path,
+        max_jobs=0,
+        select="pending",
+        publish=True,
+        output_dir=tmp_path / "final",
+        require_job_assets=False,
+    )
+    assert len(results) == 2
+    assert all(r.get("publish") == "ok" for r in results)
+    assert mock_publish.call_count == 2

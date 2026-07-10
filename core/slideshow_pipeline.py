@@ -455,8 +455,15 @@ def run_slideshow_pipeline(
     caption_mode: str = "none",
     skip_images: bool = False,
     image_provider: str | None = None,
+    job_assets_id: str | None = None,
+    require_job_assets: bool = False,
 ) -> dict[str, Any]:
-    """Run script writer → TTS writer → slide images → per-scene TTS → pipeline_payload.json."""
+    """Run script writer → TTS writer → slide images → per-scene TTS → pipeline_payload.json.
+
+    When ``job_assets_id`` points at a complete ``assets/jobs/<id>/`` library entry,
+    script LLM writers and image APIs are skipped; frozen draft + PNGs are reused.
+    TTS audio is still synthesized each run.
+    """
     if caption_mode not in VALID_CAPTION_MODES:
         raise ValueError(
             f"caption_mode must be one of {sorted(VALID_CAPTION_MODES)}; got {caption_mode!r}."
@@ -465,44 +472,75 @@ def run_slideshow_pipeline(
     resolved_provider = resolve_image_provider(image_provider)
     image_step = provider_step_label(resolved_provider)
 
-    client = _get_client()
     out = Path(output_dir)
     out.mkdir(parents=True, exist_ok=True)
     voice = _tts_voice_from_env()
     topic = topic_prompt.strip()
 
-    cached_draft = _load_scenes_draft(out, topic=topic)
-    if cached_draft is not None:
-        slides, publish = cached_draft
+    from core.job_assets import (
+        JobAssetsError,
+        copy_job_images_into,
+        has_complete_job_assets,
+        load_job_scenes_draft,
+        require_complete_job_assets,
+    )
+
+    assets_id = (job_assets_id or "").strip() or None
+    using_job_assets = False
+    if assets_id:
+        if require_job_assets:
+            require_complete_job_assets(assets_id)
+            using_job_assets = True
+        elif has_complete_job_assets(assets_id):
+            using_job_assets = True
+
+    if using_job_assets:
+        assert assets_id is not None
+        slides, publish = load_job_scenes_draft(assets_id, topic=topic)
         log_step_done(
             "scene script writer (LLM, Gemini)",
-            f"resumed from {SCENES_DRAFT_FILENAME}",
+            f"reused assets/jobs/{assets_id}/{SCENES_DRAFT_FILENAME}",
         )
-        log_step_done("TTS script writer (LLM)", f"resumed from {SCENES_DRAFT_FILENAME}")
-    else:
-        slides, publish = run_scene_script_writer(client, topic)
-
-        step_script = "scene script writer (LLM, Gemini)"
-        for slide in slides:
-            role = slide.get("role", "content")
-            log_step_done(
-                step_script,
-                f"{role} slide {slide['id']}/{TOTAL_SLIDE_COUNT}: \"{slide['title']}\"",
-            )
-        log_step_done(step_script, f"complete ({TOTAL_SLIDE_COUNT} slides)")
-        log_step_done(
-            "publish metadata (LLM)",
-            f"\"{publish['title']}\" ({len(publish['hashtags'])} hashtags)",
-        )
-
-        content_slides = get_content_slides(slides)
-        tts_blocks = run_tts_writer(client, content_slides)
-        _attach_tts_to_content_slides(content_slides, tts_blocks)
         log_step_done(
             "TTS script writer (LLM)",
-            f"complete ({CONTENT_SCENE_COUNT} narration blocks)",
+            f"reused assets/jobs/{assets_id}/{SCENES_DRAFT_FILENAME}",
         )
         _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
+        client = None
+    else:
+        client = _get_client()
+        cached_draft = _load_scenes_draft(out, topic=topic)
+        if cached_draft is not None:
+            slides, publish = cached_draft
+            log_step_done(
+                "scene script writer (LLM, Gemini)",
+                f"resumed from {SCENES_DRAFT_FILENAME}",
+            )
+            log_step_done("TTS script writer (LLM)", f"resumed from {SCENES_DRAFT_FILENAME}")
+        else:
+            slides, publish = run_scene_script_writer(client, topic)
+
+            step_script = "scene script writer (LLM, Gemini)"
+            for slide in slides:
+                role = slide.get("role", "content")
+                log_step_done(
+                    step_script,
+                    f"{role} slide {slide['id']}/{TOTAL_SLIDE_COUNT}: \"{slide['title']}\"",
+                )
+            log_step_done(step_script, f"complete ({TOTAL_SLIDE_COUNT} slides)")
+            log_step_done(
+                "publish metadata (LLM)",
+                f"\"{publish['title']}\" ({len(publish['hashtags'])} hashtags)",
+            )
+
+            content_slides = get_content_slides(slides)
+            tts_blocks = run_tts_writer(client, content_slides)
+            _attach_tts_to_content_slides(content_slides, tts_blocks)
+            log_step_done(
+                "TTS script writer (LLM)",
+                f"complete ({CONTENT_SCENE_COUNT} narration blocks)",
+            )
+            _save_scenes_draft(out, topic=topic, slides=slides, publish=publish)
 
     content_slides = get_content_slides(slides)
     narration_path = out / "narration.mp3"
@@ -516,13 +554,18 @@ def run_slideshow_pipeline(
 
     content_for_captions = deepcopy(content_slides)
     _apply_tts_timestamps(content_for_captions, scene_timestamps)
-    tokens = _build_caption_tokens(
-        client,
-        content_for_captions,
-        caption_mode,
-        word_timestamps,
-        words_by_scene,
-    )
+    if caption_mode == "none":
+        tokens: list[dict[str, Any]] = []
+    else:
+        if client is None:
+            client = _get_client()
+        tokens = _build_caption_tokens(
+            client,
+            content_for_captions,
+            caption_mode,
+            word_timestamps,
+            words_by_scene,
+        )
 
     narration_duration_ms = _narration_duration_ms(word_timestamps, scene_timestamps)
     if narration_duration_ms <= 0:
@@ -537,7 +580,12 @@ def run_slideshow_pipeline(
         "scenes": content_scenes,
     }
 
-    if not skip_images:
+    if using_job_assets:
+        assert assets_id is not None
+        copy_job_images_into(out, assets_id, slides=slides)
+        log_step_done(image_step, f"reused assets/jobs/{assets_id}/images ({TOTAL_SLIDE_COUNT})")
+        resolved_provider = "job_assets"
+    elif not skip_images:
         generate_scene_images(
             project_stub,
             images_dir=out / "images",
@@ -623,7 +671,7 @@ def run_slideshow_pipeline(
     print(f"  {out.resolve()}/")
     print(f"  ├── pipeline_payload.json")
     print(f"  ├── narration.mp3")
-    if not skip_images:
+    if using_job_assets or not skip_images:
         print(f"  ├── images/")
         print(f"  │     intro.png, scene_*.png, ending.png")
     if music is not None:

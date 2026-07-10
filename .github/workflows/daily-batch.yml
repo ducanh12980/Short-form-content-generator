@@ -2,9 +2,19 @@ name: Daily video batch
 
 on:
   schedule:
-    # 17:00 UTC = 00:00 UTC+7 — one pending video per day
+    # 17:00 UTC = 00:00 UTC+7 — pending jobs due today (created_at date == today VN)
     - cron: "0 17 * * *"
-  workflow_dispatch: {}
+    # 23:00 UTC = 06:00 UTC+7 — retry all failed jobs
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Batch select mode"
+        type: choice
+        options:
+          - due-today
+          - failed
+        default: due-today
 
 # Prevent overlapping runs (a render can outlast the next trigger)
 concurrency:
@@ -17,7 +27,7 @@ permissions:
 jobs:
   render:
     runs-on: ubuntu-22.04
-    timeout-minutes: 90
+    timeout-minutes: 180
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       OPENAI_BASE_URL: ${{ secrets.OPENAI_BASE_URL }}
@@ -42,6 +52,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+
+      - name: Resolve batch mode
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "select=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "0 17 * * *" ]; then
+            echo "select=due-today" >> "$GITHUB_OUTPUT"
+          else
+            echo "select=failed" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -88,11 +109,12 @@ jobs:
         working-directory: remotion
 
       - name: Run daily batch
-        run: python batch_runner.py --csv jobs.csv --max-jobs 1
-
-      - name: Publish to configured platforms
-        if: success()
-        run: python core/publish_runner.py output/final/final.mp4 --jobs-csv jobs.csv
+        run: >
+          python batch_runner.py
+          --csv jobs.csv
+          --select ${{ steps.mode.outputs.select }}
+          --max-jobs 0
+          --publish
 
       - name: Notify Telegram on failure
         if: failure()
