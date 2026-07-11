@@ -3,7 +3,7 @@ name: Test Cron
 on:
   schedule:
     # 00:3 UTC = 13:15 Asia/Ho_Chi_Minh — due-today
-    - cron: "3 17 * * *"
+    - cron: "3 2 * * *"
     # 23:00 UTC = 06:00 Asia/Ho_Chi_Minh — retry failed
     - cron: "3 23 * * *"
 
