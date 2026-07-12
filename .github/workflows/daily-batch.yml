@@ -196,34 +196,18 @@ jobs:
         if: always()
         shell: bash
         run: |
-
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-
-          # Sync trước khi commit
-          git pull --rebase origin main
-
-
-          # Đảm bảo cache folder tồn tại
           mkdir -p assets/jobs
           touch assets/jobs/.gitkeep
 
-
-          # Chỉ commit dữ liệu cần cache
           git add jobs.csv
           git add assets/jobs
 
-
           if git diff --cached --quiet; then
-
-            echo "No changes to commit."
-
+          echo "No changes to commit."
           else
-
-            git commit \
-            -m "chore: update jobs and cached assets"
-
-            git push origin HEAD:main
-
+          git commit -m "chore: update jobs and cached assets"
+          git push origin HEAD:main
           fi
