@@ -133,6 +133,15 @@ jobs:
         working-directory: remotion
         run: npx remotion browser ensure
 
+      - name: Ensure asset directories exist
+        shell: bash
+        run: |
+          mkdir -p assets/jobs
+          mkdir -p output/final
+
+          # Để Git có thể lưu thư mục rỗng
+          touch assets/jobs/.gitkeep
+
       - name: Run daily batch
         run: >
           python batch_runner.py
@@ -163,6 +172,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git pull --rebase origin main
+
+          mkdir -p assets/jobs
+          touch assets/jobs/.gitkeep
 
           git add jobs.csv
           git add assets/jobs
