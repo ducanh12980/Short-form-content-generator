@@ -56,18 +56,25 @@ jobs:
       OPENAI_IMAGE_PROMPT_MODE: compact
 
       CAPTION_MODE: none
+
       JOBS_CSV: jobs.csv
+
       MUSIC_VOLUME: 0.25
       NARRATION_VOLUME: 1.2
 
+
     steps:
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
+
       - name: Sync with main
-        run: git pull --rebase origin main
+        run: |
+          git pull --rebase origin main
+
 
       - name: Resolve batch mode
         id: mode
@@ -80,20 +87,24 @@ jobs:
               "3 17 * * *")
                 echo "select=due-today" >> "$GITHUB_OUTPUT"
                 ;;
+
               "3 23 * * *")
                 echo "select=failed" >> "$GITHUB_OUTPUT"
                 ;;
+
               *)
                 echo "select=due-today" >> "$GITHUB_OUTPUT"
                 ;;
             esac
           fi
 
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: pip
+
 
       - name: Set up Node
         uses: actions/setup-node@v6
@@ -102,9 +113,11 @@ jobs:
           cache: npm
           cache-dependency-path: remotion/package-lock.json
 
+
       - name: Install system dependencies
         run: |
           sudo apt-get update
+
           sudo apt-get install -y \
             ffmpeg \
             libnss3 \
@@ -116,12 +129,17 @@ jobs:
             libpangocairo-1.0-0 \
             libgtk-3-0
 
+
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+
 
       - name: Install Remotion dependencies
         working-directory: remotion
-        run: npm ci
+        run: |
+          npm ci
+
 
       - name: Cache Chrome Headless Shell
         uses: actions/cache@v6
@@ -129,18 +147,22 @@ jobs:
           path: remotion/node_modules/.remotion
           key: remotion-chrome-${{ runner.os }}-${{ hashFiles('remotion/package-lock.json') }}
 
+
       - name: Ensure Chrome Headless Shell
         working-directory: remotion
-        run: npx remotion browser ensure
+        run: |
+          npx remotion browser ensure
 
-      - name: Ensure asset directories exist
+
+      - name: Ensure asset directories
         shell: bash
         run: |
           mkdir -p assets/jobs
           mkdir -p output/final
 
-          # Để Git có thể lưu thư mục rỗng
+          # Cho Git lưu folder rỗng
           touch assets/jobs/.gitkeep
+
 
       - name: Run daily batch
         run: >
@@ -150,10 +172,13 @@ jobs:
           --max-jobs 0
           --publish
 
+
       - name: Notify Telegram on failure
         if: failure()
         run: |
-          python core/telegram_notify.py send-message "Daily batch failed — check GitHub Actions logs."
+          python core/telegram_notify.py send-message \
+          "Daily batch failed — check GitHub Actions logs."
+
 
       - name: Upload rendered video
         if: always()
@@ -164,26 +189,41 @@ jobs:
             output/final/final.mp4
             output/final/pipeline_payload.json
           if-no-files-found: ignore
-          retention-days: 90
+          retention-days: 7
+
 
       - name: Commit updated jobs and assets
         if: always()
         shell: bash
         run: |
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+
+          # Sync trước khi commit
           git pull --rebase origin main
 
+
+          # Đảm bảo cache folder tồn tại
           mkdir -p assets/jobs
           touch assets/jobs/.gitkeep
 
+
+          # Chỉ commit dữ liệu cần cache
           git add jobs.csv
           git add assets/jobs
 
+
           if git diff --cached --quiet; then
+
             echo "No changes to commit."
+
           else
-            git commit -m "chore: update jobs and cached assets"
-            git push origin main
+
+            git commit \
+            -m "chore: update jobs and cached assets"
+
+            git push origin HEAD:main
+
           fi
