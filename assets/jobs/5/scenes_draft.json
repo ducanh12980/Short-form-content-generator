@@ -1,0 +1,76 @@
+{
+  "topic": "Sự thật về người có tướng tai Phật: Có thực sự giàu sang như lời đồn",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tai Phật: Phúc Lộc Hay Tâm Sinh?",
+      "visual_concept": "Một đôi tai to, dái tai dày, được ánh sáng vàng nhẹ bao phủ, gợi vẻ an nhiên, phúc hậu. Bối cảnh cổ kính, yên bình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tai Phật và Lời Đồn Về Phú Quý",
+      "description": "Trong dân gian, tướng tai Phật thường được xem là dấu hiệu của sự giàu sang, phú quý. Nhiều người tin rằng, ai sở hữu đôi tai này sẽ có cuộc sống sung túc, ít lo toan về tiền bạc. Nhưng liệu sự thật có đơn giản như vậy? Nhân tướng học nhìn nhận điều này như thế nào?",
+      "tts": "Trong dân gian, tướng tai Phật thường được xem là dấu hiệu của sự giàu sang, phú quý... Người ta tin rằng, ai sở hữu đôi tai này sẽ có cuộc sống sung túc, ít lo toan... Thế nhưng, liệu sự thật có đơn giản như vậy, và Nhân tướng học sẽ luận giải thế nào?",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Ý Nghĩa Sâu Xa Của Tướng Tai Phật",
+      "description": "Tướng tai Phật, với đặc điểm dái tai dày, vành tai lớn, thực chất biểu trưng cho sức khỏe tốt và trường thọ. Người sở hữu thường có tấm lòng bao dung, biết lắng nghe, và sống an nhiên tự tại. Sự ổn định về thể chất và tâm hồn này chính là nền tảng vững chắc cho mọi thành công, chứ không phải là lời hứa hẹn về tài lộc.",
+      "tts": "Thực chất, tướng tai Phật với dái tai dày, vành tai lớn... biểu trưng cho sức khỏe và trường thọ... Người sở hữu có tấm lòng bao dung, biết lắng nghe, sống an nhiên tự tại... Đây chính là nền tảng cho mọi thành công, không phải lời hứa hẹn tài lộc suông.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tâm An, Tướng Vượng, Vận Mới Hanh Thông",
+      "description": "Chính sự bao dung, trí tuệ và lòng kiên nhẫn từ tướng tai Phật mới giúp người sở hữu xây dựng mối quan hệ bền vững, đưa ra quyết định sáng suốt. Từ đó, phúc lộc tự nhiên đến, không phải do tai mang lại, mà do tâm tính mà thành. Tướng tốt chỉ là phần nhỏ của bức tranh lớn, quan trọng hơn là cách ta sống và rèn luyện tâm mình.",
+      "tts": "Chính sự bao dung, trí tuệ và lòng kiên nhẫn... mới giúp người sở hữu xây dựng mối quan hệ bền vững, đưa ra quyết định sáng suốt... Phúc lộc nhờ đó mà tự nhiên tìm đến, không phải do tướng, mà do tâm tính mà thành... Tướng tốt chỉ là một phần nhỏ, quan trọng hơn là cách ta sống và rèn luyện tâm mình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tướng Do Tâm Sinh, Vận Do Tâm Tạo",
+      "visual_concept": "Một bàn tay nhẹ nhàng đặt lên tai, ánh mắt nhìn xa xăm, thể hiện sự chiêm nghiệm về bản thân và số phận. Ánh sáng hoàng hôn nhẹ nhàng bao phủ, gợi sự bình yên.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Tai Phật có thực sự mang lại giàu sang? 💰",
+    "description": "Nhiều người tin rằng tướng tai Phật là dấu hiệu của sự phú quý. Nhưng nhân tướng học có cái nhìn sâu sắc hơn về ý nghĩa thực sự của đôi tai này. Cùng khám phá xem liệu lời đồn có đúng không và giá trị thực sự của tướng tai Phật là gì nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#taiphat",
+      "#nhantuonghoc",
+      "#trietly",
+      "#hieuminh",
+      "#hieunguoi",
+      "#phuquy",
+      "#fyp",
+      "#learnontiktok"
+    ]
+  }
+}
