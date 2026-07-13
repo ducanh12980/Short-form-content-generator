@@ -74,7 +74,7 @@ export type ShortVideoProps = {
   backgroundColor: string;
   /** Optional background music file relative to Remotion --public-dir. */
   musicSrc?: string;
-  /** Volume for background music (0–1). Defaults to 0.25. */
+  /** Volume for background music (0–1). Defaults to 0.35. */
   musicVolume?: number;
   /** Ambient overlay video relative to Remotion --public-dir. */
   ambientOverlaySrc?: string | null;

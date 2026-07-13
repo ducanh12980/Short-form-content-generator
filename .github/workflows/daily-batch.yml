@@ -59,7 +59,7 @@ jobs:
 
       JOBS_CSV: jobs.csv
 
-      MUSIC_VOLUME: 0.25
+      MUSIC_VOLUME: 0.35
       NARRATION_VOLUME: 1.2
 
 
