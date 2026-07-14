@@ -334,6 +334,27 @@ def select_jobs(
     return matched
 
 
+def select_pending_from_today(
+    rows: list[dict[str, str]],
+    *,
+    today: date | None = None,
+) -> list[dict[str, str]]:
+    """Pending jobs with created_at date >= today (Asia/Ho_Chi_Minh).
+
+    Used by asset pregenerate so each cron can fill images for today and
+    future schedule days, while skipping past-due pending rows.
+    """
+    target = today if today is not None else _today_vn()
+    matched: list[dict[str, str]] = []
+    for row in rows:
+        if row.get("status") != "pending":
+            continue
+        created = job_created_date_vn(row.get("created_at", ""))
+        if created is not None and created >= target:
+            matched.append(row)
+    return matched
+
+
 def _resolve_job_limit(max_jobs: int | None) -> int | None:
     """Return slice size, or None for unlimited (max_jobs is None or <= 0)."""
     if max_jobs is None or max_jobs <= 0:

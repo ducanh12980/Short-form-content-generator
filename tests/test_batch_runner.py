@@ -354,6 +354,41 @@ def test_select_jobs_due_today() -> None:
     assert [r["id"] for r in matched] == ["1"]
 
 
+def test_select_pending_from_today() -> None:
+    from datetime import date
+
+    from core.batch_runner import select_pending_from_today
+
+    rows = [
+        {
+            "id": "past",
+            "topic": "past",
+            "status": "pending",
+            "created_at": "2026-07-09T00:00:00+07:00",
+        },
+        {
+            "id": "today",
+            "topic": "today",
+            "status": "pending",
+            "created_at": "2026-07-10T03:30:00+07:00",
+        },
+        {
+            "id": "future",
+            "topic": "future",
+            "status": "pending",
+            "created_at": "2026-07-15T00:00:00+07:00",
+        },
+        {
+            "id": "done",
+            "topic": "done",
+            "status": "done",
+            "created_at": "2026-07-20T00:00:00+07:00",
+        },
+    ]
+    matched = select_pending_from_today(rows, today=date(2026, 7, 10))
+    assert [r["id"] for r in matched] == ["today", "future"]
+
+
 def test_select_jobs_failed() -> None:
     rows = [
         {"id": "1", "status": "failed", "created_at": "2026-07-01T00:00:00+07:00"},

@@ -164,6 +164,15 @@ jobs:
           touch assets/jobs/.gitkeep
 
 
+      - name: Fill missing job assets (today and later)
+        # Pending jobs with created_at >= today VN; skip libraries already complete.
+        # Video step below still fill-gaps for the due job if something is missing.
+        run: >
+          python scripts/pregenerate_job_assets.py
+          --csv jobs.csv
+          --from-today
+
+
       - name: Run daily batch
         run: >
           python batch_runner.py

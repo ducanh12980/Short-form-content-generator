@@ -42,6 +42,7 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T041 | Cron fill assets today+future | 2026-07-14 | `pregenerate --from-today` before video in `daily-batch.yml`; `select_pending_from_today`; inventory fill-gaps only. |
 | T040 | Fix GHA daily-batch cron + mode match | 2026-07-10 | Retry cron `0 23 * * *` (06:00 VN); explicit schedule→select mapping; docs note cron only on `main`. |
 | T039 | Batch: reset run dir + stop on Gemini quota | 2026-07-10 | Each job clears `output/final`; stop remaining pending rows when API quota exhausted. |
 | T038 | Full inventory then fill gaps only | 2026-07-10 | `inventory_job_assets` soát hết script+từng PNG trước; chỉ GPT phần còn thiếu. |

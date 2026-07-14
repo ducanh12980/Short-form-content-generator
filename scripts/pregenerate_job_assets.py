@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Pre-generate frozen script + slide images into assets/jobs/<id>/ for GitHub reuse.
+"""Pre-generate / fill frozen script + slide images into assets/jobs/<id>/.
 
-Daily batch runs load these assets and only run TTS + Remotion + publish.
+Daily cron runs ``--from-today`` first to fill today + future pending jobs,
+then the video batch reuses those assets (TTS + Remotion + publish only).
 """
 
 from __future__ import annotations
@@ -17,9 +18,11 @@ if str(_REPO_ROOT) not in sys.path:
 
 from dotenv import load_dotenv
 
-from core.batch_runner import load_jobs
+from core.batch_runner import load_jobs, select_pending_from_today
 from core.job_assets import (
+    format_inventory_summary,
     has_complete_job_assets,
+    inventory_job_assets,
     job_assets_dir,
     job_images_dir,
     save_job_scenes_draft,
@@ -45,13 +48,19 @@ def pregenerate_job(
     force: bool = False,
     image_provider: str | None = None,
 ) -> str:
-    """Freeze script + images for one CSV row. Returns status: created|skipped|error message."""
+    """Fill script + images for one CSV row. Returns status label."""
     job_id = row["id"].strip()
     topic = row["topic"].strip()
     if not job_id or not topic:
         return "error: missing id or topic"
 
-    if has_complete_job_assets(job_id) and not force:
+    inventory = inventory_job_assets(job_id, topic=topic)
+    log_step_done(
+        "pregenerate inventory",
+        f"job {job_id}: {format_inventory_summary(inventory)}",
+    )
+
+    if inventory["complete"] and not force:
         return "skipped (already complete)"
 
     provider = resolve_image_provider(
@@ -63,33 +72,51 @@ def pregenerate_job(
     assets_dir = job_assets_dir(job_id)
     assets_dir.mkdir(parents=True, exist_ok=True)
     images_dir = job_images_dir(job_id)
+    images_dir.mkdir(parents=True, exist_ok=True)
 
-    client = _get_client()
-    slides, publish = run_scene_script_writer(client, topic)
-    log_step_done(
-        "pregenerate script",
-        f"job {job_id}: {TOTAL_SLIDE_COUNT} slides — \"{publish.get('title', '')}\"",
-    )
+    slides = inventory["slides"]
+    publish = inventory["publish"]
+    script_ok = bool(inventory["script_ok"]) and not force
 
+    if not script_ok:
+        client = _get_client()
+        slides, publish = run_scene_script_writer(client, topic)
+        log_step_done(
+            "pregenerate script",
+            f"job {job_id}: {TOTAL_SLIDE_COUNT} slides — \"{publish.get('title', '')}\"",
+        )
+
+        content_slides = get_content_slides(slides)
+        tts_blocks = run_tts_writer(client, content_slides)
+        _attach_tts_to_content_slides(content_slides, tts_blocks)
+        log_step_done("pregenerate TTS writer", f"job {job_id}: {len(tts_blocks)} blocks")
+        save_job_scenes_draft(job_id, topic=topic, slides=slides, publish=publish)
+    else:
+        assert slides is not None and publish is not None
+        log_step_done(
+            "pregenerate script",
+            f"job {job_id}: reused scenes_draft.json",
+        )
+
+    assert slides is not None and publish is not None
     content_slides = get_content_slides(slides)
-    tts_blocks = run_tts_writer(client, content_slides)
-    _attach_tts_to_content_slides(content_slides, tts_blocks)
-    log_step_done("pregenerate TTS writer", f"job {job_id}: {len(tts_blocks)} blocks")
-
-    save_job_scenes_draft(job_id, topic=topic, slides=slides, publish=publish)
-
     project_stub = {"topic": topic, "slides": slides, "scenes": content_slides}
+
+    # force=False → only generate PNGs still missing under images_dir
     generate_scene_images(
         project_stub,
         images_dir=images_dir,
-        force=True,
+        force=force,
         provider=provider,
     )
     log_step_done("pregenerate images", f"job {job_id}: {images_dir}")
 
+    # Mirror into canonical library layout (draft + images) for consistency
+    save_job_scenes_draft(job_id, topic=topic, slides=slides, publish=publish)
+
     if not has_complete_job_assets(job_id):
         return "error: assets incomplete after generate"
-    return "created"
+    return "created" if not inventory["complete"] else "regenerated"
 
 
 def main() -> None:
@@ -98,7 +125,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(
         description=(
-            "Pre-generate scenes_draft.json + slide PNGs into assets/jobs/<id>/ "
+            "Pre-generate / fill scenes_draft.json + slide PNGs into assets/jobs/<id>/ "
             "for daily batch reuse on GitHub Actions."
         ),
     )
@@ -110,12 +137,20 @@ def main() -> None:
     parser.add_argument(
         "--job-id",
         default=None,
-        help="Only pregenerate this job id (default: all rows)",
+        help="Only pregenerate this job id (default: all rows, or --from-today)",
+    )
+    parser.add_argument(
+        "--from-today",
+        action="store_true",
+        help=(
+            "Only pending jobs with created_at date >= today (Asia/Ho_Chi_Minh). "
+            "Skips complete libraries unless --force."
+        ),
     )
     parser.add_argument(
         "--force",
         action="store_true",
-        help="Regenerate even when assets/jobs/<id>/ is already complete",
+        help="Regenerate script/images even when assets/jobs/<id>/ is already complete",
     )
     parser.add_argument(
         "--image-provider",
@@ -131,9 +166,12 @@ def main() -> None:
         if not rows:
             print(f"No job with id={target!r} in {args.csv}", file=sys.stderr)
             raise SystemExit(1)
+    elif args.from_today:
+        rows = select_pending_from_today(rows)
+        print(f"from-today: {len(rows)} pending job(s) with created_at >= today (VN)")
 
     if not rows:
-        print("No jobs in CSV.")
+        print("No jobs to pregenerate.")
         return
 
     failures = 0
