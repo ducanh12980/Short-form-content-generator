@@ -206,8 +206,8 @@ jobs:
           git add assets/jobs
 
           if git diff --cached --quiet; then
-          echo "No changes to commit."
+            echo "No changes to commit."
           else
-          git commit -m "chore: update jobs and cached assets"
-          git push origin HEAD:main
+            git commit -m "chore: update jobs and cached assets"
+            git push origin HEAD:main
           fi
