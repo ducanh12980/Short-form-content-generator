@@ -1,0 +1,77 @@
+{
+  "topic": "Cách nhận biết người chung thủy sắt son chỉ qua một đặc điểm trên khuôn mặt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Bí ẩn nét mặt, dấu vết lòng người",
+      "visual_concept": "Một gương mặt cổ điển, điềm tĩnh được chiếu sáng một nửa bởi ánh nến lung linh, gợi cảm giác huyền bí nhưng thanh tịnh. Nét vẽ tinh tế, không rõ ràng giới tính hay tuổi tác.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/8/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nhận biết chân tình qua tướng mạo?",
+      "description": "Trong nhân tướng học, mỗi nét trên khuôn mặt đều được cho là ẩn chứa phần nào tính cách và phẩm hạnh. Tuy nhiên, đây chỉ là những gợi ý, không phải lời khẳng định tuyệt đối.\nGiá trị cốt lõi là sự quan sát tinh tế, không phải phán xét vội vàng.",
+      "tts": "Trong nhân tướng học, mỗi đường nét trên khuôn mặt ta... đều được xem là ẩn chứa phần nào tính cách và phẩm hạnh bên trong. Tuy nhiên, đây chỉ là những gợi ý để ta quan sát tinh tế... chứ không phải là lời phán xét vội vàng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/8/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Đôi mắt: Cửa sổ tâm hồn, nơi chân thành trú ngụ",
+      "description": "Một trong những đặc điểm được chú ý là đôi mắt. Người có đôi mắt sáng, ánh nhìn kiên định nhưng ôn hòa, không láo liên hay né tránh, thường biểu lộ sự chân thật.\nÁnh mắt ấy toát lên sự ổn định, đáng tin cậy và một nội tâm vững vàng, ít bị lung lay bởi ngoại cảnh.",
+      "tts": "Và một trong những đặc điểm ta thường chú ý chính là đôi mắt... Người có đôi mắt sáng, ánh nhìn kiên định nhưng vẫn giữ được sự ôn hòa... không láo liên hay né tránh... thường biểu lộ một nội tâm vững vàng... một sự chân thật đáng tin cậy.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/8/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Sự chung thủy: Hơn cả nét mặt",
+      "description": "Dù tướng mạo có thể cho ta manh mối, lòng chung thủy thực sự lại được nuôi dưỡng từ tâm. Nó thể hiện qua hành động, lời hứa và sự kiên định theo thời gian.\nĐừng quên rằng, tướng do tâm sinh, và tấm lòng là điều quý giá nhất cần được cảm nhận bằng cả trái tim.",
+      "tts": "Dù tướng mạo có thể cho ta những manh mối ban đầu... nhưng lòng chung thủy đích thực lại được nuôi dưỡng từ sâu thẳm tâm hồn. Nó thể hiện qua từng hành động, từng lời hứa... và sự kiên định bền bỉ theo thời gian... Đừng quên rằng... tướng do tâm sinh... và tấm lòng là điều quý giá nhất cần được cảm nhận bằng cả trái tim.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/8/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hành trình thấu hiểu, không ngừng khám phá",
+      "visual_concept": "Một con đường mòn nhỏ xuyên qua rừng tre xanh mướt, ánh nắng chiều tà xuyên qua kẽ lá, tạo bóng đổ dài. Gợi cảm giác bình yên, tiếp nối và khám phá.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/8/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Nhận diện người chung thủy qua tướng mặt?",
+    "description": "Bạn có bao giờ tự hỏi liệu nét mặt có thể tiết lộ điều gì về lòng chung thủy của một người? Nhân tướng học gợi ý những dấu hiệu tinh tế, nhưng đừng quên rằng chân tình phải được xây đắp từ tâm. Hãy cùng khám phá một đặc điểm thú vị trong video này nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#hieunguoi",
+      "#chungthuy",
+      "#nhantuonghoc",
+      "#trietlycuocsong",
+      "#phunu",
+      "#danong",
+      "#fyp",
+      "#tinhyeu",
+      "#khampha"
+    ]
+  }
+}

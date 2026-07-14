@@ -1,0 +1,76 @@
+{
+  "topic": "Lý do vì sao những người có nét tướng này thường có xu hướng kết hôn muộn",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Duyên Phận Đến Muộn: Nhìn Từ Nét Tướng",
+      "visual_concept": "Một người phụ nữ/đàn ông trẻ tuổi đứng một mình dưới ánh trăng, nhìn xa xăm, vẻ suy tư. Ánh sáng dịu nhẹ chiếu qua khung cửa sổ cổ, tạo bóng đổ dài, gợi cảm giác về thời gian và sự chờ đợi.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/12/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tâm Tính Định Hướng Duyên Phận",
+      "description": "Những nét tướng như trán cao rộng, xương gò má nổi rõ, hay nhân trung sâu thường gắn liền với người có cá tính mạnh mẽ, độc lập. Họ đặt nặng sự nghiệp, lý tưởng cá nhân hơn chuyện tình cảm, hoặc đòi hỏi rất cao ở bạn đời.",
+      "tts": "Trong nhân tướng học, những nét như trán cao rộng, gò má nổi, hay nhân trung sâu... thường gợi lên người có cá tính mạnh mẽ, độc lập. Họ đặt nặng sự nghiệp, lý tưởng cá nhân... hoặc đòi hỏi rất cao ở bạn đời.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/12/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Hành Trình Tự Khám Phá",
+      "description": "Người có duyên đến muộn thường dành nhiều thời gian cho bản thân, học hỏi và trải nghiệm cuộc sống. Họ không vội vàng tìm kiếm một mối quan hệ, mà muốn hiểu rõ mình trước khi chia sẻ cuộc đời với ai đó. Sự trưởng thành cần thời gian vun đắp.",
+      "tts": "Thế nên, những tâm hồn có duyên đến muộn thường dành nhiều thời gian tự khám phá, học hỏi và chiêm nghiệm cuộc sống. Họ không vội vàng tìm kiếm mối quan hệ... mà muốn thấu hiểu mình trước khi sẻ chia cuộc đời. Bởi lẽ, sự trưởng thành cần thời gian vun đắp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/12/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Duyên Lành Đến Đúng Lúc",
+      "description": "Kết hôn muộn không phải là điều tiêu cực. Đó có thể là dấu hiệu của một tâm hồn chín chắn, biết rõ mình muốn gì và cần gì. Khi duyên đến, đó thường là mối lương duyên bền vững, dựa trên sự thấu hiểu và trân trọng sâu sắc.",
+      "tts": "Vì vậy, kết hôn muộn không hề tiêu cực... mà là dấu hiệu của một tâm hồn chín chắn, biết rõ mình muốn gì và cần gì. Khi duyên lành đến đúng lúc, đó thường là mối lương duyên bền vững... dựa trên sự thấu hiểu và trân trọng sâu sắc.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/12/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Duyên Đến Muộn, Hạnh Phúc Trọn Vẹn",
+      "visual_concept": "Một cặp đôi lớn tuổi nắm tay nhau đi trên con đường làng cổ dưới ánh nắng chiều tà, toát lên vẻ bình yên, viên mãn và hạnh phúc. Phía xa là ngôi nhà mái ngói cổ kính, ấm cúng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/12/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Duyên Phận Đến Muộn: Nét Tướng Nói Lên Điều Gì?",
+    "description": "Bạn có bao giờ tự hỏi vì sao một số người lại kết hôn muộn hơn? Nhân tướng học không phải là định mệnh, mà là những gợi ý về tính cách và đường đời. Cùng khám phá những nét tướng thường gắn với xu hướng này và hiểu thêm về hành trình tình duyên của mỗi người nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#kethonmuon",
+      "#tinhduyen",
+      "#trietlycuocsong",
+      "#hieuminh",
+      "#hieunguoi",
+      "#phunuhiendai",
+      "#fyp",
+      "#xuhuong"
+    ]
+  }
+}

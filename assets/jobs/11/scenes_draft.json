@@ -1,0 +1,75 @@
+{
+  "topic": "Đàn ông có nét tướng này là cực phẩm ai lấy được cả đời sung sướng",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Nhìn người, nhìn tâm: Khám phá phẩm chất đàn ông",
+      "visual_concept": "Một người đàn ông trung niên, vẻ mặt trầm tư, đứng trước bức tranh thủy mặc cổ điển. Ánh sáng nhẹ nhàng từ phía sau, tôn lên đường nét thanh thoát và sự điềm tĩnh.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/11/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tâm định, tướng an: Nền tảng vững bền",
+      "description": "Người có tâm tính vững vàng, không dễ dao động, thường biểu hiện qua tướng mạo điềm đạm, ánh mắt kiên định. Đây là nền tảng của sự tin cậy, một điểm tựa vững chắc cho những mối quan hệ lâu dài.",
+      "tts": "Trong nhân tướng học, một tâm hồn tĩnh tại, không dễ xao động... thường hiển lộ qua tướng mạo điềm đạm, ánh mắt kiên định. Đó chính là nền tảng vững chắc cho sự tin cậy... và những mối quan hệ bền lâu trong cuộc đời.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/11/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tướng từ, tâm thiện: Hiểu và sẻ chia",
+      "description": "Nét mặt hiền hòa, ánh mắt biết lắng nghe thường là dấu hiệu của một trái tim nhân hậu, biết cảm thông. Người có tướng từ bi thường có khả năng thấu hiểu, sẻ chia, tạo nên sự gắn kết sâu sắc trong cuộc sống.",
+      "tts": "Và khi nhìn vào nét mặt hiền hòa, ánh mắt biết lắng nghe... ta thường cảm nhận được một trái tim nhân hậu, giàu lòng cảm thông. Người có tướng từ bi, ấy là người dễ dàng thấu hiểu và sẻ chia... từ đó tạo nên sự gắn kết sâu sắc trong mọi mối tương giao.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/11/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Chí lớn, tướng rộng: Cùng nhau vươn tầm",
+      "description": "Tướng mạo toát lên sự phóng khoáng, tầm nhìn xa trông rộng thường đi đôi với ý chí vươn lên. Một người đàn ông có chí lớn không chỉ phát triển bản thân mà còn là động lực, cùng bạn đời xây dựng tương lai tốt đẹp.",
+      "tts": "Và một tướng mạo toát lên sự phóng khoáng, cùng tầm nhìn xa trông rộng... thường đi đôi với một ý chí vươn lên mạnh mẽ. Người như vậy không chỉ tự mình phát triển... mà còn là động lực, cùng bạn đời kiến tạo một tương lai tốt đẹp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/11/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tâm là gốc, tướng là cành",
+      "visual_concept": "Một cây cổ thụ vững chãi, rễ bám sâu vào lòng đất, cành lá vươn rộng che mát. Hình ảnh gợi nhắc về sự quan trọng của nền tảng nội tâm và sự phát triển bền vững.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/11/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Nét tướng nào thể hiện người đàn ông đáng tin cậy?",
+    "description": "Nhân tướng học không chỉ là nhìn hình tướng, mà còn là thấu hiểu nội tâm. Hãy cùng khám phá những phẩm chất quý giá của người đàn ông qua góc nhìn từ Nhân Tướng VN, để tìm thấy người bạn đời phù hợp và cùng nhau kiến tạo hạnh phúc.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#trietlycuocsong",
+      "#hieunguoi",
+      "#phamtieu",
+      "#danong",
+      "#tinhyeu",
+      "#hanhphuc",
+      "#fyp"
+    ]
+  }
+}
