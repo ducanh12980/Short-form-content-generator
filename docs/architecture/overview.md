@@ -58,20 +58,37 @@ flowchart LR
 
 ```mermaid
 flowchart TD
-  csv[CSV] --> readJob[Đọc job]
-  readJob --> inv[Soát hết inventory script + từng PNG]
-  inv --> enough{"Đủ hết?"}
-  enough -->|Có| reuse[Reuse toàn bộ]
-  enough -->|Thiếu| gaps[Liệt kê mọi phần thiếu]
-  gaps --> fill[GPT chỉ tạo phần còn thiếu]
-  fill --> save[Lưu assets/jobs/id]
-  reuse --> tts[TTS]
+  csv[CSV job] --> inv["Soát hết inventory: script + từng PNG"]
+  inv --> state{"Library có gì?"}
+
+  state -->|"Đủ script + 5 ảnh"| reuse["Reuse toàn bộ<br/>(không gọi LLM / image API)"]
+  state -->|"Script OK, thiếu ảnh"| partial["Giữ ảnh sẵn có<br/>sinh ảnh còn thiếu"]
+  state -->|"Script thiếu hoặc topic đổi"| regen["GPT: script + TTS mới"]
+
+  regen --> purge["Xóa ảnh của script cũ<br/>(ảnh là dẫn xuất của script)"]
+  purge --> fresh["Sinh lại 5 ảnh"]
+
+  partial --> save["Lưu assets/jobs/&lt;id&gt;/"]
+  fresh --> save
+  reuse --> tts["TTS từng scene<br/>narration.mp3 + word timestamps"]
   save --> tts
-  tts --> remotion[Remotion]
-  remotion --> publish[Publish]
+
+  tts --> timing["Slide timing + transitions<br/>nhạc nền + ambient overlay"]
+  timing --> payload["pipeline_payload.json"]
+  payload --> remotion["Remotion → final.mp4"]
+  remotion --> publish["Publish: Drive → Telegram → Facebook"]
+
+  publish --> pubok["status=done<br/>publish_status=ok"]
+  publish --> pubfail["status=done<br/>publish_status=failed:&lt;platforms&gt;"]
+  pubfail -.->|"cron 06:03 --select publish-failed"| retry["Render lại từ assets cache<br/>publish lại CHỈ platform đã lỗi"]
 ```
 
 Batch passes `job_assets_id` (ADR [0008](../adr/0008-job-asset-cache.md)). Entry: `python orchestrator_mvp.py "topic"` (default: slideshow). Prompts: `docs/prompts/`. Image cuts align to `scene_timestamps`; default `caption_mode=none`. Export: `python core/remotion_render_stage.py output/pipeline_payload.json`.
+
+Two invariants the branches above encode:
+
+- **Slide images are derived from the script**, never independent of it. A regenerated script (missing draft, or a `topic` edited in `jobs.csv`) invalidates every PNG, so they are purged rather than reused — role-based filenames (`intro.png`, `scene_1.png`) would otherwise make stale images look like a valid cache to `force=False`.
+- **A render that succeeds outlives a publish that fails.** The row stays `done` and the gap is recorded per platform in `publish_status`, so the retry re-publishes only what actually failed instead of duplicating the video on platforms that already have it. See [batch-demo.md](../batch-demo.md).
 
 ## Roadmap
 

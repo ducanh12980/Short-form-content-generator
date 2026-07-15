@@ -315,7 +315,9 @@ def test_execute_job_requires_assets_when_flag_set(tmp_path: Path) -> None:
 @patch("core.slideshow_pipeline.run_scene_script_writer")
 @patch("core.slideshow_pipeline.attach_random_ambient_overlay", return_value=None)
 @patch("core.slideshow_pipeline.attach_random_music", return_value=None)
+@patch("core.slideshow_pipeline._get_client", return_value=object())
 def test_pipeline_persists_job_assets_when_missing(
+    _client,
     _mock_music,
     _mock_overlay,
     mock_script,
@@ -378,3 +380,63 @@ def test_pipeline_persists_job_assets_when_missing(
     mock_script.assert_called_once()
     mock_images.assert_called_once()
     assert has_complete_job_assets("7", root=root)
+
+
+OLD_IMAGE_BYTES = b"OLD-IMAGE-FROM-PREVIOUS-TOPIC"
+
+
+@patch("core.slideshow_pipeline.synthesize_scene_speech")
+@patch("core.slideshow_pipeline.run_tts_writer")
+@patch("core.slideshow_pipeline.run_scene_script_writer")
+@patch("core.slideshow_pipeline.attach_random_ambient_overlay", return_value=None)
+@patch("core.slideshow_pipeline.attach_random_music", return_value=None)
+@patch("core.slideshow_pipeline._get_client", return_value=object())
+def test_changed_topic_discards_images_from_the_previous_script(
+    _client,
+    _music,
+    _overlay,
+    mock_script,
+    mock_tts,
+    mock_speech,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Editing a job's topic must not ship the old topic's slide images."""
+    from core.job_assets import job_images_dir
+    from core.slideshow_pipeline import run_slideshow_pipeline
+
+    root = tmp_path / "assets" / "jobs"
+    monkeypatch.setattr("core.job_assets.DEFAULT_JOBS_ASSETS_ROOT", root)
+    job_id = "7"
+
+    save_job_scenes_draft(
+        job_id, topic="old topic", slides=_sample_slides(), publish=_sample_publish(), root=root
+    )
+    images = job_images_dir(job_id, root=root)
+    images.mkdir(parents=True, exist_ok=True)
+    for name in ("intro.png", "scene_1.png", "scene_2.png", "scene_3.png", "ending.png"):
+        (images / name).write_bytes(OLD_IMAGE_BYTES)
+
+    mock_script.return_value = (_sample_slides(), _sample_publish())
+    mock_tts.return_value = ["Narration 1.", "Narration 2.", "Narration 3."]
+    mock_speech.return_value = (
+        [
+            {"scene_id": 2, "start_ms": 0, "end_ms": 1000},
+            {"scene_id": 3, "start_ms": 1000, "end_ms": 2000},
+            {"scene_id": 4, "start_ms": 2000, "end_ms": 3000},
+        ],
+        [{"word": "hi", "start_ms": 0, "end_ms": 3000}],
+        {2: [], 3: [], 4: []},
+    )
+
+    payload = run_slideshow_pipeline(
+        "new topic",
+        output_dir=tmp_path / "out",
+        caption_mode="none",
+        image_provider="mock",
+        job_assets_id=job_id,
+    )
+
+    shipped = [Path(image["path"]).read_bytes() for image in payload["video"]["images"]]
+    assert shipped and OLD_IMAGE_BYTES not in shipped
+    assert (job_images_dir(job_id, root=root) / "intro.png").read_bytes() != OLD_IMAGE_BYTES

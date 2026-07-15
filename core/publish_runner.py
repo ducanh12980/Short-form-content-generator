@@ -30,25 +30,26 @@ def _load_env() -> None:
     load_dotenv(_REPO_ROOT / ".env")
 
 
-def publish_video(
+def publish_video_report(
     video_path: str | Path,
     *,
     jobs_csv: str | Path | None = None,
     caption: str | None = None,
     payload_path: str | Path | None = None,
     platforms: list[str] | None = None,
-) -> bool:
+) -> dict[str, bool]:
     """
     Publish video to configured platforms.
 
-    Returns True when all attempted platforms succeed or skip; False on any failure.
+    Returns ``{platform: succeeded}`` for each platform actually attempted, so a
+    caller can retry only the ones that failed instead of re-publishing all.
     """
     resolved_platforms = platforms if platforms is not None else get_enabled_platforms()
     if not resolved_platforms:
         print("[publish] skipped (PUBLISH_PLATFORMS not set)")
-        return True
+        return {}
 
-    had_failure = False
+    report: dict[str, bool] = {}
     drive_link: str | None = None
     for name in _order_platforms(resolved_platforms):
         adapter = ADAPTERS.get(name)
@@ -75,10 +76,34 @@ def publish_video(
                 link = result.get("webViewLink")
                 if isinstance(link, str) and link.strip():
                     drive_link = link.strip()
+            report[name] = True
         except PublishError as exc:
             print(f"[{name}] publish failed: {exc}", file=sys.stderr)
-            had_failure = True
-    return not had_failure
+            report[name] = False
+    return report
+
+
+def publish_video(
+    video_path: str | Path,
+    *,
+    jobs_csv: str | Path | None = None,
+    caption: str | None = None,
+    payload_path: str | Path | None = None,
+    platforms: list[str] | None = None,
+) -> bool:
+    """
+    Publish video to configured platforms.
+
+    Returns True when all attempted platforms succeed or skip; False on any failure.
+    """
+    report = publish_video_report(
+        video_path,
+        jobs_csv=jobs_csv,
+        caption=caption,
+        payload_path=payload_path,
+        platforms=platforms,
+    )
+    return all(report.values())
 
 
 def main() -> None:

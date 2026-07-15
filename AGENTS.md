@@ -32,6 +32,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
 | **Pregenerate job assets** | `python scripts/pregenerate_job_assets.py --csv jobs.csv` or `--from-today` (daily CI fills today+future first; video reuses) |
 | **Daily CSV batch** | `python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish` — see [docs/batch-demo.md](docs/batch-demo.md) |
+| **Retry failed publishes** | `python batch_runner.py --csv jobs.csv --select publish-failed --max-jobs 0` — re-publishes only the platforms in `publish_status` |
 | **Daily batch on GitHub Actions** | `.github/workflows/daily-batch.yml` (scheduled) — see [docs/batch-demo.md](docs/batch-demo.md#github-actions-no-server) |
 | Send MP4 to Telegram | `python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv` |
 | **Publish to platforms** | `python core/publish_runner.py output/final/final.mp4 --jobs-csv jobs.csv` — set `PUBLISH_PLATFORMS=facebook,telegram` |

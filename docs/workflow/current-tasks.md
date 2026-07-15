@@ -42,6 +42,9 @@ Living task board for agent and human work. Agents: update this file when starti
 
 | ID | Task | Completed | Notes |
 |----|------|-----------|-------|
+| T044 | Prefill must not block today's video | 2026-07-14 | Prefill step moved **after** the video steps + `continue-on-error`; `pregenerate` stops early on exhausted quota (reuses `is_quota_exhausted_error`). Was: one bad future row → whole day skipped. First `tests/test_pregenerate_job_assets.py`. |
+| T043 | Publish failure no longer silently final | 2026-07-14 | `publish_status` column (`ok` \| `failed:<platforms>`); `--select publish-failed` re-renders from cached assets and re-publishes **only** the failed platforms (no duplicates). `publish_video_report()` in `publish_runner`. |
+| T042 | Discard slide images when script is regenerated | 2026-07-14 | Editing a job's `topic` shipped the **old** topic's 5 images (role-based filenames + `force=False` ⇒ always "cached"). Now purges run dir + library. Bug halves: `a907dfc` (pipeline) + `ff550c6` (pregenerate `force=True`→`force=False`); caught before either ran in production. |
 | T041 | Cron fill assets today+future | 2026-07-14 | `pregenerate --from-today` before video in `daily-batch.yml`; `select_pending_from_today`; inventory fill-gaps only. |
 | T040 | Fix GHA daily-batch cron + mode match | 2026-07-10 | Retry cron `0 23 * * *` (06:00 VN); explicit schedule→select mapping; docs note cron only on `main`. |
 | T039 | Batch: reset run dir + stop on Gemini quota | 2026-07-10 | Each job clears `output/final`; stop remaining pending rows when API quota exhausted. |

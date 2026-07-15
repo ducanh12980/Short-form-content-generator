@@ -17,6 +17,7 @@ on:
           - due-today
           - pending
           - failed
+          - publish-failed
         default: due-today
 
 concurrency:
@@ -164,15 +165,6 @@ jobs:
           touch assets/jobs/.gitkeep
 
 
-      - name: Fill missing job assets (today and later)
-        # Pending jobs with created_at >= today VN; skip libraries already complete.
-        # Video step below still fill-gaps for the due job if something is missing.
-        run: >
-          python scripts/pregenerate_job_assets.py
-          --csv jobs.csv
-          --from-today
-
-
       - name: Run daily batch
         run: >
           python batch_runner.py
@@ -180,6 +172,30 @@ jobs:
           --select ${{ steps.mode.outputs.select }}
           --max-jobs 0
           --publish
+
+
+      - name: Retry failed publishes
+        # Rows whose render succeeded but publish did not. Re-renders from cached
+        # job assets and re-publishes only the platforms recorded in publish_status.
+        if: always() && steps.mode.outputs.select == 'failed'
+        run: >
+          python batch_runner.py
+          --csv jobs.csv
+          --select publish-failed
+          --max-jobs 0
+
+
+      - name: Fill job assets for upcoming days
+        # Runs AFTER the video so a future job's script/image failure can never block
+        # today's render — the batch fills gaps for the due job on its own. Pending
+        # rows with created_at >= today VN; libraries already complete are skipped.
+        # Best-effort: a failure here shows orange but must not fail the run.
+        if: always()
+        continue-on-error: true
+        run: >
+          python scripts/pregenerate_job_assets.py
+          --csv jobs.csv
+          --from-today
 
 
       - name: Notify Telegram on failure

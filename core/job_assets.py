@@ -210,6 +210,27 @@ def format_inventory_summary(inventory: dict[str, Any]) -> str:
     return "; ".join(parts)
 
 
+def purge_slide_images_in(images_dir: str | Path) -> list[str]:
+    """Delete the canonical slide PNGs from a directory. Returns removed filenames.
+
+    Slide images render the script, so a regenerated script leaves them showing
+    content the narration no longer mentions.
+    """
+    directory = Path(images_dir)
+    removed: list[str] = []
+    for name in REQUIRED_IMAGE_NAMES:
+        path = directory / name
+        if path.is_file():
+            path.unlink()
+            removed.append(name)
+    return removed
+
+
+def purge_job_images(job_id: str, *, root: str | Path | None = None) -> list[str]:
+    """Delete every library slide PNG for a job. Returns removed filenames."""
+    return purge_slide_images_in(job_images_dir(job_id, root=root))
+
+
 def copy_existing_job_images_into(
     run_dir: str | Path,
     job_id: str,

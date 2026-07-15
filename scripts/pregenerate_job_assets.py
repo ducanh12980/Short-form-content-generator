@@ -18,13 +18,14 @@ if str(_REPO_ROOT) not in sys.path:
 
 from dotenv import load_dotenv
 
-from core.batch_runner import load_jobs, select_pending_from_today
+from core.batch_runner import is_quota_exhausted_error, load_jobs, select_pending_from_today
 from core.job_assets import (
     format_inventory_summary,
     has_complete_job_assets,
     inventory_job_assets,
     job_assets_dir,
     job_images_dir,
+    purge_job_images,
     save_job_scenes_draft,
 )
 from core.pipeline_log import log_step_done
@@ -91,6 +92,14 @@ def pregenerate_job(
         _attach_tts_to_content_slides(content_slides, tts_blocks)
         log_step_done("pregenerate TTS writer", f"job {job_id}: {len(tts_blocks)} blocks")
         save_job_scenes_draft(job_id, topic=topic, slides=slides, publish=publish)
+
+        stale = purge_job_images(job_id)
+        if stale:
+            log_step_done(
+                "pregenerate images",
+                f"job {job_id}: discarded {len(stale)} image(s) from the previous script "
+                f"({', '.join(stale)})",
+            )
     else:
         assert slides is not None and publish is not None
         log_step_done(
@@ -175,7 +184,7 @@ def main() -> None:
         return
 
     failures = 0
-    for row in rows:
+    for index, row in enumerate(rows):
         job_id = row["id"].strip()
         print(f"=== job {job_id}: {row['topic'][:60]} ===")
         try:
@@ -187,6 +196,17 @@ def main() -> None:
         except Exception as exc:
             print(f"job {job_id} failed: {exc}", file=sys.stderr)
             failures += 1
+            # Free-tier Gemini quota is shared — every later job would fail the same way.
+            if is_quota_exhausted_error(exc):
+                remaining = len(rows) - index - 1
+                if remaining:
+                    print(
+                        f"[pregenerate] stopping early after job {job_id}: API quota "
+                        f"exhausted ({remaining} job(s) left for a later run).",
+                        file=sys.stderr,
+                        flush=True,
+                    )
+                break
             continue
         print(f"job {job_id}: {status}")
         if status.startswith("error"):

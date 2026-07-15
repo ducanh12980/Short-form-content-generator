@@ -40,7 +40,8 @@ def main() -> None:
         default="pending",
         help=(
             "Which rows to process: pending (default), due-today "
-            "(pending with created_at date == today VN), or failed (retry all failed)"
+            "(pending with created_at date == today VN), failed (retry all failed), "
+            "or publish-failed (re-publish done rows whose publish failed; implies --publish)"
         ),
     )
     parser.add_argument(
@@ -100,7 +101,8 @@ def main() -> None:
             output_dir=args.output_dir,
             dry_run=args.dry_run,
             select=args.select,
-            publish=args.publish,
+            # Re-publishing is the whole point of this mode; --publish is redundant there.
+            publish=args.publish or args.select == "publish-failed",
             require_job_assets=args.require_job_assets,
         )
 

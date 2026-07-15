@@ -485,11 +485,14 @@ def run_slideshow_pipeline(
         format_inventory_summary,
         inventory_job_assets,
         persist_job_assets_from_run_dir,
+        purge_job_images,
+        purge_slide_images_in,
         require_complete_job_assets,
     )
 
     assets_id = (job_assets_id or "").strip() or None
     script_from_library = False
+    script_resumed = False
     images_complete = False
     slides: list[dict[str, Any]] | None = None
     publish: dict[str, Any] | None = None
@@ -539,6 +542,7 @@ def run_slideshow_pipeline(
         cached_draft = _load_scenes_draft(out, topic=topic)
         if cached_draft is not None:
             slides, publish = cached_draft
+            script_resumed = True
             log_step_done(
                 "scene script writer (LLM, Gemini)",
                 f"resumed from {SCENES_DRAFT_FILENAME}",
@@ -571,6 +575,10 @@ def run_slideshow_pipeline(
 
     assert slides is not None and publish is not None
 
+    # A script that came from neither the library nor a resumed draft is brand new,
+    # so any slide PNG lying around was rendered from a script we just discarded.
+    script_regenerated = not script_from_library and not script_resumed
+
     # Images before spoken TTS so durable assets can be saved even if TTS fails later.
     project_stub: dict[str, Any] = {
         "topic": topic_prompt.strip(),
@@ -584,7 +592,7 @@ def run_slideshow_pipeline(
         log_step_done(image_step, f"reused assets/jobs/{assets_id}/images ({TOTAL_SLIDE_COUNT})")
         resolved_provider = "job_assets"
     elif not skip_images:
-        if assets_id is not None:
+        if script_from_library and assets_id is not None:
             reused_paths = copy_existing_job_images_into(out, assets_id, slides=slides)
             missing = (inventory or {}).get("missing_images") or []
             if reused_paths or missing:
@@ -595,6 +603,16 @@ def run_slideshow_pipeline(
                         f"generate {len(missing) if missing else 'remaining'} missing"
                         + (f" ({', '.join(missing)})" if missing else "")
                     ),
+                )
+        elif script_regenerated:
+            stale = purge_slide_images_in(out / "images")
+            if assets_id is not None:
+                stale += purge_job_images(assets_id)
+            if stale:
+                names = ", ".join(sorted(set(stale)))
+                log_step_done(
+                    image_step,
+                    f"discarded {len(set(stale))} image(s) rendered from a previous script ({names})",
                 )
         # force=False → only call the image API for PNGs still absent after inventory copy
         generate_scene_images(

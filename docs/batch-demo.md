@@ -111,8 +111,13 @@ The CSV row is updated: `status=done`, `output_path=<path to final.mp4>`. Copy `
 | `error` | no | Filled on failure |
 | `created_at` | no | ISO timestamp; for GitHub **due-today** mode, the **calendar date in Asia/Ho_Chi_Minh** must match today |
 | `completed_at` | no | ISO timestamp |
+| `publish_status` | no | `ok` \| `failed:<platforms>` — set after a publish attempt |
 
 Add many `pending` rows to the CSV. Set each row’s `created_at` to the Vietnam calendar day you want it to run. GitHub **00:00 VN** uses `--select due-today --max-jobs 0` (all matching rows that day). **06:00 VN** retries every `failed` row. Local default remains `--select pending --max-jobs 1` (next pending only).
+
+A render that succeeds followed by a publish that fails leaves `status=done` with `publish_status=failed:telegram`. The row is not `failed` — the video exists — so `--select failed` will not pick it up; `--select publish-failed` does. That mode re-renders from the cached job assets (no LLM or image API calls) and re-publishes **only** the platforms named in `publish_status`, so platforms that already received the video do not get a duplicate.
+
+> **Changing a row’s `topic` after its assets exist** discards `assets/jobs/<id>/images/` — slide images are rendered from the script, so a new script invalidates them. They are regenerated on the next run.
 
 ## Environment
 
@@ -185,11 +190,13 @@ Edit the workflow file to change these, or add optional repo secrets (`OPENAI_IM
 **How it runs:**
 
 - Triggers (GitHub Actions schedule is UTC; times below are Vietnam / UTC+7). **Cron only runs from the default branch (`main`)** — merge workflow changes before expecting schedule to update.
-  - `cron: "3 17 * * *"` → **00:03 VN** — (1) fill assets for **today + future** pending jobs, (2) `--select due-today --max-jobs 0 --publish`
-  - `cron: "3 23 * * *"` → **06:03 VN** — (1) same asset fill, (2) `--select failed --max-jobs 0 --publish`
-  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today`, `pending`, or `failed`
+  - `cron: "3 17 * * *"` → **00:03 VN** — (1) `--select due-today --max-jobs 0 --publish`, (2) prefill assets for **today + future** pending jobs
+  - `cron: "3 23 * * *"` → **06:03 VN** — (1) `--select failed --max-jobs 0 --publish`, (2) `--select publish-failed --max-jobs 0`, (3) same prefill
+  - Manual **Run workflow** (`workflow_dispatch`) with input `mode`: `due-today`, `pending`, `failed`, or `publish-failed`
   - GitHub may delay scheduled runs by minutes–hours (or skip a day on low-activity repos). Prefer **Run workflow** to verify.
-- **Asset fill step** (`scripts/pregenerate_job_assets.py --from-today`): pending rows with `created_at` date **≥ today (VN)**; skip libraries already complete; only generate missing script/images. First run after adding many future jobs can take a long time and cost many ChatGPT image calls; later days mostly skip.
+- **Asset prefill step** (`scripts/pregenerate_job_assets.py --from-today`): pending rows with `created_at` date **≥ today (VN)**; skip libraries already complete; only generate missing script/images. First run after adding many future jobs can take a long time and cost many ChatGPT image calls; later days mostly skip.
+  - It runs **after** the video steps and is `continue-on-error`. Prefill is an optimization for *later* days — the batch fills gaps for the due job on its own — so a future job's script/image failure must never block today's render. Ordering it first inverted that priority: one bad row two weeks out could skip the whole day.
+  - Stops early when the LLM reports an exhausted daily quota (same rule as the batch): the free tier is shared, so every later job would fail identically. The remaining rows are picked up by the next run.
 - One day may have **multiple** jobs; set each row’s `created_at` to that calendar day (e.g. `2026-07-10T00:00:00+07:00`). Empty `created_at` is skipped by `due-today` / `--from-today`.
 - Slideshow jobs reuse `assets/jobs/<id>/` when complete; otherwise generate + persist missing parts, then TTS + Remotion + publish. Optional `--require-job-assets` fails if the library is missing.
 - After each successful render, the batch publishes that MP4 via `publish_runner` (`--publish`) so multi-job runs do not lose earlier videos when `output/final/` is overwritten.
@@ -205,6 +212,9 @@ python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish
 
 # Retry every failed row
 python batch_runner.py --csv jobs.csv --select failed --max-jobs 0 --publish
+
+# Re-publish done rows whose publish failed (only the platforms that failed; implies --publish)
+python batch_runner.py --csv jobs.csv --select publish-failed --max-jobs 0
 
 # Legacy: next pending only (no date filter)
 python batch_runner.py --csv jobs.csv --select pending --max-jobs 1

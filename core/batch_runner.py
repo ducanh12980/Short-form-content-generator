@@ -20,7 +20,7 @@ except Exception:  # ZoneInfoNotFoundError / missing tzdata on Windows
 VALID_STATUSES = frozenset({"pending", "running", "done", "failed"})
 VALID_MODES = frozenset({"slideshow", "mvp"})
 VALID_IMAGE_PROVIDERS = frozenset({"chatgpt", "pollinations", "mock"})
-VALID_SELECT_MODES = frozenset({"pending", "due-today", "failed"})
+VALID_SELECT_MODES = frozenset({"pending", "due-today", "failed", "publish-failed"})
 
 REQUIRED_COLUMNS = ("id", "topic", "status")
 JOB_COLUMNS = (
@@ -33,7 +33,27 @@ JOB_COLUMNS = (
     "error",
     "created_at",
     "completed_at",
+    "publish_status",
 )
+
+PUBLISH_STATUS_OK = "ok"
+_PUBLISH_FAILED_PREFIX = "failed:"
+
+
+def format_publish_status(failed_platforms: list[str]) -> str:
+    """Render a publish outcome for the CSV: ``ok`` or ``failed:<platforms>``."""
+    if not failed_platforms:
+        return PUBLISH_STATUS_OK
+    return _PUBLISH_FAILED_PREFIX + ",".join(sorted(failed_platforms))
+
+
+def parse_failed_publish_platforms(publish_status: str) -> list[str]:
+    """Platforms named in a ``failed:<a>,<b>`` publish status; empty when none."""
+    raw = (publish_status or "").strip()
+    if not raw.startswith(_PUBLISH_FAILED_PREFIX):
+        return []
+    names = raw[len(_PUBLISH_FAILED_PREFIX) :].split(",")
+    return [name.strip() for name in names if name.strip()]
 
 
 def _utc_now_iso() -> str:
@@ -322,6 +342,14 @@ def select_jobs(
     if mode == "failed":
         return [row for row in rows if row.get("status") == "failed"]
 
+    if mode == "publish-failed":
+        return [
+            row
+            for row in rows
+            if row.get("status") == "done"
+            and parse_failed_publish_platforms(row.get("publish_status", ""))
+        ]
+
     # due-today: pending jobs whose created_at calendar date (VN) is today
     target = today if today is not None else _today_vn()
     matched: list[dict[str, str]] = []
@@ -380,6 +408,8 @@ def process_pending_jobs(
       - ``pending`` — all pending rows (legacy default)
       - ``due-today`` — pending rows with created_at date == today (Asia/Ho_Chi_Minh)
       - ``failed`` — all failed rows (retry)
+      - ``publish-failed`` — done rows whose publish failed; re-renders from cached
+        job assets and re-publishes only the platforms named in ``publish_status``
 
     ``max_jobs``: positive int limits how many; ``None`` or ``0`` means all matched.
     ``publish``: after each successful render, publish that MP4 via publish_runner.
@@ -408,6 +438,14 @@ def process_pending_jobs(
                 results.append({"id": job_id, "status": "dry_run", "topic": row["topic"]})
                 continue
 
+            # Re-publish only what actually failed, so platforms that already have
+            # the video do not receive a duplicate.
+            retry_platforms = (
+                parse_failed_publish_platforms(row.get("publish_status", ""))
+                if select == "publish-failed"
+                else None
+            )
+
             if not row.get("created_at"):
                 row["created_at"] = _utc_now_iso()
             row["status"] = "running"
@@ -429,32 +467,29 @@ def process_pending_jobs(
                 save_jobs(path, rows)
 
                 if publish:
-                    from core.publish_runner import publish_video
+                    from core.publish_runner import publish_video_report
 
                     payload_path = output.resolve().parent / "pipeline_payload.json"
-                    ok = publish_video(
+                    report = publish_video_report(
                         output,
                         jobs_csv=path,
                         payload_path=payload_path if payload_path.is_file() else None,
+                        platforms=retry_platforms or None,
                     )
-                    if not ok:
-                        results.append(
-                            {
-                                "id": job_id,
-                                "status": "done",
-                                "output_path": row["output_path"],
-                                "publish": "failed",
-                            }
-                        )
-                    else:
-                        results.append(
-                            {
-                                "id": job_id,
-                                "status": "done",
-                                "output_path": row["output_path"],
-                                "publish": "ok",
-                            }
-                        )
+                    failed_platforms = sorted(
+                        name for name, succeeded in report.items() if not succeeded
+                    )
+                    if report:
+                        row["publish_status"] = format_publish_status(failed_platforms)
+                        save_jobs(path, rows)
+                    results.append(
+                        {
+                            "id": job_id,
+                            "status": "done",
+                            "output_path": row["output_path"],
+                            "publish": "failed" if failed_platforms else "ok",
+                        }
+                    )
                 else:
                     results.append(
                         {"id": job_id, "status": "done", "output_path": row["output_path"]}

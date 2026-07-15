@@ -529,7 +529,7 @@ def test_process_failed_retries_all(mock_execute, tmp_path: Path) -> None:
     assert by_id["3"]["status"] == "done"
 
 
-@patch("core.publish_runner.publish_video", return_value=True)
+@patch("core.publish_runner.publish_video_report", return_value={"telegram": True})
 @patch("core.batch_runner.execute_job")
 def test_process_publish_per_job(mock_execute, mock_publish, tmp_path: Path) -> None:
     out = tmp_path / "output" / "final.mp4"
@@ -577,3 +577,97 @@ def test_process_publish_per_job(mock_execute, mock_publish, tmp_path: Path) -> 
     assert len(results) == 2
     assert all(r.get("publish") == "ok" for r in results)
     assert mock_publish.call_count == 2
+    assert all(row["publish_status"] == "ok" for row in load_jobs(csv_path))
+
+
+def _done_row(job_id: str, publish_status: str) -> dict[str, str]:
+    return {
+        "id": job_id,
+        "topic": f"topic {job_id}",
+        "status": "done",
+        "mode": "slideshow",
+        "image_provider": "mock",
+        "output_path": "",
+        "error": "",
+        "created_at": "2026-07-10T00:00:00+07:00",
+        "completed_at": "2026-07-10T01:00:00+07:00",
+        "publish_status": publish_status,
+    }
+
+
+def test_format_and_parse_publish_status_round_trip() -> None:
+    from core.batch_runner import format_publish_status, parse_failed_publish_platforms
+
+    assert format_publish_status([]) == "ok"
+    assert format_publish_status(["telegram", "drive"]) == "failed:drive,telegram"
+    assert parse_failed_publish_platforms("failed:drive,telegram") == ["drive", "telegram"]
+    assert parse_failed_publish_platforms("ok") == []
+    assert parse_failed_publish_platforms("") == []
+
+
+def test_select_publish_failed_picks_only_done_rows_with_failed_platforms() -> None:
+    from core.batch_runner import select_jobs
+
+    rows = [
+        _done_row("1", "ok"),
+        _done_row("2", "failed:telegram"),
+        _done_row("3", ""),
+        {**_done_row("4", "failed:drive"), "status": "failed"},
+    ]
+    assert [row["id"] for row in select_jobs(rows, select="publish-failed")] == ["2"]
+
+
+@patch("core.publish_runner.publish_video_report")
+@patch("core.batch_runner.execute_job")
+def test_publish_failure_is_recorded_per_platform(
+    mock_execute, mock_publish, tmp_path: Path
+) -> None:
+    out = tmp_path / "output" / "final.mp4"
+    (tmp_path / "output").mkdir()
+    out.write_bytes(b"mp4")
+    mock_execute.return_value = out
+    mock_publish.return_value = {"drive": True, "telegram": False}
+
+    csv_path = tmp_path / "jobs.csv"
+    save_jobs(csv_path, [{**_done_row("1", ""), "status": "pending", "completed_at": ""}])
+
+    results = process_pending_jobs(
+        csv_path,
+        max_jobs=0,
+        select="pending",
+        publish=True,
+        output_dir=tmp_path / "final",
+    )
+
+    assert results[0]["publish"] == "failed"
+    row = load_jobs(csv_path)[0]
+    # Render succeeded, so the row stays done — the publish gap lives in its own column.
+    assert row["status"] == "done"
+    assert row["publish_status"] == "failed:telegram"
+
+
+@patch("core.publish_runner.publish_video_report", return_value={"telegram": True})
+@patch("core.batch_runner.execute_job")
+def test_publish_failed_retry_skips_platforms_that_already_succeeded(
+    mock_execute, mock_publish, tmp_path: Path
+) -> None:
+    out = tmp_path / "output" / "final.mp4"
+    (tmp_path / "output").mkdir()
+    out.write_bytes(b"mp4")
+    mock_execute.return_value = out
+
+    csv_path = tmp_path / "jobs.csv"
+    save_jobs(csv_path, [_done_row("1", "failed:telegram")])
+
+    results = process_pending_jobs(
+        csv_path,
+        max_jobs=0,
+        select="publish-failed",
+        publish=True,
+        output_dir=tmp_path / "final",
+    )
+
+    # Drive already has the video; only telegram is retried.
+    assert mock_publish.call_args.kwargs["platforms"] == ["telegram"]
+    assert results[0]["publish"] == "ok"
+    assert load_jobs(csv_path)[0]["publish_status"] == "ok"
