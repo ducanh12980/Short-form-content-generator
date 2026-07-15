@@ -1,0 +1,76 @@
+{
+  "topic": "Người có đặc điểm này luôn có quý nhân phù trợ gặp nguy hóa an",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tâm lành ắt gặp người hiền",
+      "visual_concept": "Một con thuyền nhỏ vững chãi giữa dòng sông lớn, phía xa là ánh sáng dẫn lối từ một ngọn hải đăng cổ kính, gợi ý chí kiên định và sự phù trợ thầm lặng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/16/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Quý nhân, duyên lành từ đâu?",
+      "description": "Trong hành trình đời người, ai cũng mong gặp được quý nhân. Nhưng quý nhân không phải may mắn ngẫu nhiên, mà thường là quả ngọt của hạt giống thiện lương ta đã gieo. Người có tâm hồn rộng mở, luôn sẵn lòng giúp đỡ người khác, tự khắc sẽ thu hút những duyên lành về phía mình.",
+      "tts": "Trong hành trình đời người... ai cũng mong gặp được quý nhân... Nhưng duyên lành ấy, không phải ngẫu nhiên... mà là quả ngọt của hạt giống thiện lương ta đã gieo trồng... Khi tâm hồn rộng mở, sẵn lòng giúp đỡ... tự khắc quý nhân sẽ tìm đến ta.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/16/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tướng mạo phản ánh thiện tâm",
+      "description": "Trong Nhân tướng học, một số đặc điểm như vầng trán cao rộng, đôi mắt sáng trong, hay khuôn mặt phúc hậu thường được xem là tướng quý. Những nét này không chỉ là vẻ ngoài, mà còn là biểu hiện của một nội tâm hiền hòa, trí tuệ minh mẫn và lòng từ bi, những phẩm chất dễ được người khác tin cậy và hỗ trợ.",
+      "tts": "Trong Nhân tướng học... vầng trán cao rộng, đôi mắt sáng trong hay khuôn mặt phúc hậu... thường được xem là tướng quý... Chúng phản ánh nội tâm hiền hòa, trí tuệ và lòng từ bi... những phẩm chất dễ được tin cậy và hỗ trợ.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/16/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Gặp nguy hóa an, nhờ đức độ",
+      "description": "Người có đức, có tâm, dù gặp nghịch cảnh cũng không dễ dàng gục ngã. Chính cái 'tướng' của sự chân thành, chính trực và lòng tốt ấy sẽ cảm hóa và lay động người xung quanh. Khi hoạn nạn, những người đã từng được ta giúp đỡ, hoặc cảm mến phẩm hạnh của ta, sẽ sẵn lòng ra tay tương trợ, giúp ta vượt qua giông bão.",
+      "tts": "Người có đức, có tâm... dù gặp nghịch cảnh cũng không dễ gục ngã... Cái 'tướng' của sự chân thành và lòng tốt ấy... sẽ cảm hóa người xung quanh... Khi hoạn nạn, những duyên lành từ trước... sẽ sẵn lòng tương trợ... giúp ta vượt qua giông bão.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/16/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Đức dày, phước lớn, quý nhân vây",
+      "visual_concept": "Một cây cổ thụ vững chãi, tán lá sum suê che chở cho những mầm non bên dưới, dưới ánh nắng ấm áp. Gợi hình ảnh của sự che chở, phát triển bền vững và lòng tốt được đền đáp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/16/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bí mật đằng sau người luôn có quý nhân phù trợ",
+    "description": "Bạn có bao giờ tự hỏi vì sao có những người dù gặp khó khăn đến mấy cũng luôn có người giúp đỡ? Trong Nhân tướng học, điều này không phải ngẫu nhiên mà ẩn chứa những ý nghĩa sâu sắc về tâm và tướng. Cùng Nhân Tướng VN khám phá những phẩm chất giúp bạn thu hút quý nhân và biến nguy thành an nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#quynhanphutro",
+      "#tamlinh",
+      "#trietlycuocsong",
+      "#hieunguoi",
+      "#phattrienbanthan",
+      "#loikhuyen",
+      "#huyenhoc",
+      "#fyp"
+    ]
+  }
+}

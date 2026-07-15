@@ -1,0 +1,70 @@
+{
+  "topic": "Cách nhận diện người nóng tính cộc cằn chỉ sau vài giây quan sát gương mặt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tâm động, tướng hiện: Dấu vết của lửa trong gương mặt",
+      "visual_concept": "Gương mặt người đang cau mày nhẹ, ánh mắt sắc lẹm, có chút tia sáng đỏ mờ ảo phản chiếu trong đồng tử – gợi sự nóng nảy ẩn chứa bên trong. Bối cảnh cổ kính, hơi tối.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/18/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Vầng trán căng, ấn đường hẹp: Tâm tính khó dung",
+      "description": "Người nóng nảy thường có vầng trán dễ nhăn, tạo thành các nếp gấp sâu khi biểu lộ cảm xúc. Ấn đường (khoảng giữa hai lông mày) thường hẹp, hoặc hay bị cau lại, cho thấy nội tâm dễ căng thẳng, khó thư thái.",
+      "tts": "Nhìn vào vầng trán, nếu thấy căng thẳng, dễ nhăn... cùng ấn đường giữa hai lông mày hẹp, hay bị cau lại... ta có thể cảm nhận được nội tâm người ấy đang chất chứa những điều khó dung, khó bề thư thái.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/18/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Ánh mắt sắc, môi mím chặt: Lời chưa nói đã gằn",
+      "description": "Đôi mắt có thể có thần sắc quá mạnh, ánh nhìn sắc hoặc hay liếc nhanh. Miệng thường có xu hướng mím chặt, khóe môi trễ xuống, hoặc khi nói chuyện dễ co giật nhẹ, lộ rõ sự bực bội, thiếu kiên nhẫn.",
+      "tts": "Tiếp đó, quan sát ánh mắt... nếu thấy quá sắc, hay liếc nhanh... kết hợp với đôi môi mím chặt, khóe miệng trễ xuống hay co giật nhẹ khi nói... dường như lời chưa cất lên đã mang theo sự gằn gừ, thiếu kiên nhẫn khó giấu.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/18/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Thần khí bức bối, sắc mặt ám: Lửa ngầm bùng cháy",
+      "description": "Quan trọng hơn cả là thần thái và khí sắc tổng thể. Người nóng tính thường có vẻ mặt căng thẳng, ít khi thư giãn hoàn toàn. Sắc mặt đôi khi hơi đỏ hoặc ám tối, toát ra một năng lượng bức bối, khó chịu, dễ bộc phát.",
+      "tts": "Nhưng điều cốt yếu hơn cả... là thần thái và khí sắc tổng thể. Một vẻ mặt căng thẳng, ít khi thư thái... sắc diện đôi khi đỏ hoặc ám tối... thường toát ra một năng lượng bức bối, như ngọn lửa âm ỉ... chực chờ bùng cháy bất cứ lúc nào.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/18/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hiểu tướng để an tâm, an trí",
+      "visual_concept": "Một con đường đá dưới ánh hoàng hôn dẫn vào sương mù nhẹ, gợi hành trình tiếp tục khám phá bản thân và sự tĩnh tại trong tâm hồn. Không gian yên bình, thanh tịnh.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/18/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Nhận diện người nóng tính qua tướng mặt: Bí quyết giao tiếp",
+    "description": "Bạn có bao giờ gặp người dễ nổi nóng và tự hỏi làm sao để nhận biết họ? Nhân tướng học sẽ mách bạn những dấu hiệu tinh tế trên gương mặt, giúp bạn hiểu hơn về tính cách và cách ứng xử khôn ngoan để giữ hòa khí.",
+    "hashtags": [
+      "#NhanTuongVn",
+      "#huyenhoc",
+      "#fyp"
+    ]
+  }
+}

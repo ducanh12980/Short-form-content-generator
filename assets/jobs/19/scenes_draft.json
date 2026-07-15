@@ -1,0 +1,76 @@
+{
+  "topic": "Người có tâm địa lương thiện sống phúc đức thường sở hữu nét mặt này",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tâm thiện, tướng an: Nét mặt người phúc đức",
+      "visual_concept": "Khuôn mặt người phụ nữ lớn tuổi, ánh mắt hiền từ, nụ cười nhẹ nhàng, toát lên vẻ an lành, phúc hậu. Ánh sáng dịu nhẹ từ cửa sổ cổ kính chiếu vào.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/19/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tâm sinh tướng: Nét mặt phản ánh nội tâm",
+      "description": "Trong Nhân tướng học, dung mạo không chỉ là vẻ ngoài. Nó là tấm gương phản chiếu những gì ta vun đắp từ bên trong. Một tâm hồn thiện lương, lòng từ bi sẽ dần khắc họa những đường nét hiền hòa, an lạc trên khuôn mặt.",
+      "tts": "Người xưa có câu, tâm sinh tướng... Nét mặt mỗi người... thực chất là tấm gương phản chiếu những gì ta vun đắp từ sâu thẳm bên trong. Một tâm hồn thiện lương, lòng từ bi... sẽ dần khắc họa nên những đường nét hiền hòa, an lạc trên dung mạo của chúng ta.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/19/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Dấu ấn của thiện lương trên dung mạo",
+      "description": "Người có tâm địa lương thiện thường sở hữu ánh mắt trong sáng, hiền hòa, không sắc lạnh. Nụ cười của họ chân thành, lan tỏa sự ấm áp. Tổng thể khuôn mặt toát lên vẻ hài hòa, phúc hậu, ít căng thẳng hay u uất theo thời gian.",
+      "tts": "Người có tâm thiện lương... thường mang ánh mắt trong sáng, hiền hòa... nụ cười chân thành, ấm áp. Khuôn mặt họ toát lên vẻ hài hòa, phúc hậu... ít khi vương nét căng thẳng hay u uất theo thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/19/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tướng tùy tâm chuyển: Vẻ đẹp từ bên trong",
+      "description": "Điều đáng quý là tướng mạo không phải bất biến. Mọi hành động, suy nghĩ thiện lành đều góp phần định hình lại dung mạo ta. Vẻ đẹp thực sự đến từ sự tu dưỡng nội tâm, từ một trái tim biết yêu thương và sẻ chia không ngừng nghỉ.",
+      "tts": "Điều đáng quý... là tướng mạo không bất biến, mà tùy tâm chuyển. Mọi hành động, suy nghĩ thiện lành... đều góp phần định hình lại dung mạo. Vẻ đẹp thực sự... đến từ sự tu dưỡng nội tâm... từ trái tim biết yêu thương và sẻ chia.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/19/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Gieo mầm thiện, gặt hái phúc đức",
+      "visual_concept": "Một bàn tay nhẹ nhàng đặt hạt giống xuống lòng đất màu mỡ, được bao quanh bởi những mầm cây xanh tươi. Ánh nắng ấm áp chiếu rọi, tượng trưng cho sự phát triển và hy vọng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/19/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Khuôn mặt phúc hậu có phải do tâm thiện?",
+    "description": "Bạn có bao giờ để ý những người có vẻ mặt hiền lành, phúc hậu? Nhân tướng học cho rằng, nét đẹp ấy không tự nhiên mà có. Nó là kết quả của một quá trình tu dưỡng tâm hồn, gieo mầm thiện và gặt hái phước lành trong cuộc sống. Cùng khám phá mối liên hệ sâu sắc này nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#tamthien",
+      "#phucduc",
+      "#hieunguoi",
+      "#trietlysong",
+      "#vebeptutrong",
+      "#phuochau",
+      "#fyp",
+      "#khampha"
+    ]
+  }
+}

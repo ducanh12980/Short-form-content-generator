@@ -1,0 +1,76 @@
+{
+  "topic": "Tuyệt đối đừng kể bí mật cho người có nét tướng này nếu không muốn tai vách mạch rừng",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Lời kín, tâm an: Nền tảng tín nhiệm",
+      "visual_concept": "Bức tranh tĩnh lặng, một chiếc hộp gỗ cổ xưa được khóa cẩn thận, đặt trên bàn đá dưới ánh trăng dịu nhẹ. Gợi sự quý giá của bí mật và sự cần thiết của lòng tin.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/17/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nét tướng và tiếng lòng: Giao thoa tinh tế",
+      "description": "Nhân tướng học không phải bói toán, mà là nghệ thuật quan sát con người. Từ ánh mắt, nụ cười đến cử chỉ, lời nói, mỗi người đều mang dấu ấn của tâm tính riêng. Hiểu được sự giao thoa này giúp ta nhận diện bản chất nội tại, từ đó ứng xử khôn ngoan hơn trong mọi mối quan hệ.",
+      "tts": "Nhân tướng học... không phải bói toán, mà là nghệ thuật quan sát con người... Từ ánh mắt, nụ cười, cử chỉ... mỗi người đều mang dấu ấn tâm tính riêng... Hiểu sự giao thoa này, giúp ta nhận diện bản chất nội tại... để ứng xử khôn ngoan hơn trong mọi mối quan hệ.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/17/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Người buông lời, tâm khó giữ: Dấu hiệu cần nhận biết",
+      "description": "Hãy cẩn trọng với những người có ánh mắt hay liếc ngang, liếc dọc, khó giữ sự tập trung khi trò chuyện. Cùng với thói quen nói nhanh, lời lẽ thường buột ra không suy nghĩ kỹ, những dấu hiệu này cho thấy một tâm tính ít kiềm chế, dễ dàng bộc lộ cả điều riêng tư của bản thân và người khác.",
+      "tts": "Hãy cẩn trọng với những người ánh mắt hay liếc ngang, liếc dọc... khó giữ sự tập trung khi trò chuyện... Họ thường nói nhanh, lời lẽ buột ra không suy nghĩ kỹ... Đây là dấu hiệu của tâm tính ít kiềm chế, dễ dàng bộc lộ cả điều riêng tư của bản thân và người khác.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/17/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Trí tuệ giữ mình: Bí mật là tài sản",
+      "description": "Bí mật của bạn, dù lớn hay nhỏ, đều là một phần của sự riêng tư và là tài sản quý giá. Việc chọn người để sẻ chia đòi hỏi sự tinh tế và trí tuệ. Đừng vội vàng tin tưởng những lời hứa hẹn, mà hãy quan sát hành vi và tướng mạo để nhận ra ai là người đáng tin cậy giữ lời.",
+      "tts": "Bí mật của bạn... dù lớn hay nhỏ... đều là tài sản quý giá của sự riêng tư... Việc chọn người để sẻ chia... đòi hỏi sự tinh tế và trí tuệ... Đừng vội vàng tin lời hứa hẹn... mà hãy quan sát hành vi và tướng mạo... để nhận ra ai là người đáng tin cậy giữ lời cho mình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/17/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hành trình thấu hiểu: Vẹn tròn tâm trí",
+      "visual_concept": "Một cuốn sách cổ mở ra trên bệ cửa sổ, ánh sáng ban mai chiếu qua trang giấy, gợi lên sự học hỏi và chiêm nghiệm không ngừng. Bên ngoài là khu vườn yên bình, tượng trưng cho sự bình an nội tại.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/17/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Cẩn trọng khi chia sẻ: Nét tướng của người khó giữ lời",
+    "description": "Bạn có bao giờ tự hỏi làm sao để biết ai là người đáng tin cậy để chia sẻ bí mật? Nhân tướng học không phải là bói toán, mà là một công cụ giúp bạn quan sát và thấu hiểu con người thông qua những dấu hiệu tinh tế. Hãy học cách nhận diện những nét tướng và thói quen của người khó giữ lời để bảo vệ sự riêng tư của mình. Bởi lẽ, việc giữ lời cũng là một nghệ thuật sống.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#trietly",
+      "#hieunguoi",
+      "#kythuatgiaotiep",
+      "#loikhuyen",
+      "#tamsinh",
+      "#fyp",
+      "#xuhuong",
+      "#binhan"
+    ]
+  }
+}
