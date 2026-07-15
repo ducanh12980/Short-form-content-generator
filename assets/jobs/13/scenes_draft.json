@@ -1,0 +1,75 @@
+{
+  "topic": "Nhìn bộ vị này biết ngay người có tố chất làm sếp lãnh đạo thiên bẩm",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Nhìn Thấu Khí Chất, Hiểu Rõ Tiềm Năng",
+      "visual_concept": "Hình ảnh một vị trưởng lão với ánh mắt tinh anh, đang nhìn xa xăm về phía chân trời. Phía sau là ngọn núi vững chãi, biểu tượng cho sự kiên định và tầm nhìn.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/13/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Khí Chất Lãnh Đạo: Không Chỉ Từ Diện Mạo",
+      "description": "Lãnh đạo thiên bẩm không chỉ nằm ở những đường nét trên khuôn mặt, mà còn toát ra từ nội tâm, từ khí phách. Đó là tổng hòa của trí tuệ, lòng dũng cảm và sự chính trực, thể hiện qua thần thái và hành động.",
+      "tts": "Khí chất lãnh đạo... thực chất không chỉ đến từ những đường nét trên khuôn mặt... mà nó còn toát ra từ nội tâm sâu sắc... từ khí phách của một người. Đó là sự tổng hòa của trí tuệ, lòng dũng cảm và sự chính trực... thể hiện qua thần thái và mọi hành động.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/13/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Trán Rộng, Mắt Sáng: Dấu Hiệu Của Tầm Nhìn",
+      "description": "Trong nhân tướng học, vầng trán cao rộng, đầy đặn thường biểu thị trí tuệ hơn người và khả năng tư duy chiến lược. Đôi mắt sáng, có thần lại thể hiện sự quyết đoán, tầm nhìn xa trông rộng và khả năng dẫn dắt.",
+      "tts": "Theo quan niệm nhân tướng học... vầng trán cao rộng, đầy đặn... thường biểu thị một trí tuệ sâu sắc... cùng khả năng tư duy chiến lược vượt trội. Còn đôi mắt sáng, có thần... lại thể hiện sự quyết đoán, tầm nhìn xa trông rộng... và năng lực dẫn dắt bẩm sinh.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/13/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Thần Thái Uy Nghi, Lời Nói Trọng Lượng",
+      "description": "Người có tố chất lãnh đạo thường sở hữu thần thái điềm tĩnh, uy nghi, dù trong hoàn cảnh nào. Lời nói của họ có sức nặng, thuyết phục và truyền cảm hứng. Họ không cần phô trương, nhưng sự hiện diện đã đủ để tạo ảnh hưởng.",
+      "tts": "Một người có tố chất lãnh đạo... thường sở hữu thần thái điềm tĩnh, uy nghi... dù trong bất cứ hoàn cảnh nào. Lời nói của họ có sức nặng, đầy thuyết phục... và luôn truyền cảm hứng. Họ không cần phô trương... nhưng sự hiện diện đã đủ để tạo nên ảnh hưởng sâu rộng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/13/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hành Trình Khám Phá: Hiểu Mình, Hiểu Người",
+      "visual_concept": "Con đường làng lát đá cổ kính, hai bên là hàng tre xanh mướt, dẫn vào một cổng làng truyền thống. Ánh nắng chiều tà chiếu rọi, tạo cảm giác bình yên và sự tiếp nối.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/13/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Dấu hiệu của người có tố chất lãnh đạo thiên bẩm?",
+    "description": "Bạn có bao giờ tự hỏi, những người sinh ra đã có tố chất làm sếp thường có đặc điểm gì? Cùng khám phá góc nhìn nhân tướng học về những dấu hiệu của một lãnh đạo bẩm sinh, không chỉ qua diện mạo mà còn qua khí chất và thần thái.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#LanhDao",
+      "#ToChatLanhDao",
+      "#NhanTuongHoc",
+      "#TrietLySong",
+      "#KienThucMoi",
+      "#HuyenHoc",
+      "#fyp"
+    ]
+  }
+}

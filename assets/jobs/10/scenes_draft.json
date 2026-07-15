@@ -1,0 +1,76 @@
+{
+  "topic": "Tướng phụ nữ vượng phu ích tử đàn ông cưới được như rước lộc vào nhà",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Nét Tướng Vượng, Tâm An Gia",
+      "visual_concept": "Hình ảnh một người phụ nữ dịu dàng, ánh mắt tinh anh, đang chăm sóc một chậu cây cảnh xanh tốt trong không gian nhà cổ ấm cúng. Ánh sáng tự nhiên chiếu vào, tạo cảm giác bình yên và thịnh vượng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/10/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Vượng Phu Ích Tử: Hiểu Sâu Sắc Hơn",
+      "description": "Khái niệm 'vượng phu ích tử' xưa nay thường bị hiểu lầm. Nó không chỉ là những nét tướng bề ngoài, mà ẩn chứa trong khí chất, sự thấu hiểu và khả năng vun đắp hạnh phúc. Một người phụ nữ có nội tâm thiện lương, trí tuệ sẽ tự khắc tạo nên sự thịnh vượng cho gia đình. Tướng tốt là tướng tâm an, trí sáng, chứ không phải tướng cầu may.",
+      "tts": "Khái niệm vượng phu ích tử... từ xưa đến nay thường bị hiểu lầm. Nó không chỉ là những nét tướng bên ngoài... mà thực chất ẩn sâu trong khí chất, sự thấu hiểu và khả năng vun đắp hạnh phúc. Tướng tốt... chính là tướng tâm an, trí sáng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/10/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Khí Chất Vàng Son, Vẹn Toàn Gia Đạo",
+      "description": "Một người phụ nữ có khí chất 'vượng' thường sở hữu sự kiên nhẫn, lòng vị tha và khả năng quản lý gia đình khéo léo. Họ biết cách lắng nghe, chia sẻ và động viên, trở thành điểm tựa vững chắc cho chồng con. Sự ổn định về mặt cảm xúc và tư duy tích cực của họ lan tỏa, kiến tạo nên một tổ ấm bình yên.",
+      "tts": "Một người phụ nữ có khí chất 'vượng'... thường sở hữu lòng kiên nhẫn, vị tha... cùng khả năng quản lý gia đình khéo léo. Họ biết lắng nghe, chia sẻ và động viên... trở thành điểm tựa vững chắc cho chồng con. Từ đó... sự ổn định cảm xúc và tư duy tích cực... sẽ kiến tạo nên một tổ ấm bình yên.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/10/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Nền Tảng Hạnh Phúc, Phát Triển Bền Vững",
+      "description": "Khi người phụ nữ mang lại sự hài hòa và cân bằng, không chỉ chồng mà cả con cái cũng được hưởng lợi. Con cái lớn lên trong môi trường yêu thương, được giáo dưỡng tốt sẽ có nhân cách mạnh mẽ. Chồng có hậu phương vững chắc sẽ an tâm phát triển sự nghiệp. Đó chính là sự 'ích tử' và 'vượng phu' chân thực, bền vững.",
+      "tts": "Người phụ nữ mang lại hài hòa, cân bằng... giúp chồng con đều hưởng lợi. Con cái lớn lên trong yêu thương... chồng an tâm phát triển sự nghiệp. Đây chính là 'ích tử' và 'vượng phu' chân thực... và bền vững.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/10/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Nội Lực Vô Biên, Hạnh Phúc Vẹn Tròn",
+      "visual_concept": "Một gia đình ba thế hệ đang quây quần bên mâm cơm ấm cúng, tiếng cười nói rộn ràng. Nụ cười mãn nguyện trên gương mặt người phụ nữ lớn tuổi, ánh mắt bao dung nhìn con cháu. Ánh đèn vàng ấm áp chiếu sáng không gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/10/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Phụ Nữ 'Vượng Phu Ích Tử': Không Chỉ Là Nét Tướng!",
+    "description": "Bạn có biết 'vượng phu ích tử' thực sự mang ý nghĩa sâu sắc hơn những gì chúng ta thường nghĩ? Cùng Nhân Tướng VN khám phá khí chất và nội lực tạo nên sự thịnh vượng bền vững cho gia đình, không phải mê tín hay tướng số bề ngoài.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#vongphuichtu",
+      "#phunuviet",
+      "#trietlycuocsong",
+      "#giaitri",
+      "#hieuminh",
+      "#hanhphucgiadinh",
+      "#phunuthongthai",
+      "#fyp"
+    ]
+  }
+}

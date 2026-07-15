@@ -1,0 +1,76 @@
+{
+  "topic": "Sở hữu nét tướng đào hoa này bạn đi đến đâu cũng có người thầm thương trộm nhớ",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Nét Tướng Đào Hoa: Từ Tâm Sinh Tướng",
+      "visual_concept": "Cận cảnh một gương mặt thanh tú, ánh mắt lấp lánh như có sao, nụ cười nhẹ ẩn chứa sự duyên dáng. Ánh sáng mềm mại chiếu rọi, tạo cảm giác thu hút tự nhiên, không phô trương.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/9/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Ánh Mắt Biết Nói, Nụ Cười Sáng Duyên",
+      "description": "Trong Nhân tướng học, nét đào hoa thường khởi nguồn từ đôi mắt và nụ cười. Không phải sự phô trương, mà là ánh nhìn chân thành, nụ cười tự nhiên, toát lên sự thiện cảm và cuốn hút khó cưỡng. Đó là sự giao thoa giữa thần thái và dung mạo, tạo nên sức hút riêng biệt.",
+      "tts": "Trong nhân tướng học, nét đào hoa không phải là sự phô trương... mà là ánh nhìn chân thành, nụ cười tự nhiên, toát lên sự thiện cảm và cuốn hút khó cưỡng... Nó là sự giao thoa tinh tế giữa thần thái và dung mạo, tạo nên sức hút khó diễn tả bằng lời.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/9/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Thần Thái Hút Hồn, Khí Chất Lay Động",
+      "description": "Nét đào hoa không chỉ là đặc điểm hình thể, mà còn là khí chất toát ra từ bên trong. Người có tướng này thường sở hữu thần thái tự tin, cử chỉ duyên dáng và cách ứng xử khéo léo. Họ tạo cảm giác thoải mái và dễ chịu, dễ dàng kết nối với mọi người xung quanh.",
+      "tts": "Nhưng nét đào hoa còn vượt xa hình tướng bên ngoài... Nó là khí chất toát ra từ nội tâm, từ thần thái tự tin, cử chỉ duyên dáng và cách ứng xử khéo léo... Những người này thường mang đến cảm giác thoải mái, dễ chịu, khiến mọi người dễ dàng kết nối.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/9/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Duyên Lành Tự Đến, Hạnh Phúc Tự Tìm",
+      "description": "Sự thu hút này không chỉ dừng lại ở tình cảm nam nữ, mà còn mở rộng trong các mối quan hệ xã hội. Người sở hữu nét tướng đào hoa thường được yêu mến, dễ dàng nhận được sự giúp đỡ và cơ hội. Duyên lành đến từ sự chân thành và năng lượng tích cực mà họ lan tỏa.",
+      "tts": "Sức hút này không chỉ dừng lại ở tình cảm đôi lứa... mà còn lan tỏa trong mọi mối quan hệ xã hội... Họ thường được yêu mến, dễ dàng nhận được sự giúp đỡ và những cơ hội tốt đẹp... Bởi lẽ, duyên lành thực sự đến từ sự chân thành và năng lượng tích cực mà họ lan tỏa.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/9/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Vẻ Đẹp Thực Sự Đến Từ Tâm Hồn",
+      "visual_concept": "Một đóa sen hồng hé nở trên mặt nước tĩnh lặng, ánh sáng dịu nhẹ bao phủ. Gợi cảm giác thanh khiết, vẻ đẹp nội tại và sự an yên trong tâm hồn.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/9/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bạn có nét tướng đào hoa này không?",
+    "description": "Nét tướng đào hoa không chỉ là sự thu hút về ngoại hình mà còn là thần thái và khí chất từ bên trong. Khám phá xem những đặc điểm nào giúp bạn được mọi người yêu mến và dễ dàng kết nối. Hãy xem video để biết thêm chi tiết nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#nettuongdaohao",
+      "#hieunguoi",
+      "#trietlysong",
+      "#vebeptamhon",
+      "#fyp",
+      "#khampha",
+      "#nhantuonghoc",
+      "#phongthuy"
+    ]
+  }
+}

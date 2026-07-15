@@ -1,0 +1,76 @@
+{
+  "topic": "Kiểu người có nét tướng này cực kỳ đa tình trong tình yêu rất dễ thay lòng",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tâm như nước chảy, tình tựa mây trời",
+      "visual_concept": "Bóng người đứng trước dòng sông chảy êm đềm, phía trên là bầu trời với những đám mây trôi nhẹ. Ánh sáng bình minh hoặc hoàng hôn tạo cảm giác chiêm nghiệm, trầm lắng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/7/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Biến động trong tâm, dấu hiệu trên tướng",
+      "description": "Trong Nhân tướng học, một số đặc điểm trên gương mặt có thể gợi lên sự biến động trong tâm tư. Đó không phải là lời phán xét, mà là những tín hiệu để ta quan sát, để hiểu về một nội tâm không ngừng tìm kiếm, khám phá những điều mới mẻ. Chúng ta học cách đọc vị, không phải để kết tội, mà để thấu hiểu bản chất con người.",
+      "tts": "Trong Nhân tướng học, có những nét đặc trưng trên gương mặt... có thể hé lộ một nội tâm đang không ngừng tìm kiếm, khám phá điều mới mẻ. Đây không phải là sự phán xét... mà là những dấu hiệu để ta chiêm nghiệm, để thấu hiểu bản chất con người.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/7/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Cội rễ của khao khát và sự tìm kiếm",
+      "description": "Sự thay đổi trong tình cảm thường bắt nguồn từ một nội tâm khao khát trải nghiệm, thích sự tự do và không muốn bị ràng buộc. Họ dễ bị cuốn hút bởi những điều mới lạ, nhưng cũng dễ đánh mất hứng thú khi sự mới mẻ qua đi. Đây là một hành trình tìm kiếm sự trọn vẹn của chính mình, đôi khi vô định, đôi khi đầy thử thách.",
+      "tts": "Sự biến động trong tình cảm... thường bắt nguồn từ một nội tâm khao khát trải nghiệm, thích tự do và không muốn bị ràng buộc. Họ dễ bị cuốn hút bởi những điều mới lạ... nhưng cũng có thể nhanh chóng đánh mất hứng thú. Đây là một hành trình tự tìm kiếm bản thân... đôi khi vô định, đôi khi đầy thử thách.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/7/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Hiểu tướng để thấu tâm, không phán xét",
+      "description": "Nét tướng chỉ là một phần, cốt lõi vẫn là tâm hồn. Người có những đặc điểm này không hẳn là xấu, mà có thể họ đang trên hành trình tìm kiếm ý nghĩa thật sự của tình yêu. Hiểu để không vội vàng phán xét, mà để chọn lựa cách ứng xử phù hợp, dựa trên sự chân thành và tôn trọng. Vì tướng do tâm sinh, tâm đổi tướng cũng đổi.",
+      "tts": "Thực ra, nét tướng chỉ là một biểu hiện... cốt lõi vẫn nằm ở tâm hồn. Những người có đặc điểm này... không hẳn là xấu, mà có thể họ đang trên hành trình tìm kiếm ý nghĩa chân thật của tình yêu. Hãy hiểu để không vội vàng phán xét... mà để chọn lựa cách ứng xử phù hợp, bằng sự chân thành và tôn trọng. Bởi lẽ... tướng do tâm sinh, tâm đổi tướng cũng đổi.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/7/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tình yêu chân thật, tự tâm mà soi",
+      "visual_concept": "Một ngọn nến lung linh trong đêm tối, ánh sáng phản chiếu trên mặt nước tĩnh lặng. Gợi cảm giác bình yên, sự soi chiếu nội tâm và tìm thấy chân giá trị. Có thể có vài cánh hoa sen nổi trên mặt nước.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/7/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Dấu hiệu của một tâm hồn không ngừng kiếm tìm trong tình yêu?",
+    "description": "Bạn có bao giờ tự hỏi vì sao một số người lại dễ thay đổi trong tình cảm? Nhân tướng học không phán xét, mà giúp ta hiểu sâu hơn về tâm tính con người qua những dấu hiệu bên ngoài. Hãy cùng khám phá cội rễ của sự khao khát và cách nhìn nhận nó một cách chiêm nghiệm nhé.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#trietly",
+      "#hieunguoi",
+      "#tamlyhoc",
+      "#tinhyeu",
+      "#phattrienbanthan",
+      "#khamphabanthan",
+      "#gocnhindoisong",
+      "#fyp"
+    ]
+  }
+}

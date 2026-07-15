@@ -1,0 +1,77 @@
+{
+  "topic": "Người có tướng cằm này hậu vận cực sung túc về già tiền tiêu không hết",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Cằm: Nét vẽ của thời gian và định mệnh",
+      "visual_concept": "Một gương mặt người già an nhiên, hiền hậu, với vùng cằm được chiếu sáng nhẹ nhàng, toát lên sự mãn nguyện và trí tuệ. Nền là khung cảnh làng quê Việt thanh bình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/6/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Cằm nói gì về hậu vận?",
+      "description": "Trong nhân tướng học, cằm được xem là 'địa các' – nơi thể hiện sự ổn định, tích lũy và phúc lộc khi về già. Không chỉ là đường nét vật lý, cằm còn phản ánh ý chí và khả năng giữ gìn thành quả của một đời người. Nó là biểu tượng của sự kiên định và khả năng đối mặt với thử thách.",
+      "tts": "Trong nhân tướng học, cằm được xem là 'địa các'... Nơi đây thể hiện sự ổn định, tích lũy và phúc lộc khi về già... Nó không chỉ là đường nét vật lý, mà còn phản ánh ý chí, cùng khả năng giữ gìn thành quả của một đời người... là biểu tượng của sự kiên định, và bản lĩnh đối mặt với thử thách.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/6/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Nét cằm viên mãn, tâm an nhiên",
+      "description": "Một tướng cằm đầy đặn, tròn trịa, cân đối thường cho thấy chủ nhân là người có phúc khí, biết vun đắp cho tương lai. Họ thường có tính cách bao dung, kiên nhẫn và sống có trách nhiệm. Những phẩm chất này giúp họ xây dựng được nền tảng vững chắc, hưởng thụ cuộc sống an nhàn khi tuổi xế chiều.",
+      "tts": "Một tướng cằm đầy đặn, tròn trịa, cân đối... thường cho thấy chủ nhân là người có phúc khí, biết vun đắp cho tương lai... Họ thường có tâm tính bao dung, kiên nhẫn và sống có trách nhiệm... Những phẩm chất này giúp họ xây dựng nền tảng vững chắc, để rồi hưởng cuộc sống an nhàn khi tuổi xế chiều.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/6/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tâm tạo tướng, tướng tùy tâm chuyển",
+      "description": "Tuy nhiên, tướng cằm chỉ là một phần nhỏ trong bức tranh nhân tướng. Điều cốt lõi vẫn là tâm tính và hành động của mỗi người. Một trái tim lương thiện, ý chí phấn đấu không ngừng và biết sẻ chia sẽ giúp cải thiện vận mệnh. Bởi lẽ, tướng do tâm sinh, và tướng cũng theo tâm mà đổi.",
+      "tts": "Tuy nhiên, tướng cằm chỉ là một phần nhỏ trong bức tranh nhân tướng... Điều cốt lõi vẫn là tâm tính và hành động của mỗi người... Một trái tim lương thiện, ý chí phấn đấu không ngừng, cùng sự sẻ chia... sẽ giúp cải thiện vận mệnh... Bởi lẽ, tướng do tâm sinh, và tướng cũng theo tâm mà đổi.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/6/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hậu vận an yên, đâu chỉ tại cằm?",
+      "visual_concept": "Một bàn tay già nua, ấm áp đang nâng niu một hạt mầm nhỏ, tượng trưng cho sự vun trồng và thành quả của một đời người. Ánh sáng vàng dịu bao trùm, gợi cảm giác bình yên và hy vọng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/6/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Cằm đầy đặn có phải phúc lộc đầy nhà khi về già?",
+    "description": "Đường nét khuôn mặt luôn ẩn chứa những câu chuyện thú vị về tính cách và tiềm năng của mỗi người. Cằm, hay còn gọi là 'địa các', được xem là biểu tượng của hậu vận. Hãy cùng khám phá xem nhân tướng học nói gì về tướng cằm và mối liên hệ với cuộc sống an nhàn tuổi xế chiều nhé.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#nhantuonghoc",
+      "#tuongcam",
+      "#hauvan",
+      "#phucloc",
+      "#trietlycuocsong",
+      "#huyenhocphuongdong",
+      "#tuongso",
+      "#khampha",
+      "#fyp"
+    ]
+  }
+}
