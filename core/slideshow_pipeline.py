@@ -17,6 +17,7 @@ from core.caption_tokens import (
     merge_styled_tokens_with_timestamps,
 )
 from core.pipeline_log import log_step_done
+from core.endcard import attach_endcard
 from core.music_picker import attach_random_music
 from core.overlay_picker import attach_random_ambient_overlay, resolve_overlays_dir
 from core.project_schema import (
@@ -675,6 +676,19 @@ def run_slideshow_pipeline(
         "build slides + video.images timeline",
         f"{len(image_timeline)} images timed ({timing_summary})",
     )
+
+    endcard = attach_endcard(image_timeline, out)
+    if endcard is not None:
+        hold_ms = endcard["end_ms"] - endcard["start_ms"]
+        log_step_done(
+            "brand end card",
+            f"{endcard['original_name']} — {hold_ms}ms after narration",
+        )
+    else:
+        log_step_done(
+            "brand end card",
+            "skipped — no image (add assets/endcard/endcard.jpg or set ENDCARD_PATH)",
+        )
 
     audio_section: dict[str, Any] = {
         "path": str(narration_path.resolve()),

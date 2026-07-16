@@ -651,7 +651,11 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
     assert result["slides"][0]["end_ms"] == 312
     assert result["slides"][1]["end_ms"] == 937
     assert result["slides"][-1]["end_ms"] == 2500
-    assert len(result["video"]["images"]) == TOTAL_SLIDE_COUNT
+    # One entry per slide, plus the brand end card appended after narration.
+    images = result["video"]["images"]
+    assert len(images) == TOTAL_SLIDE_COUNT + 1
+    assert images[-1]["role"] == "endcard"
+    assert images[-1]["start_ms"] == 2500
     assert result["captions"]["tokens"] == []
     assert (tmp_path / "pipeline_payload.json").is_file()
 

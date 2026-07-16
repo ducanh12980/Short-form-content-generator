@@ -26,6 +26,9 @@ REQUIRED_IMAGE_NAMES = (
     "ending.png",
 )
 
+USAGE_FILENAME = "usage.json"
+TOKEN_FIELDS = ("input_tokens", "cached_tokens", "output_tokens", "total_tokens")
+
 
 class JobAssetsError(RuntimeError):
     """Raised when job library assets are missing or invalid."""
@@ -54,6 +57,10 @@ def job_scenes_draft_path(job_id: str, *, root: str | Path | None = None) -> Pat
 
 def job_images_dir(job_id: str, *, root: str | Path | None = None) -> Path:
     return job_assets_dir(job_id, root=root) / "images"
+
+
+def job_usage_path(job_id: str, *, root: str | Path | None = None) -> Path:
+    return job_assets_dir(job_id, root=root) / USAGE_FILENAME
 
 
 def expected_image_paths(job_id: str, *, root: str | Path | None = None) -> list[Path]:
@@ -318,6 +325,95 @@ def load_job_scenes_draft(
         raise JobAssetsError(f"Job {job_id} draft publish invalid: {exc}") from exc
 
     return slides, publish
+
+
+def _image_sort_key(record: dict[str, Any]) -> tuple[int, str]:
+    """Order records the way slides play, unknown filenames last."""
+    name = str(record.get("image", ""))
+    try:
+        return (REQUIRED_IMAGE_NAMES.index(name), name)
+    except ValueError:
+        return (len(REQUIRED_IMAGE_NAMES), name)
+
+
+def load_job_image_usage(job_id: str, *, root: str | Path | None = None) -> dict[str, Any]:
+    """Load usage.json, or an empty report when absent/unreadable."""
+    path = job_usage_path(job_id, root=root)
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def summarize_image_usage(records: list[dict[str, Any]]) -> dict[str, int]:
+    """Total token fields across image records; only fields actually reported."""
+    totals: dict[str, int] = {"images": len(records)}
+    for field in TOKEN_FIELDS:
+        values = [
+            int(record[field])
+            for record in records
+            if isinstance(record, dict) and isinstance(record.get(field), (int, float))
+        ]
+        if values:
+            totals[field] = sum(values)
+    return totals
+
+
+def save_job_image_usage(
+    job_id: str,
+    *,
+    topic: str,
+    records: list[dict[str, Any]],
+    root: str | Path | None = None,
+) -> Path:
+    """Merge freshly generated image usage into assets/jobs/<id>/usage.json.
+
+    Records are keyed by image filename: a gap-fill run that regenerates one PNG
+    replaces only that entry and leaves the other four intact, so the file always
+    reports what each image on disk actually cost.
+    """
+    existing = load_job_image_usage(job_id, root=root)
+    merged: dict[str, dict[str, Any]] = {}
+    for record in existing.get("images", []):
+        if isinstance(record, dict) and record.get("image"):
+            merged[str(record["image"])] = record
+    for record in records:
+        if isinstance(record, dict) and record.get("image"):
+            merged[str(record["image"])] = record
+
+    image_records = sorted(merged.values(), key=_image_sort_key)
+    payload = {
+        "topic": topic.strip(),
+        "images": image_records,
+        "totals": summarize_image_usage(image_records),
+    }
+
+    dest_dir = job_assets_dir(job_id, root=root)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    path = job_usage_path(job_id, root=root)
+    path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def format_usage_summary(totals: dict[str, int]) -> str:
+    """One-line token summary for logs and Telegram."""
+    images = totals.get("images", 0)
+    if not any(field in totals for field in TOKEN_FIELDS):
+        return f"{images} image(s) — tokens unavailable"
+
+    parts = [f"{images} image(s)"]
+    in_tokens = totals.get("input_tokens")
+    if in_tokens is not None:
+        cached = totals.get("cached_tokens")
+        parts.append(f"in={in_tokens}" + (f" (cached={cached})" if cached else ""))
+    if totals.get("output_tokens") is not None:
+        parts.append(f"out={totals['output_tokens']}")
+    if totals.get("total_tokens") is not None:
+        parts.append(f"total={totals['total_tokens']}")
+    return " — ".join([parts[0], ", ".join(parts[1:])])
 
 
 def save_job_scenes_draft(

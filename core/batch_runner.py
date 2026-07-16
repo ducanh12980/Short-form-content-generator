@@ -20,7 +20,20 @@ except Exception:  # ZoneInfoNotFoundError / missing tzdata on Windows
 VALID_STATUSES = frozenset({"pending", "running", "done", "failed"})
 VALID_MODES = frozenset({"slideshow", "mvp"})
 VALID_IMAGE_PROVIDERS = frozenset({"chatgpt", "pollinations", "mock"})
-VALID_SELECT_MODES = frozenset({"pending", "due-today", "failed", "publish-failed"})
+VALID_SELECT_MODES = frozenset(
+    {
+        "pending",
+        "due-today",
+        "failed",
+        "failed-today",
+        "publish-failed",
+        "publish-failed-today",
+    }
+)
+
+# Automatic retries stop here so a job failing for a fixed reason (a topic the
+# image API always refuses, say) cannot burn the daily quota on every slot.
+DEFAULT_MAX_ATTEMPTS = 3
 
 REQUIRED_COLUMNS = ("id", "topic", "status")
 JOB_COLUMNS = (
@@ -34,6 +47,7 @@ JOB_COLUMNS = (
     "created_at",
     "completed_at",
     "publish_status",
+    "attempts",
 )
 
 PUBLISH_STATUS_OK = "ok"
@@ -54,6 +68,18 @@ def parse_failed_publish_platforms(publish_status: str) -> list[str]:
         return []
     names = raw[len(_PUBLISH_FAILED_PREFIX) :].split(",")
     return [name.strip() for name in names if name.strip()]
+
+
+def job_attempts(row: dict[str, str]) -> int:
+    """How many times this row has been run. Unset/garbage counts as 0."""
+    raw = (row.get("attempts") or "").strip()
+    if not raw:
+        return 0
+    try:
+        value = int(raw)
+    except ValueError:
+        return 0
+    return max(0, value)
 
 
 def _utc_now_iso() -> str:
@@ -330,8 +356,13 @@ def select_jobs(
     *,
     select: str = "pending",
     today: date | None = None,
+    max_attempts: int | None = DEFAULT_MAX_ATTEMPTS,
 ) -> list[dict[str, str]]:
-    """Filter job rows by select mode. Returns references into ``rows`` (same dict objects)."""
+    """Filter job rows by select mode. Returns references into ``rows`` (same dict objects).
+
+    ``max_attempts`` caps the retry modes (``failed``, ``failed-today``) only;
+    ``None`` or ``0`` retries regardless of how many times a row already ran.
+    """
     mode = (select or "pending").strip().lower()
     if mode not in VALID_SELECT_MODES:
         raise ValueError(f"select must be one of {sorted(VALID_SELECT_MODES)}.")
@@ -339,27 +370,43 @@ def select_jobs(
     if mode == "pending":
         return [row for row in rows if row.get("status") == "pending"]
 
+    def under_attempt_cap(row: dict[str, str]) -> bool:
+        if not max_attempts or max_attempts <= 0:
+            return True
+        return job_attempts(row) < max_attempts
+
+    def is_publish_failed(row: dict[str, str]) -> bool:
+        return row.get("status") == "done" and bool(
+            parse_failed_publish_platforms(row.get("publish_status", ""))
+        )
+
     if mode == "failed":
-        return [row for row in rows if row.get("status") == "failed"]
+        return [
+            row for row in rows if row.get("status") == "failed" and under_attempt_cap(row)
+        ]
 
     if mode == "publish-failed":
+        return [row for row in rows if is_publish_failed(row)]
+
+    # Remaining modes are scoped to one VN calendar day.
+    target = today if today is not None else _today_vn()
+
+    def is_today(row: dict[str, str]) -> bool:
+        created = job_created_date_vn(row.get("created_at", ""))
+        return created is not None and created == target
+
+    if mode == "failed-today":
         return [
             row
             for row in rows
-            if row.get("status") == "done"
-            and parse_failed_publish_platforms(row.get("publish_status", ""))
+            if row.get("status") == "failed" and is_today(row) and under_attempt_cap(row)
         ]
 
+    if mode == "publish-failed-today":
+        return [row for row in rows if is_publish_failed(row) and is_today(row)]
+
     # due-today: pending jobs whose created_at calendar date (VN) is today
-    target = today if today is not None else _today_vn()
-    matched: list[dict[str, str]] = []
-    for row in rows:
-        if row.get("status") != "pending":
-            continue
-        created = job_created_date_vn(row.get("created_at", ""))
-        if created is not None and created == target:
-            matched.append(row)
-    return matched
+    return [row for row in rows if row.get("status") == "pending" and is_today(row)]
 
 
 def select_pending_from_today(
@@ -401,6 +448,7 @@ def process_pending_jobs(
     publish: bool = False,
     today: date | None = None,
     require_job_assets: bool = False,
+    max_attempts: int | None = DEFAULT_MAX_ATTEMPTS,
 ) -> list[dict[str, str]]:
     """Process selected job rows. Returns summary dicts for each attempted row.
 
@@ -408,13 +456,17 @@ def process_pending_jobs(
       - ``pending`` — all pending rows (legacy default)
       - ``due-today`` — pending rows with created_at date == today (Asia/Ho_Chi_Minh)
       - ``failed`` — all failed rows (retry)
+      - ``failed-today`` — failed rows created today; lets each daily slot repair the
+        day before rendering its own job
       - ``publish-failed`` — done rows whose publish failed; re-renders from cached
         job assets and re-publishes only the platforms named in ``publish_status``
+      - ``publish-failed-today`` — same, limited to rows created today
 
     ``max_jobs``: positive int limits how many; ``None`` or ``0`` means all matched.
     ``publish``: after each successful render, publish that MP4 via publish_runner.
     ``require_job_assets``: if True, slideshow jobs fail when ``assets/jobs/<id>/``
     is incomplete; default False generates and persists missing assets.
+    ``max_attempts``: retry cap for the failed modes; ``None``/``0`` disables it.
     """
     path = Path(csv_path)
     lock = Path(lock_path) if lock_path else path.with_suffix(path.suffix + ".lock")
@@ -425,7 +477,12 @@ def process_pending_jobs(
         rows = load_jobs(path)
         reset_stale_running(rows)
 
-        selected = select_jobs(rows, select=select, today=today)
+        selected = select_jobs(
+            rows,
+            select=select,
+            today=today,
+            max_attempts=max_attempts,
+        )
         if not selected:
             save_jobs(path, rows)
             return results
@@ -442,7 +499,7 @@ def process_pending_jobs(
             # the video do not receive a duplicate.
             retry_platforms = (
                 parse_failed_publish_platforms(row.get("publish_status", ""))
-                if select == "publish-failed"
+                if select in ("publish-failed", "publish-failed-today")
                 else None
             )
 
@@ -452,6 +509,9 @@ def process_pending_jobs(
             row["error"] = ""
             row["output_path"] = ""
             row["completed_at"] = ""
+            # Counted before the work, so a crash mid-render still burns the attempt
+            # rather than letting a reliably-crashing job retry forever.
+            row["attempts"] = str(job_attempts(row) + 1)
             save_jobs(path, rows)
 
             try:

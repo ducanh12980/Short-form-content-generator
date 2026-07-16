@@ -10,6 +10,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 from core.batch_runner import (
+    DEFAULT_MAX_ATTEMPTS,
     VALID_SELECT_MODES,
     BatchLockError,
     BatchRunnerError,
@@ -41,7 +42,20 @@ def main() -> None:
         help=(
             "Which rows to process: pending (default), due-today "
             "(pending with created_at date == today VN), failed (retry all failed), "
-            "or publish-failed (re-publish done rows whose publish failed; implies --publish)"
+            "failed-today (retry only today's failures), publish-failed (re-publish "
+            "done rows whose publish failed; implies --publish), or "
+            "publish-failed-today (same, today only)"
+        ),
+    )
+    parser.add_argument(
+        "--max-attempts",
+        type=int,
+        default=DEFAULT_MAX_ATTEMPTS,
+        metavar="N",
+        help=(
+            f"Stop retrying a row after N runs (default: {DEFAULT_MAX_ATTEMPTS}; "
+            "0 = no cap). Applies to --select failed and failed-today. "
+            "Clear the row's attempts cell to give it a fresh budget."
         ),
     )
     parser.add_argument(
@@ -101,9 +115,11 @@ def main() -> None:
             output_dir=args.output_dir,
             dry_run=args.dry_run,
             select=args.select,
-            # Re-publishing is the whole point of this mode; --publish is redundant there.
-            publish=args.publish or args.select == "publish-failed",
+            # Re-publishing is the whole point of these modes; --publish is redundant there.
+            publish=args.publish
+            or args.select in ("publish-failed", "publish-failed-today"),
             require_job_assets=args.require_job_assets,
+            max_attempts=args.max_attempts,
         )
 
         if not results:

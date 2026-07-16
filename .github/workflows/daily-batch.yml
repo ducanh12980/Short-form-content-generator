@@ -2,11 +2,20 @@ name: Test Cron
 
 on:
   schedule:
-    # 17:03 UTC = 00:03 Asia/Ho_Chi_Minh
-    - cron: "3 17 * * *"
+    # Three videos a day, one per run. Times are Asia/Ho_Chi_Minh (UTC+7);
+    # GitHub schedules in UTC and may delay a run by 5-15 min under load.
 
-    # 23:03 UTC = 06:03 Asia/Ho_Chi_Minh
-    - cron: "3 23 * * *"
+    # 21:33 UTC = 04:33 VN (next day — due-today resolves to that VN date)
+    - cron: "33 21 * * *"
+
+    # 01:33 UTC = 08:33 VN
+    - cron: "33 1 * * *"
+
+    # 09:33 UTC = 16:33 VN
+    - cron: "33 9 * * *"
+
+    # 15:03 UTC = 22:03 VN — retry whatever failed, after all three renders
+    - cron: "3 15 * * *"
 
   workflow_dispatch:
     inputs:
@@ -17,7 +26,9 @@ on:
           - due-today
           - pending
           - failed
+          - failed-today
           - publish-failed
+          - publish-failed-today
         default: due-today
 
 concurrency:
@@ -81,23 +92,30 @@ jobs:
         id: mode
         shell: bash
         run: |
+          # due-today takes one row per run so the three daily slots produce three
+          # videos; retry modes clear the whole backlog in one go.
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "select=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+            select="${{ inputs.mode }}"
           else
             case "${{ github.event.schedule }}" in
-              "3 17 * * *")
-                echo "select=due-today" >> "$GITHUB_OUTPUT"
-                ;;
-
-              "3 23 * * *")
-                echo "select=failed" >> "$GITHUB_OUTPUT"
+              "3 15 * * *")
+                select="failed"
                 ;;
 
               *)
-                echo "select=due-today" >> "$GITHUB_OUTPUT"
+                select="due-today"
                 ;;
             esac
           fi
+
+          if [ "$select" = "due-today" ]; then
+            max_jobs=1
+          else
+            max_jobs=0
+          fi
+
+          echo "select=$select" >> "$GITHUB_OUTPUT"
+          echo "max_jobs=$max_jobs" >> "$GITHUB_OUTPUT"
 
 
       - name: Set up Python
@@ -165,12 +183,37 @@ jobs:
           touch assets/jobs/.gitkeep
 
 
+      - name: Repair today's failed renders
+        # Each slot checks the day before adding to it: a job an earlier slot failed
+        # is retried here, so a bad 04:33 no longer waits until the 22:03 sweep.
+        # Capped at --max-attempts runs per row, and best-effort — a row that fails
+        # again must not stop this slot from rendering its own job.
+        if: steps.mode.outputs.select == 'due-today'
+        continue-on-error: true
+        run: >
+          python batch_runner.py
+          --csv jobs.csv
+          --select failed-today
+          --max-jobs 0
+          --publish
+
+      - name: Repair today's failed publishes
+        # Renders that succeeded but did not reach every platform. Re-renders from
+        # cached assets (no LLM or image API calls) and re-publishes only what failed.
+        if: steps.mode.outputs.select == 'due-today'
+        continue-on-error: true
+        run: >
+          python batch_runner.py
+          --csv jobs.csv
+          --select publish-failed-today
+          --max-jobs 0
+
       - name: Run daily batch
         run: >
           python batch_runner.py
           --csv jobs.csv
           --select ${{ steps.mode.outputs.select }}
-          --max-jobs 0
+          --max-jobs ${{ steps.mode.outputs.max_jobs }}
           --publish
 
 
@@ -196,6 +239,7 @@ jobs:
           python scripts/pregenerate_job_assets.py
           --csv jobs.csv
           --from-today
+          --notify
 
 
       - name: Notify Telegram on failure
@@ -228,7 +272,7 @@ jobs:
           touch assets/jobs/.gitkeep
 
           git add jobs.csv
-          git add assets/jobs
+          git add assets/jobs   # scenes_draft.json + images/ + usage.json
 
           if git diff --cached --quiet; then
             echo "No changes to commit."

@@ -292,6 +292,12 @@ def project_to_remotion_props(
 
     font_override = settings["font_override"]
     public_dir = narration_path.resolve().parent
+    images = _resolve_image_timeline(project, public_dir)
+    # The end card sits past the last spoken word, so the timeline — not narration
+    # alone — decides how long the composition runs.
+    timeline_end_ms = max((int(image["end_ms"]) for image in images), default=0)
+    duration_ms = max(duration_ms, timeline_end_ms)
+
     props: dict[str, Any] = {
         "width": width,
         "height": height,
@@ -303,7 +309,7 @@ def project_to_remotion_props(
         "tokens": tokens,
         "narrationSrc": _to_static_src(narration_path, public_dir),
         "narrationVolume": resolve_narration_volume(),
-        "images": _resolve_image_timeline(project, public_dir),
+        "images": images,
         "backgroundColor": background_color,
     }
 

@@ -7,6 +7,7 @@ import os
 import secrets
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -528,14 +529,24 @@ def generate_slide_image(
     return path
 
 
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
+
+
 def generate_scene_images(
     project: dict[str, Any],
     *,
     images_dir: Path | None = None,
     force: bool = False,
     provider: str | None = None,
+    usage_out: list[dict[str, Any]] | None = None,
 ) -> list[Path]:
-    """Generate slide images for each slide and update slide.image paths."""
+    """Generate slide images for each slide and update slide.image paths.
+
+    ``usage_out`` collects one record per image **actually generated** — cached
+    images cost nothing and are left out, so callers merging into a stored report
+    keep the tokens the file originally cost.
+    """
     slides = get_slides(project)
     if not slides:
         raise ValueError("Project has no slides for slide image generation.")
@@ -613,6 +624,7 @@ def generate_scene_images(
             image_kwargs["seed"] = secrets.randbelow(2**31)
 
         usage_before = len(token_usage)
+        quality_before = len(resolved_qualities)
         generate_slide_image(
             prompt,
             image_path,
@@ -629,6 +641,22 @@ def generate_scene_images(
             if len(resolved_qualities) > usage_before and resolved_qualities[-1]:
                 detail = f"{detail}, quality={resolved_qualities[-1]}"
         log_step_done(step, detail)
+
+        if usage_out is not None:
+            record: dict[str, Any] = {
+                "image": image_path.name,
+                "slide_id": slide_id,
+                "role": role,
+                "provider": resolved_provider,
+                "generated_at": _utc_now_iso(),
+            }
+            if resolved_provider == "chatgpt":
+                record["model"] = _get_openai_image_model()
+                if len(resolved_qualities) > quality_before and resolved_qualities[-1]:
+                    record["quality"] = resolved_qualities[-1]
+                if len(token_usage) > usage_before:
+                    record.update(token_usage[-1])
+            usage_out.append(record)
 
     if resolved_provider == "chatgpt" and token_usage:
         total_in = sum(entry.get("input_tokens", 0) for entry in token_usage)

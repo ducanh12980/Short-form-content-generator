@@ -11,6 +11,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
@@ -21,12 +22,15 @@ from dotenv import load_dotenv
 from core.batch_runner import is_quota_exhausted_error, load_jobs, select_pending_from_today
 from core.job_assets import (
     format_inventory_summary,
+    format_usage_summary,
     has_complete_job_assets,
     inventory_job_assets,
     job_assets_dir,
     job_images_dir,
     purge_job_images,
+    save_job_image_usage,
     save_job_scenes_draft,
+    summarize_image_usage,
 )
 from core.pipeline_log import log_step_done
 from core.project_schema import TOTAL_SLIDE_COUNT, get_content_slides
@@ -48,6 +52,7 @@ def pregenerate_job(
     *,
     force: bool = False,
     image_provider: str | None = None,
+    usage_out: list[dict[str, Any]] | None = None,
 ) -> str:
     """Fill script + images for one CSV row. Returns status label."""
     job_id = row["id"].strip()
@@ -112,13 +117,25 @@ def pregenerate_job(
     project_stub = {"topic": topic, "slides": slides, "scenes": content_slides}
 
     # force=False → only generate PNGs still missing under images_dir
+    image_usage: list[dict[str, Any]] = []
     generate_scene_images(
         project_stub,
         images_dir=images_dir,
         force=force,
         provider=provider,
+        usage_out=image_usage,
     )
     log_step_done("pregenerate images", f"job {job_id}: {images_dir}")
+
+    if image_usage:
+        usage_path = save_job_image_usage(job_id, topic=topic, records=image_usage)
+        log_step_done(
+            "pregenerate token usage",
+            f"job {job_id}: {format_usage_summary(summarize_image_usage(image_usage))} "
+            f"→ {usage_path.name}",
+        )
+        if usage_out is not None:
+            usage_out.extend({**record, "job_id": job_id} for record in image_usage)
 
     # Mirror into canonical library layout (draft + images) for consistency
     save_job_scenes_draft(job_id, topic=topic, slides=slides, publish=publish)
@@ -126,6 +143,40 @@ def pregenerate_job(
     if not has_complete_job_assets(job_id):
         return "error: assets incomplete after generate"
     return "created" if not inventory["complete"] else "regenerated"
+
+
+def format_run_usage_report(records: list[dict[str, Any]]) -> str:
+    """Per-image token lines grouped by job, plus a run total."""
+    lines = ["Prefill ảnh — token đã dùng"]
+    for job_id in dict.fromkeys(str(record.get("job_id", "?")) for record in records):
+        job_records = [r for r in records if str(r.get("job_id", "?")) == job_id]
+        lines.append(f"\nJob {job_id}: {format_usage_summary(summarize_image_usage(job_records))}")
+        for record in job_records:
+            tokens = format_usage_summary(summarize_image_usage([record])).split(" — ", 1)
+            detail = tokens[1] if len(tokens) > 1 else "tokens unavailable"
+            lines.append(f"  • {record.get('image', '?')}: {detail}")
+    lines.append(f"\nTổng: {format_usage_summary(summarize_image_usage(records))}")
+    return "\n".join(lines)
+
+
+def report_run_usage(records: list[dict[str, Any]], *, notify: bool) -> None:
+    """Print the token report; optionally push the same text to Telegram."""
+    if not records:
+        print("No images generated — no token usage to report.")
+        return
+
+    report = format_run_usage_report(records)
+    print(report)
+
+    if not notify:
+        return
+    try:
+        from core.telegram_notify import deliver_message
+
+        deliver_message(report)
+    except Exception as exc:
+        # A reporting failure must never fail a prefill that produced real assets.
+        print(f"[pregenerate] Telegram token report skipped: {exc}", file=sys.stderr)
 
 
 def main() -> None:
@@ -166,6 +217,14 @@ def main() -> None:
         default=None,
         help="Override IMAGE_PROVIDER / CSV image_provider for this run",
     )
+    parser.add_argument(
+        "--notify",
+        action="store_true",
+        help=(
+            "Send a token summary via Telegram when images were generated "
+            "(skipped when TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID are unset)"
+        ),
+    )
     args = parser.parse_args()
 
     rows = load_jobs(args.csv)
@@ -184,6 +243,7 @@ def main() -> None:
         return
 
     failures = 0
+    run_usage: list[dict[str, Any]] = []
     for index, row in enumerate(rows):
         job_id = row["id"].strip()
         print(f"=== job {job_id}: {row['topic'][:60]} ===")
@@ -192,6 +252,7 @@ def main() -> None:
                 row,
                 force=args.force,
                 image_provider=args.image_provider,
+                usage_out=run_usage,
             )
         except Exception as exc:
             print(f"job {job_id} failed: {exc}", file=sys.stderr)
@@ -211,6 +272,8 @@ def main() -> None:
         print(f"job {job_id}: {status}")
         if status.startswith("error"):
             failures += 1
+
+    report_run_usage(run_usage, notify=args.notify)
 
     if failures:
         raise SystemExit(1)

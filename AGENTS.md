@@ -30,9 +30,10 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Run slideshow + final MP4 | `python orchestrator_mvp.py "topic"` (no captions by default) |
 | Slideshow + sentence captions | `python orchestrator_mvp.py "topic" --caption-mode sentence` |
 | Payload only (no render) | `python orchestrator_mvp.py "topic" --no-render` |
-| **Pregenerate job assets** | `python scripts/pregenerate_job_assets.py --csv jobs.csv` or `--from-today` (daily CI fills today+future first; video reuses) |
-| **Daily CSV batch** | `python batch_runner.py --csv jobs.csv --select due-today --max-jobs 0 --publish` — see [docs/batch-demo.md](docs/batch-demo.md) |
+| **Pregenerate job assets** | `python scripts/pregenerate_job_assets.py --csv jobs.csv` or `--from-today` (daily CI fills today+future first; video reuses); `--notify` reports image tokens to Telegram |
+| **Daily CSV batch** | `python batch_runner.py --csv jobs.csv --select due-today --max-jobs 1 --publish` — one of 3 daily slots; see [docs/batch-demo.md](docs/batch-demo.md) |
 | **Retry failed publishes** | `python batch_runner.py --csv jobs.csv --select publish-failed --max-jobs 0` — re-publishes only the platforms in `publish_status` |
+| **Repair today's failures** | `python batch_runner.py --csv jobs.csv --select failed-today --max-jobs 0 --publish` — each daily slot runs this before its own job; capped by `--max-attempts` (default 3) |
 | **Daily batch on GitHub Actions** | `.github/workflows/daily-batch.yml` (scheduled) — see [docs/batch-demo.md](docs/batch-demo.md#github-actions-no-server) |
 | Send MP4 to Telegram | `python core/telegram_notify.py send-video output/final/final.mp4 --jobs-csv jobs.csv` |
 | **Publish to platforms** | `python core/publish_runner.py output/final/final.mp4 --jobs-csv jobs.csv` — set `PUBLISH_PLATFORMS=facebook,telegram` |
@@ -48,6 +49,7 @@ cp .env.example .env   # fill OPENAI_API_KEY (Gemini), OPENAI_BASE_URL
 | Path | Purpose |
 |------|---------|
 | `remotion/` | **Main video renderer** — Remotion compositions, Studio, export |
+| `assets/endcard/` | Brand end card appended after narration on every video (`core/endcard.py`) |
 | `core/telegram_notify.py` | Telegram delivery (legacy CLI; also used for failure alerts) |
 | `core/publish_runner.py` | Multi-platform publish CLI (`PUBLISH_PLATFORMS`) |
 | `core/publish/` | Per-platform publish adapters (facebook, telegram) + shared helpers |
