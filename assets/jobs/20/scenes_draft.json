@@ -1,0 +1,77 @@
+{
+  "topic": "Càng già càng có phúc khí con cháu đề huề nếu bạn sở hữu đặc điểm sau",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Thời gian khắc phúc khí: Dấu ấn của tâm hồn",
+      "visual_concept": "Một cụ ông/bà với nụ cười hiền hậu, ánh mắt nhân từ, đang ngồi trong một khu vườn yên tĩnh dưới ánh nắng chiều tà ấm áp, gợi lên sự bình yên và viên mãn của tuổi già.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/20/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nét tướng hiền hòa: Gốc rễ của phúc đức",
+      "description": "Phúc khí không tự nhiên mà có, nó là kết tinh từ tâm thiện, lòng từ bi qua năm tháng. Những nét tướng như ánh mắt nhân hậu, khuôn miệng phúc hậu thường phản ánh một nội tâm an lành, biết cho đi và bao dung. Đây là nền tảng vững chắc cho một cuộc đời an yên.",
+      "tts": "Phúc khí không tự nhiên mà có... nó là kết tinh từ tâm thiện, lòng từ bi qua bao năm tháng... Ánh mắt nhân hậu, khuôn miệng phúc hậu... thường phản ánh một nội tâm an lành, biết cho đi và bao dung... Đây chính là nền tảng cho một cuộc đời an yên.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/20/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Diện mạo viên mãn: Hậu vận an yên",
+      "description": "Khi về già, một số nét tướng trở nên rõ ràng hơn, như vành tai đầy đặn, cằm tròn đầy hay trán rộng mở. Đây không chỉ là biểu hiện của sức khỏe, mà còn là dấu hiệu của sự tích lũy công đức, sống có trách nhiệm, mang lại sự an ổn, hòa thuận cho bản thân và gia đình, con cháu đề huề.",
+      "tts": "Và khi về già... những nét tướng như vành tai đầy đặn, cằm tròn đầy hay trán rộng mở... thường trở nên rõ nét hơn... Đây không chỉ là biểu hiện của sức khỏe... mà còn là dấu hiệu của sự tích lũy công đức, sống có trách nhiệm... mang lại sự an ổn, hòa thuận cho bản thân, gia đình và con cháu đề huề.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/20/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tâm sinh tướng: Dưỡng phúc từ nội tâm",
+      "description": "Nhân tướng học chỉ là sự quan sát, thấu hiểu. Quan trọng hơn, tướng mạo luôn thay đổi theo tâm tính và hành động. Dù ở độ tuổi nào, việc tu dưỡng nội tâm, sống thiện lương chính là cách tạo dựng phúc khí bền vững cho chính mình và con cháu, giúp hậu vận thêm phần tốt đẹp.",
+      "tts": "Nhân tướng học, xét cho cùng, chỉ là sự quan sát và thấu hiểu... Bởi lẽ, tướng mạo luôn thay đổi theo tâm tính và hành động của mỗi người... Dù ở độ tuổi nào... việc tu dưỡng nội tâm, sống thiện lương... chính là cách tạo dựng phúc khí bền vững cho chính mình và thế hệ sau... giúp hậu vận thêm phần tốt đẹp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/20/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hành trình vun đắp: Phúc đức trọn đời",
+      "visual_concept": "Bàn tay già nua nhưng ấm áp, nhẹ nhàng nắm lấy bàn tay non nớt của trẻ thơ, dưới ánh nắng vàng, tượng trưng cho sự kế thừa, tình yêu thương và phúc khí được truyền lại qua các thế hệ.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/20/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Dấu hiệu 'phúc khí' khi về già: Bạn có không?",
+    "description": "Trong Nhân tướng học, một số nét tướng khi về già được cho là biểu hiện của phúc khí và cuộc sống viên mãn bên con cháu. Nhưng quan trọng hơn cả, đó là sự phản ánh của một tâm hồn thiện lương, biết cách vun đắp hạnh phúc. Cùng tìm hiểu nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#PhucKhi",
+      "#HauVan",
+      "#TuongSo",
+      "#TrietLyCuocSong",
+      "#SongThien",
+      "#GiaDinh",
+      "#VanHoaViet",
+      "#HuyenHoc",
+      "#FYP"
+    ]
+  }
+}

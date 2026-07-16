@@ -1,0 +1,77 @@
+{
+  "topic": "Bạn có số làm chủ hay làm thuê? Hãy nhìn vào đặc điểm này trên gương mặt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Bản ngã định hình, chí hướng khai mở",
+      "visual_concept": "Một người đứng trước gương đồng cổ, tay chạm nhẹ vào mặt mình, ánh mắt trầm tư nhìn vào phản chiếu, phía sau là một bản đồ cổ với những con đường rẽ nhánh.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/14/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nét tướng nói gì về tiềm năng?",
+      "description": "Nhân tướng học không khẳng định bạn sẽ làm chủ hay làm thuê. Thay vào đó, nó gợi mở về những tiềm năng, xu hướng tính cách. Nét mặt là tấm gương phản chiếu nội tâm, nơi chí hướng dần được định hình.",
+      "tts": "Nhân tướng học không phải là lời khẳng định về vai trò của một người... mà là những gợi mở tinh tế về tiềm năng và xu hướng tính cách bên trong họ. Bởi lẽ, mỗi nét mặt đều là tấm gương phản chiếu nội tâm... nơi chí hướng và định mệnh dần được định hình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/14/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Khí phách người dẫn lối",
+      "description": "Vầng trán cao rộng, gò má đầy đặn thường biểu thị tư duy sâu sắc, khả năng nhìn xa trông rộng. Cằm vuông vức, tai dày dặn lại thể hiện ý chí kiên cường, khả năng chịu đựng áp lực. Đây là những đặc điểm thường thấy ở người có tố chất lãnh đạo.",
+      "tts": "Vầng trán cao rộng, gò má đầy đặn thường biểu thị tư duy sâu sắc, tầm nhìn xa trông rộng... Còn cằm vuông vức, tai dày dặn lại thể hiện ý chí kiên cường, khả năng chịu đựng áp lực. Những nét tướng này... thường gợi nhắc đến tố chất của người dẫn lối.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/14/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Sức mạnh của sự hợp tác",
+      "description": "Ngược lại, khuôn mặt hài hòa, đôi mắt sáng và miệng cân đối lại cho thấy sự khéo léo trong giao tiếp, khả năng thích nghi và tinh thần hợp tác cao. Những người này thường là cầu nối, là nhân tố quan trọng trong mọi đội nhóm, dù ở vị trí nào.",
+      "tts": "Ngược lại, một khuôn mặt hài hòa, đôi mắt sáng và miệng cân đối lại cho thấy sự khéo léo trong giao tiếp... khả năng thích nghi và tinh thần hợp tác cao. Những người này, dù ở vị trí nào, cũng thường là cầu nối... là nhân tố quan trọng, không thể thiếu trong mọi đội nhóm.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/14/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tâm sinh tướng, tướng tùy tâm chuyển",
+      "visual_concept": "Một cuốn sách cổ được đặt trên bàn đá dưới gốc cây cổ thụ, ánh sáng mặt trời xuyên qua tán lá, tạo cảm giác tĩnh lặng và tri thức vĩnh cửu.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/14/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bạn sinh ra để làm chủ hay làm thuê? Nét tướng sẽ hé lộ!",
+    "description": "Bạn có bao giờ tự hỏi mình thuộc tuýp người lãnh đạo hay người đồng hành? Nhân tướng học không phải là bói toán, mà là một lăng kính để bạn nhìn sâu hơn vào bản thân. Khám phá những đặc điểm trên gương mặt có thể gợi mở về tiềm năng và con đường sự nghiệp của bạn. Hãy cùng Nhân Tướng VN tìm hiểu nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#nhantuonghoc",
+      "#lamchu",
+      "#lamthue",
+      "#phattrienbanthan",
+      "#khamphabanthan",
+      "#trietlycuocsong",
+      "#hieuminh",
+      "#fyp",
+      "#viral"
+    ]
+  }
+}

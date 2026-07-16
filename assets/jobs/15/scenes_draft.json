@@ -1,0 +1,76 @@
+{
+  "topic": "Đừng nản lòng nếu chưa giàu nét tướng này dự báo bạn sẽ thành công vang dội sau tuổi 40",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Đại Khí Vãn Thành: Chờ Thời, Trưởng Thành",
+      "visual_concept": "Cây cổ thụ vững chãi giữa núi rừng, rễ sâu bám đất, cành lá sum suê. Ánh nắng chiều tà chiếu rọi, gợi vẻ đẹp của sự từng trải và kiên nhẫn qua thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/15/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Thành Công: Dòng Chảy Chứ Không Phải Đích Đến Sớm",
+      "description": "Đừng vội nản lòng trước những thành công sớm của người khác. Mỗi người có một nhịp điệu riêng, một hành trình riêng. Có những hạt mầm cần thời gian ủ mình, chờ đợi gió sương để đâm chồi nảy lộc rực rỡ nhất. Sự kiên trì và tích lũy là chìa khóa.",
+      "tts": "Thành công, thực chất là một dòng chảy miên viễn, chứ không phải một đích đến vội vàng... Đừng quá bận lòng trước những thành tựu sớm của người khác... Bởi mỗi người có một nhịp điệu riêng, một hành trình riêng... Sự kiên trì và tích lũy, chính là chìa khóa vậy.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/15/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tướng Do Tâm Sinh: Nét Tướng Của Người Kiên Định",
+      "description": "Những người có 'tướng' thành công muộn thường sở hữu sự bền bỉ, tính cách trầm ổn và tầm nhìn xa trông rộng. Họ không ngừng học hỏi, tích lũy kinh nghiệm, và biến thất bại thành bài học quý giá. Nét tướng của họ toát lên sự điềm đạm, tự tin vào nội lực.",
+      "tts": "Những ai gặt hái thành công muộn, thường sở hữu nét tướng của sự bền bỉ, tính cách trầm ổn và tầm nhìn xa trông rộng... Họ không ngừng học hỏi, tích lũy kinh nghiệm, biến thất bại thành bài học quý giá... Nét tướng của họ, toát lên vẻ điềm đạm, tự tin vào nội lực của chính mình.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/15/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tu Tâm Dưỡng Tính: Gặt Hái Quả Ngọt",
+      "description": "Thành công vang dội sau tuổi 40 không đến từ may mắn ngẫu nhiên, mà là kết quả của quá trình tu dưỡng bản thân không ngừng nghỉ. Khi tâm an, trí sáng, hành động kiên trì, 'tướng' của bạn sẽ tự nhiên đổi thay, thu hút cơ hội và tài lộc. Đó là sự trưởng thành trọn vẹn.",
+      "tts": "Thành công vang dội sau tuổi 40, không phải là may mắn ngẫu nhiên... mà là kết quả của quá trình tu dưỡng bản thân không ngừng nghỉ... Khi tâm an, trí sáng, hành động kiên trì... 'tướng' của bạn sẽ tự nhiên đổi thay, thu hút cơ hội và tài lộc... Đó chính là sự trưởng thành trọn vẹn.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/15/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Hành Trình Vươn Lên, Không Ngừng Nghỉ",
+      "visual_concept": "Một cây non đang vươn mình mạnh mẽ lên ánh sáng mặt trời, bên cạnh là những cây cổ thụ đã vững chãi. Gợi cảm giác hy vọng, sự tiếp nối và quá trình phát triển không ngừng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/15/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bạn có nét tướng 'Đại Khí Vãn Thành'? Khám phá ngay!",
+    "description": "Đừng vội nản lòng nếu thành công chưa gõ cửa sớm. Nhiều người có nét tướng báo hiệu sự nghiệp sẽ thăng hoa rực rỡ sau tuổi 40. Video này sẽ giúp bạn hiểu rõ hơn về những phẩm chất và hành trình dẫn đến thành công viên mãn, không chỉ dựa vào tướng mạo mà còn từ tâm thế và sự kiên trì.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#thanhcong",
+      "#daikhivanthanh",
+      "#trietlycuocsong",
+      "#hieuminh",
+      "#phattrienbanthan",
+      "#tuoitac",
+      "#kinhnghiem",
+      "#fyp"
+    ]
+  }
+}
