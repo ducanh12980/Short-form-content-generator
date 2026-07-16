@@ -1,0 +1,71 @@
+{
+  "topic": "Sở hữu tướng mũi này bạn là bậc thầy giữ tiền tài lộc tụ lại không phai",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:25:40+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 465,
+      "output_tokens": 120,
+      "total_tokens": 585
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:26:07+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 562,
+      "output_tokens": 120,
+      "total_tokens": 682
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:26:33+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 580,
+      "output_tokens": 120,
+      "total_tokens": 700
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:27:03+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 576,
+      "output_tokens": 120,
+      "total_tokens": 696
+    },
+    {
+      "image": "ending.png",
+      "slide_id": 5,
+      "role": "ending",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:27:28+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 461,
+      "output_tokens": 120,
+      "total_tokens": 581
+    }
+  ],
+  "totals": {
+    "images": 5,
+    "input_tokens": 2644,
+    "output_tokens": 600,
+    "total_tokens": 3244
+  }
+}

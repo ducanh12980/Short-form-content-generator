@@ -1,0 +1,76 @@
+{
+  "topic": "3 nét tướng của người sinh ra đã có lộc cả đời không lo thiếu tiền",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Dấu hiệu của phúc lộc tự nhiên",
+      "visual_concept": "Một bàn tay nhẹ nhàng đặt lên gương mặt phản chiếu ánh sáng dịu, phía sau là khung cảnh một khu vườn cổ điển với cây cối xanh tốt, gợi sự bình yên và thịnh vượng ẩn chứa.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/2/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Mũi đầy đặn: Kho chứa tài lộc",
+      "description": "Trong nhân tướng học, mũi không chỉ là trung tâm của khuôn mặt mà còn đại diện cho tài vận. Mũi cao, cánh mũi dày, đầu mũi tròn đầy không chỉ thể hiện sự tự tin, mà còn là dấu hiệu của khả năng tích lũy, giữ của. Người có nét tướng này thường biết cách quản lý tài chính, cuộc sống ít khi phải lo nghĩ về tiền bạc.",
+      "tts": "Trong nhân tướng học, mũi thường được xem là kho chứa tài lộc... Một chiếc mũi cao, cánh mũi dày dặn, đầu mũi tròn đầy... không chỉ thể hiện sự tự tin, mà còn là dấu hiệu của khả năng tích lũy, giữ của... Người sở hữu nét tướng này thường biết cách quản lý tài chính, và cuộc sống của họ... dường như ít khi phải bận tâm về tiền bạc.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/2/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tai dày và cao: Gốc rễ của phúc khí",
+      "description": "Đôi tai được xem là biểu tượng của phúc khí và tuổi thọ. Tai dày, vành tai rõ ràng, dái tai lớn thường là tướng của người có nền tảng vững chắc, được quý nhân phù trợ. Họ có khả năng nhận biết cơ hội, được hưởng an nhàn và may mắn. Cuộc sống thường thuận lợi, ít gặp sóng gió lớn.",
+      "tts": "Đôi tai... trong quan niệm phương Đông... lại là biểu tượng của phúc khí và tuổi thọ... Tai dày, vành tai rõ ràng, dái tai lớn... thường cho thấy một nền tảng vững chắc, được quý nhân phù trợ... Họ có khả năng nhận biết cơ hội, cuộc sống thường thuận lợi, ít gặp phải sóng gió lớn.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/2/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Cằm tròn đầy: Hậu vận an yên",
+      "description": "Phần cằm thể hiện hậu vận và khả năng giữ tài sản khi về già. Cằm tròn đầy, hai bên má cân đối không chỉ mang lại vẻ phúc hậu, mà còn cho thấy cuộc sống về sau sung túc, ít biến động. Người có cằm đẹp thường được hưởng thụ thành quả lao động, con cháu hiếu thảo, an hưởng tuổi già.",
+      "tts": "Và khi nhìn về hậu vận... phần cằm lại có vai trò quan trọng... Một chiếc cằm tròn đầy, hai bên má cân đối... không chỉ mang lại vẻ phúc hậu, mà còn gợi mở về một cuộc sống về sau sung túc, ít biến động... Người có nét tướng này thường được an hưởng tuổi già, bên cạnh con cháu hiếu thảo...",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/2/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Phúc lộc từ tâm mà sinh",
+      "visual_concept": "Một cây cổ thụ vững chãi, rễ sâu bám chắc vào đất, tán lá sum suê dưới ánh nắng dịu nhẹ của buổi chiều tà. Hình ảnh gợi sự bền vững, thịnh vượng và an lạc qua thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/2/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bạn có 3 nét tướng phú quý này không?",
+    "description": "Trong nhân tướng học, có những nét tướng được cho là biểu tượng của phúc lộc, may mắn. Chúng không chỉ thể hiện khả năng tài chính mà còn là dấu hiệu của một cuộc sống an yên, sung túc. Cùng khám phá xem bạn có sở hữu những đặc điểm này không nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#PhuQuy",
+      "#LocTai",
+      "#TuongSo",
+      "#PhongThuy",
+      "#HocNhanTuong",
+      "#KhamPhaBanThan",
+      "#TrietLyCuocSong",
+      "#fyp"
+    ]
+  }
+}

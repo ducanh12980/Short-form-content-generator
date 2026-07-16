@@ -1,0 +1,76 @@
+{
+  "topic": "Sở hữu tướng mũi này bạn là bậc thầy giữ tiền tài lộc tụ lại không phai",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tướng Mũi: Nơi Hội Tụ Vận Khí?",
+      "visual_concept": "Gương mặt thanh tú, ánh sáng nhẹ nhàng chiếu vào sống mũi cao, thẳng tắp — gợi sự vững chãi, tài lộc và sự tự chiêm nghiệm.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/4/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Mũi: Cửa Ngõ Của Tài Lộc Và Khí Chất",
+      "description": "Trong nhân tướng học, mũi không chỉ là điểm nhấn trên khuôn mặt mà còn là biểu tượng của tài vận, sự nghiệp và ý chí. Nó được ví như 'núi' trung tâm, phản ánh khả năng tích lũy và giữ gìn của cải. Một tướng mũi đẹp thường đi kèm với sự ổn định và khí chất vững vàng.",
+      "tts": "Trong nhân tướng học, chiếc mũi không chỉ là điểm nhấn trên khuôn mặt... mà còn là cửa ngõ quan trọng, biểu tượng cho tài vận, sự nghiệp và ý chí cá nhân. Nó được ví như ngọn núi trung tâm, phản ánh khả năng ta tích lũy và giữ gìn của cải trong cuộc đời.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/4/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Dáng Mũi Vững Chãi: Nét Tướng Của Người Biết Giữ Gìn",
+      "description": "Một tướng mũi đầy đặn, sống mũi thẳng, cánh mũi dày dặn và lỗ mũi kín đáo thường gợi lên khả năng quản lý tài chính tốt. Người sở hữu nét tướng này có xu hướng biết tích lũy, chi tiêu hợp lý và ít khi để tiền bạc thất thoát vô cớ. Đây là dấu hiệu của sự khôn ngoan trong chi tiêu và đầu tư.",
+      "tts": "Một tướng mũi đẹp, vững chãi... thường có sống mũi thẳng, đầy đặn, cánh mũi dày dặn và lỗ mũi kín đáo. Nét tướng này cho thấy người có khả năng quản lý tài chính tốt, biết cách chi tiêu hợp lý... một sự khôn ngoan trong việc vun đắp tài sản.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/4/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tài Lộc Tụ Lại: Do Tâm Mà Sinh",
+      "description": "Tuy nhiên, tướng mũi tốt không chỉ là trời cho, mà còn là sự phản ánh của một tâm hồn biết vun đắp, một ý chí kiên định. Khả năng giữ gìn và phát triển tài sản đến từ sự cẩn trọng, kỷ luật và tầm nhìn xa. Tài lộc tụ lại không phải nhờ may mắn đơn thuần, mà còn bởi sự khôn ngoan trong ứng xử với tiền bạc và lòng hướng thiện.",
+      "tts": "Tuy nhiên, tài lộc tụ lại không chỉ là nét tướng trời cho... mà còn là sự phản ánh của một tâm hồn biết vun đắp và ý chí kiên định. Khả năng giữ gìn và phát triển tài sản, suy cho cùng, đến từ sự cẩn trọng, kỷ luật... và lòng hướng thiện trong mỗi chúng ta.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/4/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Nhân Tướng: Hiểu Mình Để Vững Bước",
+      "visual_concept": "Con đường lát đá cổ dưới ánh trăng dịu nhẹ, dẫn vào một cổng làng truyền thống — gợi hành trình khám phá tri thức và sự bình an trong tâm hồn.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/4/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Tướng mũi này có phải là 'bậc thầy giữ tiền'?",
+    "description": "Trong nhân tướng học, mũi thường được coi là biểu tượng của tài lộc và sự nghiệp. Nhưng liệu có tướng mũi nào giúp bạn 'giữ tiền' không? Cùng Nhân Tướng VN khám phá nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#nhantuonghoc",
+      "#trietly",
+      "#hieunguoi",
+      "#phongthuy",
+      "#tailoc",
+      "#tichluy",
+      "#fyp",
+      "#khoahocnhantuong"
+    ]
+  }
+}

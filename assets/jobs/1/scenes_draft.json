@@ -1,0 +1,75 @@
+{
+  "topic": "Dấu hiệu trên khuôn mặt của người có số đại phú đại quý trước sau gì cũng giàu",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tướng Pháp: Vẻ Ngoài Nào Tiết Lộ Khí Chất?",
+      "visual_concept": "Một bức tranh thủy mặc cổ điển, hình ảnh một người đàn ông/phụ nữ đứng trầm tư trước bức tường đá rêu phong, ánh sáng chiếu rọi từ trên cao, tạo cảm giác uyên bác và suy tư, gợi sự tự vấn về bản thân.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/1/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Trán Rộng: Nền Tảng Của Tầm Nhìn Xa",
+      "description": "Vùng trán cao, rộng thường được xem là biểu hiện của trí tuệ và tư duy rộng mở. Người sở hữu tướng trán này thường có khả năng nhìn nhận vấn đề sâu sắc, đặt ra mục tiêu lớn và kiên trì theo đuổi. Đây là tố chất quan trọng giúp họ định hình con đường thành công.",
+      "tts": "Trong nhân tướng học, vầng trán cao rộng... thường là biểu hiện của một trí tuệ ưu việt... và tầm nhìn xa trông rộng. Người sở hữu tướng trán này... thường nhìn nhận vấn đề sâu sắc... đặt ra mục tiêu lớn... và kiên trì theo đuổi đến cùng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/1/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Ánh Mắt Sáng: Nơi Khí Phách Tụ Hội",
+      "description": "Đôi mắt được ví như cửa sổ tâm hồn, thể hiện nội lực và tinh thần. Ánh mắt có thần, sáng rõ, không lờ đờ thường đi kèm với người có ý chí kiên định, khả năng tập trung cao độ và sự quyết đoán. Họ biết cách nắm bắt cơ hội và vượt qua thử thách.",
+      "tts": "Và sau vầng trán... đôi mắt chính là cửa sổ tâm hồn... thể hiện nội lực và tinh thần. Ánh mắt có thần, sáng rõ... thường là dấu hiệu của ý chí kiên định... khả năng tập trung cao độ... và sự quyết đoán... giúp họ nắm bắt cơ hội... và vượt qua thử thách.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/1/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Thần Thái An Hòa: Gốc Rễ Của Phúc Khí",
+      "description": "Ngoài những đường nét cụ thể, thần thái toát ra từ một người mới là điều quan trọng nhất. Một thần thái an hòa, tự tin, nhưng không kiêu ngạo, thường thu hút được nhân duyên tốt và sự giúp đỡ từ quý nhân. Đây là nền tảng vững chắc cho sự nghiệp bền vững.",
+      "tts": "Tuy nhiên... vượt lên trên mọi đường nét cụ thể... thần thái toát ra từ một người... mới là điều quan trọng nhất. Thần thái an hòa... tự tin nhưng không kiêu ngạo... thường thu hút nhân duyên tốt... và sự giúp đỡ từ quý nhân. Đó chính là gốc rễ vững chắc... cho một sự nghiệp bền vững... và phúc khí lâu dài.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/1/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tâm Sinh Tướng: Khí Chất Vượt Thời Gian",
+      "visual_concept": "Một cây cổ thụ vững chãi đứng một mình trên ngọn đồi, rễ cây bám sâu vào lòng đất, tán lá vươn rộng ra bầu trời xanh thẳm. Biểu tượng cho sự kiên định, bền vững và trường tồn theo thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/1/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Dấu hiệu của người có khí chất đại phú đại quý?",
+    "description": "Bạn có bao giờ tự hỏi liệu những đường nét trên khuôn mặt có thể tiết lộ điều gì về vận mệnh? Nhân tướng học không phải là bói toán, mà là nghệ thuật nhìn người, hiểu mình. Cùng khám phá những dấu hiệu của khí chất vươn tầm, tạo nên thành công và phúc khí.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#nhantuonghoc",
+      "#trietlycuocsong",
+      "#hieunguoi",
+      "#phucduc",
+      "#tamlinh",
+      "#fyp",
+      "#learnontiktok"
+    ]
+  }
+}
