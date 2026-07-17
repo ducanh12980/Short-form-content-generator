@@ -1,0 +1,71 @@
+{
+  "topic": "Nhìn đặc điểm này biết ngay ai càng lớn tuổi càng giàu hậu vận rực rỡ",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:23:26+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 476,
+      "output_tokens": 120,
+      "total_tokens": 596
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:23:52+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 519,
+      "output_tokens": 120,
+      "total_tokens": 639
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:24:14+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 522,
+      "output_tokens": 120,
+      "total_tokens": 642
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:24:35+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 524,
+      "output_tokens": 120,
+      "total_tokens": 644
+    },
+    {
+      "image": "ending.png",
+      "slide_id": 5,
+      "role": "ending",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-16T11:24:58+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 456,
+      "output_tokens": 120,
+      "total_tokens": 576
+    }
+  ],
+  "totals": {
+    "images": 5,
+    "input_tokens": 2497,
+    "output_tokens": 600,
+    "total_tokens": 3097
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "topic": "Nhìn đặc điểm này biết ngay ai càng lớn tuổi càng giàu hậu vận rực rỡ",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Hậu vận rực rỡ, tướng nào hiển lộ?",
+      "visual_concept": "Một người cao tuổi với nụ cười hiền hậu, ánh mắt tinh anh, ngồi thanh thản dưới bóng cây cổ thụ. Ánh nắng nhẹ chiếu qua tán lá, gợi sự bình yên và trí tuệ tích lũy theo thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/3/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nét phúc đức, dấu ấn thời gian",
+      "description": "Nhân tướng học không chỉ nhìn vào đường nét. Nó soi chiếu sự chuyển hóa của tâm hồn qua năm tháng. Những người có hậu vận an lành thường mang nét phúc đức, không do bẩm sinh mà từ sự tu dưỡng.",
+      "tts": "Trong nhân tướng học, ta không chỉ nhìn vào đường nét hình hài... mà soi chiếu sự chuyển hóa của tâm hồn qua năm tháng... Nét phúc đức, dấu ấn của một hậu vận an lành... thường không do bẩm sinh, mà từ sự tu dưỡng mà thành.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/3/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tâm an định, tướng tự thành",
+      "description": "Sự bình thản trong tâm hồn, lòng từ bi và thái độ sống tích cực là suối nguồn của vẻ đẹp nội tại. Chúng dần định hình khí chất, thần thái, làm cho dung mạo trở nên phúc hậu, rạng rỡ theo thời gian.",
+      "tts": "Và chính sự bình thản trong tâm hồn... lòng từ bi cùng thái độ sống tích cực... là suối nguồn của vẻ đẹp nội tại... Dần dà, chúng định hình nên khí chất, thần thái... khiến dung mạo trở nên phúc hậu, rạng rỡ theo thời gian.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/3/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Hậu vận an nhiên, phúc đức đủ đầy",
+      "description": "Một hậu vận 'rực rỡ' không chỉ là tiền tài, mà là sự an yên trong tâm hồn, sự kính trọng từ người khác, và cuộc sống ý nghĩa. Đó là kết quả của một quá trình tu dưỡng, tích lũy thiện lành.",
+      "tts": "Một hậu vận an nhiên, phúc đức đủ đầy... ấy không chỉ là tiền tài, vật chất... mà là sự an yên trong tâm hồn... sự kính trọng từ mọi người... và một cuộc sống thật sự ý nghĩa... Đây chính là thành quả của cả một quá trình tu dưỡng... tích lũy những điều thiện lành.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/3/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 5,
+      "role": "ending",
+      "title": "Tu tâm dưỡng tướng, đời thêm an yên",
+      "visual_concept": "Một cuốn sách cổ mở ra trên bàn đá, bên cạnh là một tách trà nóng và vài bông hoa sen. Ánh nến lung linh, tạo không gian tĩnh lặng, chiêm nghiệm.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/3/images/ending.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Dấu hiệu hậu vận an lành?",
+    "description": "Bạn có bao giờ tự hỏi điều gì tạo nên một hậu vận viên mãn? Không phải là may mắn ngẫu nhiên, mà là cả một quá trình tu dưỡng tâm hồn và tích lũy phúc đức. Cùng Nhân Tướng VN khám phá nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#hauvan",
+      "#phucduc",
+      "#tuonghoc",
+      "#trietlysong",
+      "#hieuminh",
+      "#binhyen",
+      "#fyp"
+    ]
+  }
+}
