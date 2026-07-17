@@ -1,6 +1,6 @@
 # ADR 0005: Narration-based slide timing with intro/ending bookends
 
-- **Status**: accepted
+- **Status**: superseded for the slideshow pipeline by [ADR 0009](0009-retire-ending-slide.md) — no ending slide, and content slides now follow their TTS windows instead of the even split. The formula below still drives the stitch CLI.
 - **Date**: 2026-07-07
 - **Context**: Slideshow slide duration was tied 1:1 to per-scene TTS MP3 length, so uneven narration made some slides dominate. We also needed visual-only intro/ending bookends without spoken TTS.
 - **Decision**:

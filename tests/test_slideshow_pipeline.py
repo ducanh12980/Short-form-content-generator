@@ -64,10 +64,6 @@ def _sample_script_payload() -> dict:
             {"title": "Hiểu mình", "description": "Dòng mô tả hai."},
             {"title": "Sống khôn", "description": "Dòng mô tả ba."},
         ],
-        "ending": {
-            "title": "Kết",
-            "visual_concept": "Stone path at sunset fading into soft mist.",
-        },
         "publish": _sample_publish(),
     }
 
@@ -116,15 +112,6 @@ def _sample_slides() -> list[dict]:
             "end_ms": 17500,
             "image": {"path": "output/images/scene_3.png", "source": "dalle"},
         },
-        {
-            "id": 5,
-            "role": "ending",
-            "title": "Kết",
-            "visual_concept": "Sunset stone path.",
-            "start_ms": 17500,
-            "end_ms": 20000,
-            "image": {"path": "output/images/ending.png", "source": "dalle"},
-        },
     ]
 
 
@@ -166,7 +153,7 @@ def _sample_scenes() -> list[dict]:
     ]
 
 
-def test_parse_scene_script_response_accepts_intro_content_ending() -> None:
+def test_parse_scene_script_response_accepts_intro_content() -> None:
     slides = parse_scene_script_response(json.dumps(_sample_script_payload()))
     assert len(slides) == TOTAL_SLIDE_COUNT
     assert slides[0]["role"] == "intro"
@@ -175,8 +162,17 @@ def test_parse_scene_script_response_accepts_intro_content_ending() -> None:
     assert "description" not in slides[0]
     assert slides[1]["role"] == "content"
     assert slides[1]["content_index"] == 1
-    assert slides[-1]["role"] == "ending"
+    assert slides[-1]["role"] == "content"
     assert "tts" not in slides[0]
+
+
+def test_parse_scene_script_response_ignores_ending_block() -> None:
+    payload = _sample_script_payload()
+    payload["ending"] = {"title": "Kết", "visual_concept": "Sunset stone path."}
+
+    slides = parse_scene_script_response(json.dumps(payload))
+
+    assert [slide["role"] for slide in slides] == ["intro", "content", "content", "content"]
 
 
 def test_parse_publish_metadata_accepts_valid_block() -> None:
@@ -243,7 +239,6 @@ def test_parse_scene_script_response_rejects_wrong_count() -> None:
     payload = {
         "intro": {"title": "A", "visual_concept": "hero visual"},
         "scenes": [{"title": "A", "description": "d"}],
-        "ending": {"title": "Z", "visual_concept": "closing visual"},
     }
     with pytest.raises(ValueError, match=f"exactly {CONTENT_SCENE_COUNT}"):
         parse_scene_script_response(json.dumps(payload))
@@ -251,7 +246,7 @@ def test_parse_scene_script_response_rejects_wrong_count() -> None:
 
 def test_parse_scene_script_response_rejects_missing_field() -> None:
     payload = _sample_script_payload()
-    payload["ending"] = {"title": "only title"}
+    payload["intro"] = {"title": "only title"}
     with pytest.raises(ValueError, match="visual_concept"):
         parse_scene_script_response(json.dumps(payload))
 
@@ -304,7 +299,7 @@ def test_assign_slide_transitions_rotation() -> None:
     assert slides[0]["transition"] == DEFAULT_TRANSITION_ROTATION[0]
     assert slides[1]["transition"] == DEFAULT_TRANSITION_ROTATION[1]
     assert slides[2]["transition"] == "whipPan"
-    assert slides[4]["transition"] == DEFAULT_TRANSITION_ROTATION[4 % len(DEFAULT_TRANSITION_ROTATION)]
+    assert slides[3]["transition"] == DEFAULT_TRANSITION_ROTATION[3 % len(DEFAULT_TRANSITION_ROTATION)]
 
 
 def test_assign_slide_transitions_whip_pan_at_index_two() -> None:
@@ -647,9 +642,13 @@ def test_run_slideshow_pipeline_happy_path_none_captions(
     assert len(result["slides"]) == TOTAL_SLIDE_COUNT
     assert len(result["scenes"]) == CONTENT_SCENE_COUNT
     assert result["publish"]["title"] == _sample_publish()["title"]
+    # Content slides track their own TTS windows; intro holds the opening moments.
     assert result["slides"][0]["start_ms"] == 0
-    assert result["slides"][0]["end_ms"] == 312
-    assert result["slides"][1]["end_ms"] == 937
+    assert result["slides"][0]["end_ms"] == 500
+    assert result["slides"][1]["start_ms"] == 500
+    assert result["slides"][1]["end_ms"] == 1000
+    assert result["slides"][2]["start_ms"] == 1000
+    assert result["slides"][-1]["start_ms"] == 2000
     assert result["slides"][-1]["end_ms"] == 2500
     # One entry per slide, plus the brand end card appended after narration.
     images = result["video"]["images"]

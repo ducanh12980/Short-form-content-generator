@@ -67,7 +67,6 @@ assets/jobs/<id>/
     scene_1.png
     scene_2.png
     scene_3.png
-    ending.png
 ```
 
 ### Image token usage (`usage.json`)
@@ -127,8 +126,7 @@ output/final/
 │   ├── intro.png
 │   ├── scene_1.png
 │   ├── scene_2.png
-│   ├── scene_3.png
-│   └── ending.png
+│   └── scene_3.png
 ├── endcard.jpg          # brand card, staged from assets/endcard/
 └── <music>.mp3          # if a track was picked
 ```

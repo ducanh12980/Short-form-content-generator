@@ -1,4 +1,4 @@
-"""Slideshow pipeline — intro/content/ending slides, narration-based timing, per-scene TTS."""
+"""Slideshow pipeline — intro/content slides, narration-based timing, per-scene TTS."""
 
 from __future__ import annotations
 
@@ -27,10 +27,11 @@ from core.project_schema import (
     VALID_CAPTION_MODES,
     assign_slide_transitions,
     build_image_timeline_from_slides,
+    drop_ending_slides,
     get_content_slides,
 )
 from core.slide_image_stage import generate_scene_images, provider_step_label, resolve_image_provider
-from core.slide_timing import apply_slide_timing
+from core.slide_timing import apply_narration_slide_timing
 
 # Re-use orchestrator helpers (avoid circular import at module level for tests)
 from orchestrator_mvp import (
@@ -96,7 +97,11 @@ def _load_scenes_draft(
     if not isinstance(data, dict) or data.get("topic", "").strip() != topic.strip():
         return None
     slides = data.get("slides")
-    if not isinstance(slides, list) or len(slides) != TOTAL_SLIDE_COUNT:
+    if not isinstance(slides, list):
+        return None
+    # Drafts frozen before the ending slide was retired carry one extra slide.
+    slides = drop_ending_slides([slide for slide in slides if isinstance(slide, dict)])
+    if len(slides) != TOTAL_SLIDE_COUNT:
         return None
     content_slides = get_content_slides(slides)
     if len(content_slides) != CONTENT_SCENE_COUNT:
@@ -232,14 +237,11 @@ def parse_scene_script_response_from_parsed(parsed: dict[str, Any]) -> list[dict
 
     intro = parsed.get("intro")
     content_scenes = parsed.get("scenes")
-    ending = parsed.get("ending")
 
     if not isinstance(intro, dict):
         raise ValueError('Scene script writer JSON must include an "intro" object.')
     if not isinstance(content_scenes, list):
         raise ValueError('Scene script writer JSON must include a "scenes" array.')
-    if not isinstance(ending, dict):
-        raise ValueError('Scene script writer JSON must include an "ending" object.')
 
     if len(content_scenes) != CONTENT_SCENE_COUNT:
         raise ValueError(
@@ -272,15 +274,6 @@ def parse_scene_script_response_from_parsed(parsed: dict[str, Any]) -> list[dict
             }
         )
 
-    ending_title, ending_visual = _validate_bookend_slide_copy(ending, "Ending")
-    slides.append(
-        {
-            "id": CONTENT_SCENE_COUNT + 2,
-            "role": "ending",
-            "title": ending_title,
-            "visual_concept": ending_visual,
-        }
-    )
     return slides
 
 
@@ -351,7 +344,7 @@ def run_scene_script_writer(
     client: OpenAI,
     topic_prompt: str,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Generate intro + content + ending slideshow script and publish metadata from a topic."""
+    """Generate intro + content slideshow script and publish metadata from a topic."""
     topic = topic_prompt.strip()
     if not topic:
         raise ValueError("topic_prompt must not be empty.")
@@ -663,7 +656,7 @@ def run_slideshow_pipeline(
     narration_duration_ms = _narration_duration_ms(word_timestamps, scene_timestamps)
     if narration_duration_ms <= 0:
         raise PipelineError("TTS produced no usable narration duration.")
-    apply_slide_timing(slides, narration_duration_ms)
+    apply_narration_slide_timing(slides, scene_timestamps, narration_duration_ms)
 
     content_scenes = deepcopy(content_for_captions)
 
@@ -757,7 +750,7 @@ def run_slideshow_pipeline(
     print(f"  ├── narration.mp3")
     if images_complete or not skip_images:
         print(f"  ├── images/")
-        print(f"  │     intro.png, scene_*.png, ending.png")
+        print(f"  │     intro.png, scene_*.png")
     if music is not None:
         print(f"  ├── {Path(str(music['path'])).name}")
     if ambient_overlay is not None:

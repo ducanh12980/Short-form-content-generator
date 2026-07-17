@@ -83,7 +83,7 @@ Duration comes entirely from `--audio`. Images are split across that length:
 
 For 4 images and 34 s audio, roughly: ~5.7 s → ~11.3 s → ~11.3 s → ~5.7 s.
 
-The default **slideshow pipeline** uses the same formula in `core/slide_timing.py` (intro + content + ending slides over total narration length).
+This even split applies to the **stitch CLI only**, where images have no narration of their own. The **slideshow pipeline** instead times each content slide from its TTS window (`apply_narration_slide_timing` in the same module), so image and voice stay in sync; only the intro holds a fixed `INTRO_HOLD_MS`. See [ADR 0009](adr/0009-retire-ending-slide.md).
 
 Image order on the command line is the playback order.
 

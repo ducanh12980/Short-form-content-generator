@@ -43,7 +43,13 @@ def _sample_slides() -> list[dict]:
                 "tts": f"Narration for slide {i}.",
             }
         )
-    slides.append(
+    assert len(slides) == TOTAL_SLIDE_COUNT
+    return slides
+
+
+def _legacy_slides_with_ending() -> list[dict]:
+    """Slides as frozen before the ending slide was retired (one extra slide)."""
+    return _sample_slides() + [
         {
             "id": 5,
             "role": "ending",
@@ -51,9 +57,7 @@ def _sample_slides() -> list[dict]:
             "visual_concept": "outro",
             "description": "",
         }
-    )
-    assert len(slides) == TOTAL_SLIDE_COUNT
-    return slides
+    ]
 
 
 def _sample_publish() -> dict:
@@ -74,7 +78,7 @@ def _write_complete_assets(root: Path, job_id: str, topic: str = "topic one") ->
     )
     images = job_assets_dir(job_id, root=root) / "images"
     images.mkdir(parents=True, exist_ok=True)
-    for name in ("intro.png", "scene_1.png", "scene_2.png", "scene_3.png", "ending.png"):
+    for name in ("intro.png", "scene_1.png", "scene_2.png", "scene_3.png"):
         (images / name).write_bytes(b"png")
     return job_assets_dir(job_id, root=root)
 
@@ -108,13 +112,49 @@ def test_load_job_scenes_draft_ok(tmp_path: Path) -> None:
     assert publish["title"] == "Test title"
 
 
+def test_load_job_scenes_draft_drops_legacy_ending_slide(tmp_path: Path) -> None:
+    root = tmp_path / "assets" / "jobs"
+    _write_complete_assets(root, "1", topic="topic one")
+    save_job_scenes_draft(
+        "1",
+        topic="topic one",
+        slides=_legacy_slides_with_ending(),
+        publish=_sample_publish(),
+        root=root,
+    )
+    (job_assets_dir("1", root=root) / "images" / "ending.png").write_bytes(b"png")
+
+    slides, _ = load_job_scenes_draft("1", topic="topic one", root=root)
+
+    assert len(slides) == TOTAL_SLIDE_COUNT
+    assert [slide["role"] for slide in slides] == ["intro", "content", "content", "content"]
+
+
+def test_legacy_ending_image_does_not_block_reuse(tmp_path: Path) -> None:
+    from core.job_assets import try_load_reusable_job_assets
+
+    root = tmp_path / "assets" / "jobs"
+    _write_complete_assets(root, "1", topic="topic one")
+    save_job_scenes_draft(
+        "1",
+        topic="topic one",
+        slides=_legacy_slides_with_ending(),
+        publish=_sample_publish(),
+        root=root,
+    )
+
+    # ending.png was never regenerated: reuse must not wait on it.
+    assert has_complete_job_assets("1", root=root)
+    assert try_load_reusable_job_assets("1", topic="topic one", root=root) is not None
+
+
 def test_copy_job_images_into(tmp_path: Path) -> None:
     root = tmp_path / "assets" / "jobs"
     _write_complete_assets(root, "1")
     run_dir = tmp_path / "run"
     slides = _sample_slides()
     copied = copy_job_images_into(run_dir, "1", root=root, slides=slides)
-    assert len(copied) == 5
+    assert len(copied) == 4
     assert (run_dir / "images" / "intro.png").is_file()
     assert slides[0]["image"]["path"].endswith("intro.png")
     assert slides[0]["image"]["source"] == "job_assets"
@@ -132,18 +172,17 @@ def test_inventory_job_assets_lists_all_gaps(tmp_path: Path) -> None:
         "scene_1.png",
         "scene_2.png",
         "scene_3.png",
-        "ending.png",
     }
     assert "script MISSING" in format_inventory_summary(empty)
 
     assets = _write_complete_assets(root, "9", topic="topic one")
     (assets / "images" / "scene_1.png").unlink()
-    (assets / "images" / "ending.png").unlink()
+    (assets / "images" / "scene_3.png").unlink()
     inv = inventory_job_assets("9", topic="topic one", root=root)
     assert inv["script_ok"] is True
     assert inv["complete"] is False
-    assert inv["missing_images"] == ["scene_1.png", "ending.png"]
-    assert set(inv["present_images"]) == {"intro.png", "scene_2.png", "scene_3.png"}
+    assert inv["missing_images"] == ["scene_1.png", "scene_3.png"]
+    assert set(inv["present_images"]) == {"intro.png", "scene_2.png"}
     summary = format_inventory_summary(inv)
     assert "script OK" in summary
     assert "scene_1.png" in summary
@@ -157,11 +196,11 @@ def test_try_load_reusable_job_assets(tmp_path: Path) -> None:
 
     assets = _write_complete_assets(root, "1", topic="topic one")
     # Partial: remove one image → incomplete for full reuse, but draft still loads
-    (assets / "images" / "ending.png").unlink()
+    (assets / "images" / "scene_3.png").unlink()
     assert try_load_reusable_job_assets("1", topic="topic one", root=root) is None
     assert try_load_job_scenes_draft("1", topic="topic one", root=root) is not None
 
-    (assets / "images" / "ending.png").write_bytes(b"png")
+    (assets / "images" / "scene_3.png").write_bytes(b"png")
     loaded = try_load_reusable_job_assets("1", topic="topic one", root=root)
     assert loaded is not None
     assert loaded[1]["title"] == "Test title"
@@ -190,7 +229,7 @@ def test_pipeline_fills_only_missing_images(
     monkeypatch.setattr("core.job_assets.DEFAULT_JOBS_ASSETS_ROOT", root)
     topic = "topic one"
     assets = _write_complete_assets(root, "3", topic=topic)
-    (assets / "images" / "ending.png").unlink()
+    (assets / "images" / "scene_3.png").unlink()
     (assets / "images" / "scene_2.png").unlink()
 
     def _fake_images(project: dict, **kwargs) -> list[Path]:
@@ -208,7 +247,7 @@ def test_pipeline_fills_only_missing_images(
             path.write_bytes(b"new")
             slide["image"] = {"path": str(path.resolve()), "source": "mock"}
             generated.append(path)
-        assert {p.name for p in generated} == {"scene_2.png", "ending.png"}
+        assert {p.name for p in generated} == {"scene_2.png", "scene_3.png"}
         return generated
 
     mock_images.side_effect = _fake_images
@@ -240,7 +279,7 @@ def test_pipeline_fills_only_missing_images(
     assert mock_images.call_args.kwargs["force"] is False
     assert has_complete_job_assets("3", root=root)
     assert (assets / "images" / "intro.png").read_bytes() == b"png"
-    assert (assets / "images" / "ending.png").read_bytes() == b"new"
+    assert (assets / "images" / "scene_3.png").read_bytes() == b"new"
 
 
 @patch("core.slideshow_pipeline.synthesize_scene_speech")
@@ -414,7 +453,7 @@ def test_changed_topic_discards_images_from_the_previous_script(
     )
     images = job_images_dir(job_id, root=root)
     images.mkdir(parents=True, exist_ok=True)
-    for name in ("intro.png", "scene_1.png", "scene_2.png", "scene_3.png", "ending.png"):
+    for name in ("intro.png", "scene_1.png", "scene_2.png", "scene_3.png"):
         (images / name).write_bytes(OLD_IMAGE_BYTES)
 
     mock_script.return_value = (_sample_slides(), _sample_publish())

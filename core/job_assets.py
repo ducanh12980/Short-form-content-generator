@@ -10,6 +10,7 @@ from typing import Any
 from core.project_schema import (
     CONTENT_SCENE_COUNT,
     TOTAL_SLIDE_COUNT,
+    drop_ending_slides,
     get_content_slides,
     slide_image_filename,
 )
@@ -23,7 +24,6 @@ REQUIRED_IMAGE_NAMES = (
     "scene_1.png",
     "scene_2.png",
     "scene_3.png",
-    "ending.png",
 )
 
 USAGE_FILENAME = "usage.json"
@@ -74,12 +74,12 @@ def job_assets_dir_exists(job_id: str, *, root: str | Path | None = None) -> boo
 
 
 def has_all_required_images(job_id: str, *, root: str | Path | None = None) -> bool:
-    """True when all five slide PNGs exist under ``assets/jobs/<id>/images/``."""
+    """True when every canonical slide PNG exists under ``assets/jobs/<id>/images/``."""
     return all(path.is_file() for path in expected_image_paths(job_id, root=root))
 
 
 def has_complete_job_assets(job_id: str, *, root: str | Path | None = None) -> bool:
-    """True when scenes_draft.json and all five slide PNGs exist (files only)."""
+    """True when scenes_draft.json and every canonical slide PNG exist (files only)."""
     draft = job_scenes_draft_path(job_id, root=root)
     if not draft.is_file():
         return False
@@ -200,7 +200,7 @@ def inventory_job_assets(
 def format_inventory_summary(inventory: dict[str, Any]) -> str:
     """Human-readable one-line inventory for pipeline logs."""
     if inventory.get("complete"):
-        return "complete (script + 5 images)"
+        return f"complete (script + {len(REQUIRED_IMAGE_NAMES)} images)"
     parts: list[str] = []
     if inventory.get("script_ok"):
         parts.append("script OK")
@@ -302,7 +302,11 @@ def load_job_scenes_draft(
         )
 
     slides = data.get("slides")
-    if not isinstance(slides, list) or len(slides) != TOTAL_SLIDE_COUNT:
+    if not isinstance(slides, list):
+        raise JobAssetsError(f"Job {job_id} draft must include a slides array.")
+    # Drafts frozen before the ending slide was retired carry one extra slide.
+    slides = drop_ending_slides([slide for slide in slides if isinstance(slide, dict)])
+    if len(slides) != TOTAL_SLIDE_COUNT:
         raise JobAssetsError(
             f"Job {job_id} draft must include exactly {TOTAL_SLIDE_COUNT} slides."
         )
@@ -372,7 +376,7 @@ def save_job_image_usage(
     """Merge freshly generated image usage into assets/jobs/<id>/usage.json.
 
     Records are keyed by image filename: a gap-fill run that regenerates one PNG
-    replaces only that entry and leaves the other four intact, so the file always
+    replaces only that entry and leaves the others intact, so the file always
     reports what each image on disk actually cost.
     """
     existing = load_job_image_usage(job_id, root=root)

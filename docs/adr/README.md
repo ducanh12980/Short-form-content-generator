@@ -24,10 +24,11 @@ Create `NNNN-short-title.md` (e.g. `0001-choose-llm-provider.md`):
 | [0002](0002-project-file-editability.md) | Project file as source of truth (Tier 2 editability) | accepted |
 | [0003](0003-remotion-render-and-editor.md) | Remotion as target render engine and editor | accepted |
 | [0004](0004-ambient-fire-overlay.md) | Ambient fire overlay via video loop + random picker | accepted |
-| [0005](0005-slide-timing-narration-based.md) | Narration-based slide timing with intro/ending bookends | accepted |
+| [0005](0005-slide-timing-narration-based.md) | Narration-based slide timing with intro/ending bookends | superseded by 0009 (stitch CLI only) |
 | [0006](0006-capcut-transitions.md) | CapCut-style per-cut slide transitions | accepted |
 | [0007](0007-multi-platform-publish.md) | Multi-platform publish adapters (Facebook Reels first) | accepted |
 | [0008](0008-job-asset-cache.md) | Durable per-job asset cache (`assets/jobs/<id>/`) | accepted |
+| [0009](0009-retire-ending-slide.md) | Retire the ending slide; time content slides from narration | accepted |
 
 ## When to write an ADR
 

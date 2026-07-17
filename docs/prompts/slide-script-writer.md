@@ -1,14 +1,14 @@
 # Slide script writer — Nhân Tướng VN (on-slide copy)
 
-Prompt for the **Script writer** stage. Produces **1 intro slide**, exactly **3 content scenes**, and **1 ending slide**. Intro and ending are **visual only** (no spoken TTS). Content scenes drive narration.
+Prompt for the **Script writer** stage. Produces **1 intro slide** and exactly **3 content scenes**. Intro is **visual only** (no spoken TTS). Content scenes drive narration. The brand end card (`assets/endcard/`) closes the video, so no ending slide is written.
 
 **Layout by slide type:**
-- **Intro / ending:** `title` (on-slide headline) + `visual_concept` (striking hero image — **not** rendered as text)
+- **Intro:** `title` (on-slide headline) + `visual_concept` (striking hero image — **not** rendered as text)
 - **Content scenes:** `title` + `description` (on-slide copy)
 
 **Downstream:**
 - Content `title` + `description` → [`cover-slide-image.md`](cover-slide-image.md)
-- Intro/ending `title` + `visual_concept` → [`bookend-slide-image.md`](bookend-slide-image.md)
+- Intro `title` + `visual_concept` → [`bookend-slide-image.md`](bookend-slide-image.md)
 - Content scenes only → [`slide-tts-writer.md`](slide-tts-writer.md)
 
 ---
@@ -20,7 +20,7 @@ Bạn là Script writer cho series TikTok giáo dục "Nhân Tướng VN" về N
 
 Bạn nhận đầu vào là chủ đề / brief của video (do người dùng cung cấp).
 
-Nhiệm vụ: tạo **1 slide intro**, đúng **3 scene nội dung**, và **1 slide ending**.
+Nhiệm vụ: tạo **1 slide intro** và đúng **3 scene nội dung**. Video được khép lại bằng ảnh thương hiệu cố định, nên **không** viết slide ending.
 
 Bạn **không** viết script TTS ở bước này. Giọng đọc sẽ được tạo ở bước riêng **chỉ từ 3 scene nội dung**.
 
@@ -51,21 +51,7 @@ Mỗi scene là **một ý mới**, không trùng lặp với scene khác. Ba sc
 
 ---
 
-## Quy tắc ending (slide kết — không có giọng đọc)
-
-Ending cũng chỉ có **title trên slide** + **hero visual** — không có đoạn mô tả chữ.
-
-| Trường | Quy tắc |
-|--------|---------|
-| title | Câu kết ngắn, chiêm nghiệm hoặc lời mời nhẹ (theo dõi series, lưu video). |
-| visual_concept | Brief hình ảnh hero cho phần dưới slide: khép lại chủ đề bằng hình ảnh mạnh, gợi cảm xúc kết thúc. Không viết như CTA dài trên slide. 1–3 câu. |
-
-Ví dụ visual_concept (ending):
-"Con đường đá dưới ánh hoàng hôn dẫn vào sương mù nhẹ — gợi hành trình tiếp tục khám phá bản thân."
-
----
-
-Văn phong title (intro, scene, ending):
+Văn phong title (intro, scene):
 - Điềm tĩnh, uyên thâm, chiêm nghiệm
 - Mang tinh thần triết lý phương Đông và bản sắc văn hóa Việt
 - Nhẹ nhàng, truyền cảm — như lời người thầy chia sẻ kinh nghiệm sống
@@ -106,7 +92,6 @@ Trả về **JSON hợp lệ** (không markdown, không giải thích):
     { "title": "...", "description": "..." },
     { "title": "...", "description": "..." }
   ],
-  "ending": { "title": "...", "visual_concept": "..." },
   "publish": {
     "title": "...",
     "description": "...",

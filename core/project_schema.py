@@ -17,8 +17,9 @@ DEFAULT_CANVAS = {"width": 1080, "height": 1920}
 DEFAULT_THEME = "minimalist"
 VALID_CAPTION_MODES = frozenset({"none", "sentence", "word"})
 CONTENT_SCENE_COUNT = 3
-TOTAL_SLIDE_COUNT = CONTENT_SCENE_COUNT + 2
+TOTAL_SLIDE_COUNT = CONTENT_SCENE_COUNT + 1
 SCENE_COUNT = CONTENT_SCENE_COUNT  # backward-compatible alias
+# "ending" stays valid so drafts frozen before the brand end card replaced it still load.
 VALID_SLIDE_ROLES = frozenset({"intro", "content", "ending"})
 VALID_TRANSITIONS = frozenset({"pullIn", "teleportShake", "whipPan", "zoomBlur"})
 DEFAULT_TRANSITION_ROTATION = ["pullIn", "teleportShake", "whipPan", "zoomBlur"]
@@ -375,11 +376,20 @@ def get_caption_mode(project: dict[str, Any]) -> str:
 
 
 def get_slides(project: dict[str, Any]) -> list[dict[str, Any]]:
-    """Return ordered slideshow slide list (intro + content + ending when present)."""
+    """Return ordered slideshow slide list (intro + content)."""
     slides = project.get("slides")
     if isinstance(slides, list) and slides:
         return [slide for slide in slides if isinstance(slide, dict)]
     return get_scenes(project)
+
+
+def drop_ending_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return slides without the retired ending slide.
+
+    The brand end card closes every video now, so an ending slide from a draft
+    frozen earlier would repeat that beat. Its ending.png is left on disk.
+    """
+    return [slide for slide in slides if slide.get("role") != "ending"]
 
 
 def get_content_slides(slides: list[dict[str, Any]]) -> list[dict[str, Any]]:
