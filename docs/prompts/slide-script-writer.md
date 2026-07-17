@@ -91,7 +91,7 @@ Ngoài nội dung trên slide, tạo thêm khối **publish** — metadata đăn
 |--------|---------|
 | title | Tiêu đề nền tảng ngắn, gây tò mò (≤ ~80 ký tự); tiếng Việt; cùng giọng điệu series. |
 | description | 2–4 câu mô tả video cho caption nền tảng; **không** chứa hashtag; không mê tín. |
-| hashtags | Mảng 5–10 hashtag; mỗi phần tử bắt đầu bằng `#`; mix hashtag ngách (#NhanTuongVN) và hashtag rộng (#trietly, #fyp). |
+| hashtags | Mảng 3–5 hashtag **liên quan trực tiếp tới nội dung video**; mỗi phần tử bắt đầu bằng `#`; mix hashtag ngách (#NhanTuongVN) và hashtag rộng (#trietly, #fyp). Không nhồi tag chung chung cho đủ số. |
 
 ---
 

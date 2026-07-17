@@ -52,7 +52,7 @@ SCENE_SCRIPT_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-script-writer.md"
 TTS_WRITER_PROMPT_PATH = DOCS_PROMPTS_DIR / "slide-tts-writer.md"
 SCENES_DRAFT_FILENAME = "scenes_draft.json"
 PUBLISH_HASHTAG_MIN = 3
-PUBLISH_HASHTAG_MAX = 12
+PUBLISH_HASHTAG_MAX = 5
 DEFAULT_PUBLISH_HASHTAGS = ("#NhanTuongVn", "#huyenhoc", "#fyp", "#vietnam", "#learnontiktok")
 TTS_WRITER_USER_TEMPLATE = (
     "Dựa trên nội dung các slide dưới đây, hãy tạo script TTS cho từng slide với các yêu cầu trên:\n\n"
