@@ -47,8 +47,8 @@ Chỉ ngắt ở những vị trí giúp người nghe cảm thấy tự nhiên 
 
 ## Độ dài
 
-* Tổng thời lượng đọc cả 3 scene: khoảng **30–40 giây**.
-* Khoảng **90–130 từ** cho toàn bộ tts (chia đều hợp lý giữa 3 scene).
+* Tổng thời lượng đọc cả 3 scene: khoảng **25–35 giây**.
+* Khoảng **70–100 từ** cho toàn bộ tts (chia đều hợp lý giữa 3 scene).
 * Mỗi scene: khoảng 2–4 câu nói.
 
 ## Đầu ra
