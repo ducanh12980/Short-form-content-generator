@@ -1,0 +1,62 @@
+{
+  "topic": "Nhìn đường chỉ tay này biết ngay ai có số trúng số đổi đời sau một đêm",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Bàn tay: Dấu ấn của cuộc đời?",
+      "visual_concept": "Một bàn tay mở nhẹ, các đường chỉ hiện rõ dưới ánh sáng dịu, gợi cảm giác suy tư, chiêm nghiệm về hành trình đã qua và sắp tới. Không gian thanh tịnh, cổ kính.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/22/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Chỉ tay: Gương phản chiếu tâm tư",
+      "description": "Đường chỉ tay không phải là bản đồ định mệnh cố định. Chúng là những nét vẽ tinh tế, phản ánh thói quen, suy nghĩ và sức khỏe của bạn theo thời gian. Tướng do tâm sinh, chỉ tay cũng vậy.",
+      "tts": "Chỉ tay... vốn không phải là một bản đồ định mệnh cố định... mà là những nét vẽ tinh tế... phản chiếu thói quen, suy nghĩ, và cả sức khỏe của mỗi người theo thời gian. Bởi lẽ... tướng do tâm sinh... chỉ tay cũng không ngoại lệ.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/22/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Vận hội: Từ nội lực mà thành",
+      "description": "Sự 'đổi đời' hiếm khi đến từ may mắn ngẫu nhiên. Nó là kết quả của sự kiên trì, trí tuệ và khả năng nắm bắt cơ hội. Bàn tay của người thành công thường mang dấu ấn của hành động và ý chí.",
+      "tts": "Vận hội... hay sự đổi thay trong đời người... hiếm khi đến từ may mắn ngẫu nhiên. Đó là kết quả của sự kiên trì, trí tuệ... và khả năng nắm bắt cơ hội. Bàn tay người thành công... thường mang dấu ấn của hành động và một ý chí kiên định.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/22/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Kiến tạo tương lai, không chờ đợi",
+      "description": "Hiểu về chỉ tay là để tự soi chiếu, nhận ra tiềm năng và những điều cần cải thiện. Vận mệnh thực sự nằm ở cách bạn hành động, chứ không phải ở những đường nét bất biến trên lòng bàn tay.",
+      "tts": "Vậy nên... hiểu về chỉ tay... chính là để ta tự soi chiếu nội tâm... nhận ra tiềm năng... và điều cần cải thiện. Vận mệnh thực sự nằm ở cách bạn hành động... chứ không phải ở những đường nét bất biến trên lòng bàn tay. Hãy tự kiến tạo tương lai... đừng thụ động chờ đợi.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/22/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Chỉ tay có thật sự tiết lộ vận may trúng số?",
+    "description": "Nhiều người tin rằng chỉ tay có thể dự đoán tương lai, thậm chí là vận may trúng số. Nhưng liệu ý nghĩa thực sự của những đường nét trên bàn tay có phải vậy? Cùng Nhân Tướng VN khám phá góc nhìn sâu sắc hơn về chỉ tay và vận mệnh.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#chỉtay",
+      "#tướngsố",
+      "#trietlycuocsong",
+      "#phattrienbanthan"
+    ]
+  }
+}

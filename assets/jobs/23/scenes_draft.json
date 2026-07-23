@@ -1,0 +1,62 @@
+{
+  "topic": "Tướng người lận đận tình duyên dù chân thành nhưng toàn gặp kẻ phản bội",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Duyên phận trắc trở: Vì sao người chân thành vẫn lận đận?",
+      "visual_concept": "Một cành hoa sen trắng tinh khiết, nhưng cánh hoa có vài vết bầm dập nhẹ, nổi bật trên nền hồ nước tĩnh lặng. Gợi cảm giác của sự trong sáng nhưng gặp nhiều thử thách.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/23/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tâm tướng hiển lộ qua thần thái",
+      "description": "Nhân tướng học cho rằng, nét mặt, ánh mắt, cử chỉ đều là tấm gương phản chiếu nội tâm. Đôi khi, sự chân thành quá mức lại đi kèm với vẻ nhu mì, dễ bị lợi dụng. Hay ánh mắt quá tin người, thiếu sự cảnh giác cần thiết.",
+      "tts": "Nhân tướng học nhìn nhận rằng... thần thái, ánh mắt, hay cử chỉ... đều là tấm gương phản chiếu nội tâm. Đôi khi, sự chân thành quá mức... lại khiến ta trông nhu mì, thiếu cảnh giác... dễ bị lợi dụng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/23/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Duyên nghiệp hay bài học cuộc đời?",
+      "description": "Người có tướng tình duyên lận đận thường mang trong mình những tổn thương cũ chưa lành. Vòng lặp phản bội có thể là lời nhắc nhở để ta dừng lại, nhìn sâu vào nội tâm. Để nhận ra rằng, giá trị bản thân không phụ thuộc vào tình cảm của người khác.",
+      "tts": "Những mối duyên lận đận... thường mang theo tổn thương cũ chưa lành. Vòng lặp phản bội... có thể là lời nhắc nhở để ta dừng lại... nhìn sâu vào nội tâm. Để nhận ra... giá trị bản thân không phụ thuộc vào tình cảm của người khác.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/23/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Chuyển tướng từ tâm, đón duyên lành",
+      "description": "Thay đổi tướng mạo không phải bằng cách sửa nét, mà là tu dưỡng nội tâm. Nuôi dưỡng lòng tự trọng, học cách yêu thương bản thân trọn vẹn. Khi tâm an, thần thái vững vàng, tự khắc sẽ thu hút những mối duyên lành, xứng đáng.",
+      "tts": "Chuyển hóa tướng mạo... không phải là sửa đổi nét mặt... mà là tu dưỡng nội tâm. Nuôi dưỡng lòng tự trọng... học cách yêu thương bản thân trọn vẹn. Khi tâm an, thần thái vững vàng... tự khắc sẽ thu hút những mối duyên lành... xứng đáng với ta.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/23/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Vì sao người chân thành vẫn lận đận tình duyên?",
+    "description": "Bạn có bao giờ tự hỏi vì sao mình luôn gặp trắc trở trong tình yêu dù đã rất chân thành? Nhân tướng học không chỉ nhìn vào nét mặt, mà còn đi sâu vào thần thái, nội tâm để lý giải. Cùng khám phá cách chuyển hoá để đón nhận hạnh phúc đích thực.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#tinhduyen",
+      "#hieunguoi",
+      "#chuyentam",
+      "#trietlycuocsong"
+    ]
+  }
+}

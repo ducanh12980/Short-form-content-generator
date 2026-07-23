@@ -1,0 +1,62 @@
+{
+  "topic": "Bậc thầy thao túng tâm lý thường sở hữu 3 đặc điểm này trên khuôn mặt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tướng Diện: Cửa Sổ Tâm Hồn Hay Mặt Nạ Khéo Léo?",
+      "visual_concept": "Một khuôn mặt phản chiếu trong gương đồng cổ, với một nửa ẩn trong bóng tối, nửa kia được ánh sáng chiếu rõ, gợi sự bí ẩn và những điều chưa được tiết lộ. Ánh mắt sâu thẳm, khó đoán.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Ánh Mắt Đảo Chuyển, Tâm Tư Khó Lường",
+      "description": "Đôi mắt là cửa sổ tâm hồn, nhưng cũng là nơi che giấu nhiều điều. Ánh nhìn không ổn định, thường xuyên lảng tránh hoặc quá sắc bén, có thể gợi lên sự tính toán, khó nắm bắt. Đây là dấu hiệu của người có nội tâm phức tạp, luôn ẩn chứa những toan tính riêng.",
+      "tts": "Ánh mắt... vốn là cửa sổ tâm hồn... nhưng đôi khi lại che giấu nhiều điều. Một ánh nhìn không ổn định... lảng tránh... hoặc quá sắc bén... thường gợi lên sự tính toán... một nội tâm phức tạp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Miệng Cười Hàm Ẩn, Lời Nói Khó Tin",
+      "description": "Nụ cười không chỉ biểu lộ niềm vui. Một nụ cười ẩn ý, khó đoán định cảm xúc thật, hoặc khóe miệng có xu hướng hơi trễ xuống dù đang nói lời hay ý đẹp, có thể là nét của người dùng lời nói để dẫn dắt. Sự thiếu chân thật trong biểu cảm dễ gây nghi ngờ.",
+      "tts": "Nụ cười... vốn là biểu lộ của niềm vui... nhưng đôi khi lại hàm ẩn nhiều điều. Nụ cười khó đoán định cảm xúc... hay khóe miệng trễ xuống dù lời nói thiện lành... có thể là nét của người dùng lời lẽ để dẫn dắt.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Vầng Trán Cao Rộng, Trí Lực Vượt Trội",
+      "description": "Vầng trán cao và rộng thường biểu trưng cho trí tuệ sắc sảo, khả năng phân tích và lập kế hoạch tốt. Khi kết hợp với những đặc điểm trên, trí lực này có thể được dùng để điều khiển người khác một cách tinh vi. Hiểu rõ điều này giúp ta cảnh giác, không sa vào bẫy tâm lý.",
+      "tts": "Và khi một vầng trán cao rộng... biểu trưng trí tuệ sắc sảo... khả năng phân tích tốt... kết hợp cùng những dấu hiệu kia... thì trí lực ấy có thể được dùng để điều khiển người khác tinh vi. Hiểu rõ điều này... giúp ta cảnh giác... tránh xa cạm bẫy tâm lý.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/output/final/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "3 đặc điểm nhận diện bậc thầy thao túng tâm lý trên khuôn mặt",
+    "description": "Nhân tướng học không chỉ giúp bạn hiểu về bản thân mà còn là chìa khóa để nhận diện người khác. Cùng khám phá 3 đặc điểm thường thấy ở những người có khả năng thao túng tâm lý, để biết cách bảo vệ mình và ứng xử khôn ngoan hơn trong các mối quan hệ.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#thautamly",
+      "#hieunguoi",
+      "#canhgiac",
+      "#fyp"
+    ]
+  }
+}

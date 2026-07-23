@@ -1,0 +1,59 @@
+{
+  "topic": "Nhìn đường chỉ tay này biết ngay ai có số trúng số đổi đời sau một đêm",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:00:26+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 458,
+      "output_tokens": 120,
+      "total_tokens": 578
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:00:44+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 517,
+      "output_tokens": 120,
+      "total_tokens": 637
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:01:06+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 523,
+      "output_tokens": 120,
+      "total_tokens": 643
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:01:28+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 516,
+      "output_tokens": 120,
+      "total_tokens": 636
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2014,
+    "output_tokens": 480,
+    "total_tokens": 2494
+  }
+}

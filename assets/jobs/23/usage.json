@@ -1,0 +1,59 @@
+{
+  "topic": "Tướng người lận đận tình duyên dù chân thành nhưng toàn gặp kẻ phản bội",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:02:06+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 470,
+      "output_tokens": 120,
+      "total_tokens": 590
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:02:29+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 531,
+      "output_tokens": 120,
+      "total_tokens": 651
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:02:51+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 535,
+      "output_tokens": 120,
+      "total_tokens": 655
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T05:03:13+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 535,
+      "output_tokens": 120,
+      "total_tokens": 655
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2071,
+    "output_tokens": 480,
+    "total_tokens": 2551
+  }
+}
