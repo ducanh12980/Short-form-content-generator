@@ -1,0 +1,62 @@
+{
+  "topic": "Người có xoáy tóc ở vị trí này thường sở hữu trí tuệ hơn người và cực kỳ bướng bỉnh",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Xoáy tóc: Dấu ấn trời ban hay ý chí tự thân?",
+      "visual_concept": "Hình ảnh cận cảnh một đỉnh đầu với xoáy tóc rõ nét, ánh sáng chiếu nhẹ tạo hiệu ứng huyền bí. Phía sau là bóng mờ của một cuốn sách cổ hoặc bản đồ sao, gợi sự chiêm nghiệm.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/25/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Vết xoáy trên đỉnh: Nét riêng biệt",
+      "description": "Từ ngàn xưa, người Việt đã tinh tế quan sát những đặc điểm nhỏ trên cơ thể. Xoáy tóc, tưởng chừng vô nghĩa, lại được coi là một dấu ấn độc đáo, mang theo những gợi ý về tính cách và số phận.",
+      "tts": "Từ ngàn xưa, cha ông ta đã tinh tế quan sát những đặc điểm nhỏ trên cơ thể... Vết xoáy trên đỉnh đầu, tưởng chừng vô nghĩa, lại được xem là một dấu ấn độc đáo... ẩn chứa những gợi mở về tính cách và số phận.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/25/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Trí tuệ và khí chất kiên cường",
+      "description": "Người sở hữu xoáy tóc đặc biệt thường được cho là có tư duy sắc bén, khả năng học hỏi vượt trội. Kèm theo đó là sự kiên định mạnh mẽ, đôi khi biểu hiện thành tính cách bướng bỉnh, nhưng cũng là động lực để họ theo đuổi lý tưởng.",
+      "tts": "Người sở hữu vết xoáy đặc biệt này... thường được nhận thấy có tư duy sắc bén, khả năng học hỏi vượt trội. Kèm theo đó là khí chất kiên định, đôi khi biểu hiện thành sự bướng bỉnh... nhưng cũng chính là động lực mạnh mẽ để họ theo đuổi lý tưởng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/25/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Dùng trí tuệ, mài ý chí",
+      "description": "Nhân tướng học không định đoạt tất cả. Hiểu về xoáy tóc giúp ta nhận diện những tiềm năng. Quan trọng là biết cách phát huy trí tuệ, biến sự bướng bỉnh thành ý chí bền bỉ, để tạo dựng cuộc đời mình.",
+      "tts": "Thế nhưng, nhân tướng học không định đoạt tất cả... Hiểu về vết xoáy tóc là để nhận diện tiềm năng. Quan trọng là phát huy trí tuệ, biến sự bướng bỉnh thành ý chí bền bỉ... để tự mình tạo dựng cuộc đời.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/25/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bí ẩn xoáy tóc: Bạn có thông minh và kiên cường?",
+    "description": "Xoáy tóc trên đầu bạn nói gì về trí tuệ và tính cách? Cùng Nhân Tướng VN giải mã một trong những 'dấu ấn' thú vị theo quan niệm dân gian. Đây chỉ là những chiêm nghiệm, không phải định mệnh nhé!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#xoaytoc",
+      "#nhantuonghoc",
+      "#trietlycuocsong",
+      "#hieuminh"
+    ]
+  }
+}

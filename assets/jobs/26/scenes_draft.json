@@ -1,0 +1,62 @@
+{
+  "topic": "Đặc điểm trên bàn tay của người có số giữ vàng giữ bạc không bao giờ lo thiếu hụt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tài lộc vững bền, từ tướng tay mà xem?",
+      "visual_concept": "Một bàn tay cổ kính, vân tay rõ nét, đặt trên một phiến đá rêu phong. Ánh sáng nhẹ nhàng chiếu rọi, gợi cảm giác tĩnh tại, chiêm nghiệm về sự bền vững.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/26/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Gốc rễ vững vàng, phúc lộc nảy sinh",
+      "description": "Bàn tay cân đối, da thịt hồng hào, lòng bàn tay trũng sâu như chậu ngọc. Đây là dấu hiệu của người có nền tảng sức khỏe tốt, tinh thần ổn định và khả năng tích lũy. Bởi lẽ, tài lộc bền vững luôn bắt nguồn từ một cuộc sống an yên, có kỷ luật.",
+      "tts": "Một bàn tay cân đối, da thịt hồng hào, lòng bàn tay trũng sâu như chậu ngọc... thường là dấu hiệu của một nền tảng sức khỏe vững vàng, tinh thần an định. Bởi lẽ, phúc lộc bền vững... luôn bắt nguồn từ một cuộc sống an yên, có kỷ luật.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/26/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Đường chỉ rõ nét, tâm trí sáng suốt",
+      "description": "Các đường chỉ chính (sinh đạo, trí đạo, tâm đạo) rõ ràng, sâu và liền mạch. Điều này cho thấy người có tư duy mạch lạc, ý chí kiên định và khả năng quản lý cảm xúc tốt. Những phẩm chất này giúp họ đưa ra quyết định tài chính khôn ngoan, tránh được rủi ro không đáng có.",
+      "tts": "Khi các đường chỉ chính trên bàn tay rõ ràng, sâu và liền mạch... đó là biểu hiện của một tâm trí sáng suốt, tư duy mạch lạc. Những phẩm chất này... giúp họ đưa ra các quyết định khôn ngoan... tránh được rủi ro không đáng có.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/26/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Gò tay đầy đặn, khí chất an nhiên",
+      "description": "Các gò trên bàn tay (đặc biệt là gò Mộc Tinh, Thổ Tinh) đầy đặn, có độ đàn hồi. Đây là biểu hiện của người có ý chí vươn lên, sống có trách nhiệm và biết cách tạo dựng giá trị. Họ không chỉ biết kiếm tiền mà còn giỏi giữ gìn và phát triển tài sản một cách bền vững.",
+      "tts": "Cuối cùng, khi các gò trên bàn tay đầy đặn, có độ đàn hồi... đó là khí chất của người có ý chí vươn lên, sống có trách nhiệm. Họ không chỉ biết kiếm tiền... mà còn giỏi giữ gìn và phát triển tài sản một cách bền vững.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/26/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Tướng tay của người không bao giờ lo thiếu tiền?",
+    "description": "Bạn có tò mò về những đặc điểm trên bàn tay nói lên khả năng giữ tiền, giữ của? Nhân Tướng VN sẽ cùng bạn khám phá những nét tướng ẩn chứa phúc lộc bền vững. Hãy nhớ rằng, tướng do tâm sinh, và sự giàu có thực sự đến từ trí tuệ và phẩm hạnh.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#tuongtay",
+      "#phucloc",
+      "#trietlysong",
+      "#hieunguoi"
+    ]
+  }
+}

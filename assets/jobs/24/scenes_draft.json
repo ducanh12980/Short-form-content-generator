@@ -1,0 +1,62 @@
+{
+  "topic": "Nét tướng của người có đôi mắt biết nói đi đến đâu cũng được người khác thầm yêu",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Ánh Mắt – Cửa Sổ Tâm Hồn",
+      "visual_concept": "Một khuôn mặt thanh tú với ánh mắt sâu, tĩnh lặng, như chứa đựng ngàn lời. Ánh sáng nhẹ nhàng chiếu vào đôi mắt, làm nổi bật sự trong trẻo và thấu hiểu.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/24/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Sức Mạnh Từ Ánh Nhìn",
+      "description": "Đôi mắt biết nói không chỉ là nét đẹp hình thể. Đó là sự giao thoa của cảm xúc, trí tuệ và lòng trắc ẩn. Một ánh nhìn có thể truyền tải hơn vạn lời nói, chạm đến trái tim người đối diện.",
+      "tts": "Trong nhân tướng học, đôi mắt không chỉ là nét đẹp hình thể... mà còn là sự giao thoa sâu sắc của cảm xúc, trí tuệ và lòng trắc ẩn. Một ánh nhìn tĩnh lặng, có thể truyền tải hơn vạn lời nói... chạm đến tận sâu thẳm trái tim người đối diện.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/24/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Tạo Nên Duyên Lành",
+      "description": "Những đôi mắt ấy toát lên vẻ chân thành, tin cậy. Chúng khiến người khác cảm thấy được thấu hiểu, được lắng nghe. Duyên lành tự nhiên sinh ra từ sự kết nối sâu sắc, không cần tìm cầu.",
+      "tts": "Những đôi mắt ấy... toát lên vẻ chân thành và tin cậy... khiến người đối diện cảm thấy được thấu hiểu, được lắng nghe. Từ sự kết nối sâu sắc này... duyên lành tự nhiên sẽ sinh ra... mà chẳng cần phải tìm cầu.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/24/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tâm Tạo Tướng Diện",
+      "description": "Ánh mắt là phản chiếu của nội tâm. Một tâm hồn thiện lương, bình an sẽ biểu hiện qua đôi mắt hiền hòa, đầy sức sống. Tu dưỡng tâm tính chính là gốc rễ để có một tướng diện hài hòa, thu hút.",
+      "tts": "Bởi lẽ, ánh mắt chính là tấm gương phản chiếu nội tâm. Một tâm hồn thiện lương, bình an... ắt sẽ biểu hiện qua đôi mắt hiền hòa, đầy sức sống. Tu dưỡng tâm tính... chính là gốc rễ để tạo nên một tướng diện hài hòa và thu hút.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/24/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Giải mã đôi mắt biết nói: Hút hồn người đối diện!",
+    "description": "Trong Nhân tướng học Việt Nam, đôi mắt không chỉ là cửa sổ tâm hồn mà còn là yếu tố quan trọng tạo nên sức hút đặc biệt. Khám phá bí ẩn đằng sau ánh mắt có thể khiến người khác thầm yêu mến bạn. Điều gì làm nên vẻ đẹp tiềm ẩn ấy?",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#DoiMatBietNoi",
+      "#AnhMat",
+      "#TamSinhTuong",
+      "#fyp"
+    ]
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "topic": "Đặc điểm trên bàn tay của người có số giữ vàng giữ bạc không bao giờ lo thiếu hụt",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T16:54:40+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 468,
+      "output_tokens": 120,
+      "total_tokens": 588
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T16:55:00+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 550,
+      "output_tokens": 120,
+      "total_tokens": 670
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T16:55:23+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 545,
+      "output_tokens": 120,
+      "total_tokens": 665
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-23T16:55:46+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 549,
+      "output_tokens": 120,
+      "total_tokens": 669
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2112,
+    "output_tokens": 480,
+    "total_tokens": 2592
+  }
+}
