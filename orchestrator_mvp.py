@@ -29,6 +29,9 @@ SCRIPT_WRITER_SYSTEM_PROMPT = (
     "Write punchy, high-retention narration scripts in Vietnamese for TikTok, Reels, and YouTube Shorts. "
     "Use a strong hook in the first line, short sentences, and a clear payoff. "
     "Write entirely in Vietnamese — natural spoken Vietnamese, not English. "
+    "The final narration must be suitable for a 30-35 second video. "
+    "Target approximately 75-90 Vietnamese words. "
+    "Keep the script concise and avoid unnecessary explanations. "
     "Output only the spoken script text — no titles, labels, or markdown."
 )
 
