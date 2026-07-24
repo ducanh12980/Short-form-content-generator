@@ -1,0 +1,59 @@
+{
+  "topic": "Đừng nản nếu vừa thất bại nét tướng này dự báo bạn càng vấp ngã càng dễ giàu",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:27:55+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 476,
+      "output_tokens": 120,
+      "total_tokens": 596
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:28:17+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 537,
+      "output_tokens": 120,
+      "total_tokens": 657
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:28:38+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 547,
+      "output_tokens": 120,
+      "total_tokens": 667
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:29:03+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 556,
+      "output_tokens": 120,
+      "total_tokens": 676
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2116,
+    "output_tokens": 480,
+    "total_tokens": 2596
+  }
+}

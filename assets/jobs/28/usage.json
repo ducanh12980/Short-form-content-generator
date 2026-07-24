@@ -1,0 +1,59 @@
+{
+  "topic": "Sở hữu nét tướng này bạn là người giữ được tiền suốt đời tài lộc tụ không phai",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:25:48+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 476,
+      "output_tokens": 120,
+      "total_tokens": 596
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:26:17+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 542,
+      "output_tokens": 120,
+      "total_tokens": 662
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:26:42+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 555,
+      "output_tokens": 120,
+      "total_tokens": 675
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:27:06+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 560,
+      "output_tokens": 120,
+      "total_tokens": 680
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2133,
+    "output_tokens": 480,
+    "total_tokens": 2613
+  }
+}

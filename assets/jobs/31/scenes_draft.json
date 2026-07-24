@@ -1,0 +1,62 @@
+{
+  "topic": "Nhìn đặc điểm này biết ngay ai sinh ra đã có duyên với kinh doanh mua may bán đắt",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Duyên kinh doanh, tướng ẩn phú quý",
+      "visual_concept": "Bức tranh phong cảnh chợ quê tấp nập, một người phụ nữ trung niên với nụ cười hiền hậu, ánh mắt tinh anh đang trao đổi hàng hóa. Gợi lên vẻ phúc hậu, sự khéo léo và tài buôn bán.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/31/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Nội lực tiềm tàng, khí chất dẫn đầu",
+      "description": "Kinh doanh thành công không chỉ nhờ may mắn. Nó bắt nguồn từ nội lực, sự nhạy bén và khả năng nhìn xa trông rộng. Những người này thường có thần thái tự tin, linh hoạt, toát ra sức hút tự nhiên trong giao tiếp.",
+      "tts": "Thành công kinh doanh không chỉ nhờ may mắn. Nó bắt nguồn từ nội lực, sự nhạy bén và tầm nhìn xa. Người có duyên kinh doanh thường toát ra thần thái tự tin, linh hoạt... tạo sức hút tự nhiên trong giao tiếp.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/31/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Thần thái minh mẫn, khẩu khí uy tín",
+      "description": "Đôi mắt sáng, có thần, ánh nhìn tập trung biểu thị sự tinh tường, khả năng nắm bắt cơ hội. Vầng trán cao rộng, không quá nhô, gợi ý tư duy mạch lạc và tầm nhìn chiến lược. Miệng rộng, khóe môi hơi hướng lên, cho thấy sự khéo léo trong giao tiếp, dễ tạo niềm tin.",
+      "tts": "Thần thái ấy biểu hiện qua đôi mắt sáng, có thần... cho thấy sự tinh tường, khả năng nắm bắt cơ hội. Vầng trán cao rộng gợi mở tư duy chiến lược... Miệng rộng, khóe môi hướng lên, dễ tạo niềm tin.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/31/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tướng tùy tâm sinh, đức năng thắng số",
+      "description": "Dù tướng có đẹp đến mấy, tâm không thiện, ý không vững thì cũng khó bền lâu. Người có duyên kinh doanh thực thụ còn có sự kiên trì, tâm thế vững vàng trước thử thách. Tướng tốt là nền tảng, đức tốt mới là chìa khóa thịnh vượng bền vững.",
+      "tts": "Thế nhưng, 'tướng tùy tâm sinh'... tướng đẹp đến mấy, tâm không thiện, ý không vững thì khó bền lâu. Người có duyên kinh doanh thực thụ... cần sự kiên trì, tâm thế vững vàng. 'Đức năng thắng số'... chính là chìa khóa thịnh vượng bền vững.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/31/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Nhận diện người có duyên kinh doanh!",
+    "description": "Theo Nhân tướng học, một số đặc điểm trên khuôn mặt và thần thái có thể gợi ý về khả năng kinh doanh bẩm sinh. Cùng khám phá những dấu hiệu này để hiểu rõ hơn về tiềm năng của bản thân và người xung quanh nhé. Nhớ rằng, tướng do tâm sinh và luôn có thể thay đổi!",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#kinhdoanh",
+      "#phattai",
+      "#hieunguoi",
+      "#trietlycuocsong"
+    ]
+  }
+}

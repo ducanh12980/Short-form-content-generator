@@ -1,0 +1,62 @@
+{
+  "topic": "Người có đặc điểm này trên gương mặt thường cực kỳ may mắn về tiền bạc",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tài lộc ẩn mình: Dấu hiệu trên gương mặt?",
+      "visual_concept": "Một gương mặt thanh tú, ánh sáng vàng ấm áp chiếu nhẹ lên vùng trán cao và khóe môi mỉm cười, gợi cảm giác bình an, thịnh vượng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/32/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tài lộc: Nguồn gốc từ tâm và tướng",
+      "description": "Nhân tướng học không phải bói toán, mà là đúc kết về con người. Tài lộc không chỉ là may mắn ngẫu nhiên, mà còn là kết quả của nội lực, trí tuệ và cách ta kiến tạo cuộc sống. Tướng mặt, suy cho cùng, phản ánh phần nào những điều ấy.",
+      "tts": "Nhân tướng học... là sự chiêm nghiệm sâu sắc về con người... Tài lộc không chỉ là may mắn ngẫu nhiên, mà là nội lực, trí tuệ và cách ta kiến tạo cuộc sống... Nét tướng, đôi khi, cũng phản ánh điều đó.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/32/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Vầng trán, khóe môi: Nét tướng thịnh vượng",
+      "description": "Vầng trán cao rộng, sáng sủa thường biểu thị trí tuệ, tầm nhìn xa trông rộng. Khóe môi đầy đặn, hướng lên cho thấy sự lạc quan, khả năng giao tiếp khéo léo. Những đặc điểm này thường đi kèm với người biết nắm bắt cơ hội, gây dựng tài sản.",
+      "tts": "Một vầng trán cao rộng, sáng sủa, thường gợi trí tuệ, tầm nhìn xa... Khóe môi đầy đặn, hướng lên, cho thấy sự lạc quan, khéo léo trong giao tiếp... Những nét tướng này thường đi cùng người biết nắm bắt cơ hội, gây dựng tài sản.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/32/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tâm sinh tướng, phúc do mình tạo",
+      "description": "Dẫu có nét tướng tốt, nếu tâm không thiện, chí không bền, tài lộc cũng khó mà giữ. Ngược lại, người có tâm sáng, ý chí kiên cường, biết gieo duyên lành, ắt sẽ chiêu cảm phúc khí, dần cải biến tướng mạo và vận mệnh. Tài lộc bền vững là do tu dưỡng.",
+      "tts": "Dẫu có nét tướng tốt, nếu tâm không thiện, chí không bền, tài lộc khó mà giữ... Người có tâm sáng, biết gieo duyên lành, ắt sẽ chiêu cảm phúc khí, cải biến tướng mạo và vận mệnh... Tài lộc bền vững, luôn bắt nguồn từ sự tu dưỡng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/32/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Tài lộc có 'hiện' trên mặt bạn?",
+    "description": "Bạn có tò mò về những dấu hiệu tài lộc trên gương mặt mình? Nhân tướng học gợi ý một số đặc điểm thường thấy ở người có vận tài chính hanh thông. Tuy nhiên, đừng quên rằng tướng do tâm sinh, và sự thịnh vượng bền vững luôn bắt nguồn từ nội lực và sự tu dưỡng của chính chúng ta.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#TaiLoc",
+      "#KienThuc",
+      "#TrietLySong",
+      "#PhatTrienBanThan"
+    ]
+  }
+}

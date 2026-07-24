@@ -1,0 +1,59 @@
+{
+  "topic": "Nét tướng của người cực kỳ nhạy bén dễ trúng cơ hội lớn để phất lên",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:37:40+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 468,
+      "output_tokens": 120,
+      "total_tokens": 588
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:38:05+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 557,
+      "output_tokens": 120,
+      "total_tokens": 677
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:38:41+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 563,
+      "output_tokens": 120,
+      "total_tokens": 683
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:39:14+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 563,
+      "output_tokens": 120,
+      "total_tokens": 683
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2151,
+    "output_tokens": 480,
+    "total_tokens": 2631
+  }
+}

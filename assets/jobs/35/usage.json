@@ -1,0 +1,59 @@
+{
+  "topic": "Có thật là làm ít hưởng nhiều? Nhìn tướng cách của người có số an nhàn",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:42:09+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 458,
+      "output_tokens": 120,
+      "total_tokens": 578
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:42:34+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 526,
+      "output_tokens": 120,
+      "total_tokens": 646
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:42:58+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 540,
+      "output_tokens": 120,
+      "total_tokens": 660
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:43:26+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 535,
+      "output_tokens": 120,
+      "total_tokens": 655
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2059,
+    "output_tokens": 480,
+    "total_tokens": 2539
+  }
+}

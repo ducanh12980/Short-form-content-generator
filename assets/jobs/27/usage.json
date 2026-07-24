@@ -1,0 +1,59 @@
+{
+  "topic": "Dấu hiệu trên khuôn mặt của người kiếm tiền cực nhanh chớp thời cơ là phất",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:23:40+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 454,
+      "output_tokens": 120,
+      "total_tokens": 574
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:24:09+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 533,
+      "output_tokens": 120,
+      "total_tokens": 653
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:24:33+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 552,
+      "output_tokens": 120,
+      "total_tokens": 672
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:24:59+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 546,
+      "output_tokens": 120,
+      "total_tokens": 666
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2085,
+    "output_tokens": 480,
+    "total_tokens": 2565
+  }
+}

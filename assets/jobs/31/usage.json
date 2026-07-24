@@ -1,0 +1,59 @@
+{
+  "topic": "Nhìn đặc điểm này biết ngay ai sinh ra đã có duyên với kinh doanh mua may bán đắt",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:32:26+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 472,
+      "output_tokens": 120,
+      "total_tokens": 592
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:32:56+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 524,
+      "output_tokens": 120,
+      "total_tokens": 644
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:33:23+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 551,
+      "output_tokens": 120,
+      "total_tokens": 671
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:33:53+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 543,
+      "output_tokens": 120,
+      "total_tokens": 663
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2090,
+    "output_tokens": 480,
+    "total_tokens": 2570
+  }
+}

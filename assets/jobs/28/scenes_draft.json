@@ -1,0 +1,62 @@
+{
+  "topic": "Sở hữu nét tướng này bạn là người giữ được tiền suốt đời tài lộc tụ không phai",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "Tài lộc bền vững: Gốc từ tâm",
+      "visual_concept": "Một gốc cây cổ thụ vững chãi giữa dòng chảy thời gian, rễ đâm sâu vào lòng đất, cành lá sum suê. Gợi hình ảnh sự bền vững, tích lũy theo năm tháng, không bị lay chuyển bởi ngoại cảnh.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/28/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "Tích lũy từ nội tâm",
+      "description": "Tài lộc bền vững không chỉ là may mắn nhất thời, mà còn là kết quả của sự thận trọng, biết đủ và tầm nhìn xa.\nMột người biết cách quản lý chi tiêu, trân trọng giá trị sức lao động, thường có nền tảng vững chắc.\nSự giàu có thực sự bắt nguồn từ phẩm chất bên trong.",
+      "tts": "Tài lộc bền vững, ít khi chỉ là may mắn nhất thời... mà thường là kết quả của sự thận trọng, biết đủ, cùng tầm nhìn xa. Người biết quản lý chi tiêu, trân trọng giá trị sức lao động, thường có nền tảng vững chắc. Sự giàu có thật sự, khởi nguồn từ phẩm chất bên trong.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/28/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Nét tướng thể hiện sự bền tâm",
+      "description": "Trong nhân tướng học, những nét tướng thể hiện sự điềm tĩnh, khuôn mặt có sự hài hòa và ánh mắt biết nhìn xa trông rộng, thường ngụ ý khả năng tích lũy.\nĐó là biểu hiện của nội lực vững vàng, không dễ bị lay chuyển bởi những biến động bên ngoài.\nKhi tâm an, tướng cũng tự nhiên toát lên sự ổn định.",
+      "tts": "Trong nhân tướng học, những nét tướng thể hiện sự điềm tĩnh, khuôn mặt hài hòa, cùng ánh mắt biết nhìn xa trông rộng... thường cho thấy khả năng tích lũy bền vững. Đó là biểu hiện của nội lực vững vàng... không dễ bị lay chuyển bởi biến động bên ngoài. Khi tâm an, tướng cũng tự nhiên toát lên sự ổn định.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/28/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tướng tùy tâm sinh, lộc theo đức tụ",
+      "description": "Dù tướng có biểu hiện thế nào, cốt lõi vẫn là tâm. Một người có tâm thiện lành, biết vun đắp giá trị cho bản thân và cộng đồng, tự khắc tài lộc sẽ bền vững.\nBởi lẽ, phúc đức chính là nguồn tài sản lớn nhất, không bao giờ cạn.\nThay đổi tâm tính là cội nguồn của mọi sự thịnh vượng.",
+      "tts": "Dù tướng mạo có biểu hiện thế nào, cốt lõi vẫn là cái tâm. Người có tâm thiện lành, biết vun đắp giá trị cho bản thân và cộng đồng... tự khắc tài lộc sẽ bền vững. Bởi lẽ, phúc đức chính là nguồn tài sản lớn nhất, không bao giờ cạn. Thay đổi tâm tính, chính là cội nguồn của mọi sự thịnh vượng.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/28/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Tài lộc có bền vững không? Nhìn tướng hiểu tâm!",
+    "description": "Bạn có bao giờ tự hỏi vì sao có người tiền bạc cứ đến rồi đi, còn người khác lại giữ được tài lộc vững bền? Nhân tướng học không phải là bói toán, mà là góc nhìn sâu sắc về mối liên hệ giữa tâm thái và cuộc sống. Cùng khám phá những phẩm chất nội tại giúp bạn tích lũy và gìn giữ tài sản, không chỉ về vật chất mà còn về giá trị sống.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#trietly",
+      "#hieunguoi",
+      "#tailoc",
+      "#phamdatchat"
+    ]
+  }
+}

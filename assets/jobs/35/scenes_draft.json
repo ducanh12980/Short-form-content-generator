@@ -1,0 +1,62 @@
+{
+  "topic": "Có thật là làm ít hưởng nhiều? Nhìn tướng cách của người có số an nhàn",
+  "slides": [
+    {
+      "id": 1,
+      "role": "intro",
+      "title": "An Nhàn: Phúc Lộc Hay Tâm An?",
+      "visual_concept": "Một người ngồi thiền bên cửa sổ gỗ cổ, ánh nắng nhẹ chiếu qua, khuôn mặt thanh thản, gợi lên sự bình yên tự tại, không vướng bận.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/35/images/intro.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 2,
+      "role": "content",
+      "content_index": 1,
+      "title": "An Nhàn Không Phải Là Lười Biếng",
+      "description": "An nhàn không có nghĩa là không làm gì, mà là làm việc có hiệu quả, biết đủ và biết tận hưởng. Đó là trạng thái tâm trí bình yên, không bị xáo động bởi lo toan. Người an nhàn tìm thấy niềm vui trong sự cân bằng.",
+      "tts": "An nhàn không phải là lười biếng... mà là một trạng thái tâm trí bình yên. Ta biết đủ, biết tận hưởng, làm việc hiệu quả... tìm thấy niềm vui trong sự cân bằng cuộc sống.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/35/images/scene_1.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 3,
+      "role": "content",
+      "content_index": 2,
+      "title": "Dấu Hiệu Của Phúc Tướng An Nhàn",
+      "description": "Trong nhân tướng, người có số an nhàn thường thể hiện qua nét mặt thanh tú, trán rộng, da dẻ hồng hào, ánh mắt hiền hòa. Nét tướng này thường đi đôi với phong thái điềm đạm, không vội vã. Tuy nhiên, đây chỉ là những quan sát tổng quát.",
+      "tts": "Trong nhân tướng, người có phúc tướng an nhàn thường thể hiện qua nét mặt thanh tú, trán rộng, da dẻ hồng hào... ánh mắt hiền hòa cùng phong thái điềm đạm. Tuy nhiên, đây chỉ là những quan sát tổng quát để chiêm nghiệm.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/35/images/scene_2.png",
+        "source": "chatgpt"
+      }
+    },
+    {
+      "id": 4,
+      "role": "content",
+      "content_index": 3,
+      "title": "Tướng An Nhàn: Gốc Từ Tâm Thanh",
+      "description": "Nét tướng an nhàn không phải là định mệnh cố định, mà là sự phản chiếu của nội tâm. Một tâm hồn thanh tịnh, biết buông bỏ và sống thiện lành sẽ dần định hình nên tướng mạo. 'Tướng do tâm sinh', tâm an thì tướng cũng an.",
+      "tts": "Bởi lẽ, tướng an nhàn không phải định mệnh cố định... mà là sự phản chiếu của nội tâm. Một tâm hồn thanh tịnh, biết buông bỏ, sống thiện lành... sẽ dần định hình nên tướng mạo. 'Tướng do tâm sinh'... tâm an thì tướng cũng an.",
+      "image": {
+        "path": "/home/runner/work/Short-form-content-generator/Short-form-content-generator/assets/jobs/35/images/scene_3.png",
+        "source": "chatgpt"
+      }
+    }
+  ],
+  "publish": {
+    "title": "Bạn có tướng người an nhàn không?",
+    "description": "An nhàn có phải là phúc lộc trời ban hay là kết quả của một tâm hồn bình yên? Cùng Nhân Tướng VN khám phá những dấu hiệu trên gương mặt người có số an nhàn, và ý nghĩa sâu xa đằng sau chúng.",
+    "hashtags": [
+      "#NhanTuongVN",
+      "#an_nhan",
+      "#phuoc_phu",
+      "#trietlycuocsong",
+      "#hieunguoi"
+    ]
+  }
+}

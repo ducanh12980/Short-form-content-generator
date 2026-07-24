@@ -1,0 +1,59 @@
+{
+  "topic": "Nét tướng của người có số đổi đời giàu sang sau một biến cố lớn",
+  "images": [
+    {
+      "image": "intro.png",
+      "slide_id": 1,
+      "role": "intro",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:29:54+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 460,
+      "output_tokens": 120,
+      "total_tokens": 580
+    },
+    {
+      "image": "scene_1.png",
+      "slide_id": 2,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:30:15+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 520,
+      "output_tokens": 120,
+      "total_tokens": 640
+    },
+    {
+      "image": "scene_2.png",
+      "slide_id": 3,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:30:39+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 535,
+      "output_tokens": 120,
+      "total_tokens": 655
+    },
+    {
+      "image": "scene_3.png",
+      "slide_id": 4,
+      "role": "content",
+      "provider": "chatgpt",
+      "generated_at": "2026-07-24T11:31:10+00:00",
+      "model": "gpt-image-2",
+      "quality": "low",
+      "input_tokens": 538,
+      "output_tokens": 120,
+      "total_tokens": 658
+    }
+  ],
+  "totals": {
+    "images": 4,
+    "input_tokens": 2053,
+    "output_tokens": 480,
+    "total_tokens": 2533
+  }
+}
