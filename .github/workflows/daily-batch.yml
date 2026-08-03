@@ -41,7 +41,7 @@ permissions:
 jobs:
   render:
     runs-on: ubuntu-22.04
-    timeout-minutes: 180
+    timeout-minutes: 360
 
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
